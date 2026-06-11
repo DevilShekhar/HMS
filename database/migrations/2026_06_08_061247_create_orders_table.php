@@ -43,13 +43,13 @@ return new class extends Migration
                 'cancelled'
             ])->default('pending');
 
-            $table->decimal('subtotal',10,2)
+            $table->decimal('subtotal', 10, 2)
                 ->default(0);
 
-            $table->decimal('tax',10,2)
+            $table->decimal('tax', 10, 2)
                 ->default(0);
 
-            $table->decimal('total',10,2)
+            $table->decimal('total', 10, 2)
                 ->default(0);
 
             $table->timestamps();

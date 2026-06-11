@@ -90,41 +90,41 @@ class LoginController extends Controller
     */
 
     public function restaurantLogin(Request $request, $restaurant)
-{
-    $restaurantModel = Restaurant::where('slug', $restaurant)->first();
+    {
+        $restaurantModel = Restaurant::where('slug', $restaurant)->first();
 
-    if (!$restaurantModel) {
-        abort(404);
-    }
+        if (!$restaurantModel) {
+            abort(404);
+        }
 
-    $user = User::where('email', $request->email)
-        ->where('restaurant_id', $restaurantModel->id)
-        ->first();
+        $user = User::where('email', $request->email)
+            ->where('restaurant_id', $restaurantModel->id)
+            ->first();
 
-    if (!$user) {
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'You are not allowed to login to this restaurant.'
+            ]);
+        }
+
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password,
+            'restaurant_id' => $restaurantModel->id,
+            'status' => 'Active'
+        ])) {
+
+            $request->session()->regenerate();
+
+            return redirect()->route('restaurant.dashboard', [
+                'restaurant' => $restaurantModel->slug
+            ]);
+        }
+
         return back()->withErrors([
-            'email' => 'You are not allowed to login to this restaurant.'
+            'email' => 'Invalid credentials.'
         ]);
     }
-
-    if (Auth::attempt([
-        'email' => $request->email,
-        'password' => $request->password,
-        'restaurant_id' => $restaurantModel->id,
-        'status' => 'Active'
-    ])) {
-
-        $request->session()->regenerate();
-
-        return redirect()->route('restaurant.dashboard', [
-            'restaurant' => $restaurantModel->slug
-        ]);
-    }
-
-    return back()->withErrors([
-        'email' => 'Invalid credentials.'
-    ]);
-}
 
     /*
     |--------------------------------------------------------------------------
