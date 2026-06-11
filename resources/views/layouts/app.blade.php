@@ -260,6 +260,16 @@
                                                 Create User
                                             </a>
                                         </li>
+                                        <li>
+                                            <a href="{{ route('roles.index') }}">
+                                                Manage Role
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('permissions.index') }}">
+                                                Manage Permission
+                                            </a>
+                                        </li>
                                     @elseif($restaurantSlug)
                                         <li>
                                             <a
@@ -445,6 +455,7 @@
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="{{ asset('assets/bundles/summernote/summernote-bs4.js') }}"></script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

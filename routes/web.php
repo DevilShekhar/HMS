@@ -11,6 +11,8 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
 
 
 Route::get('/', function () {
@@ -24,11 +26,31 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('room_packs', RoomPackController::class);
     Route::resource('users', UserController::class);
     Route::resource('branches', BranchController::class);
+
+    Route::resource('roles', RoleController::class);
+
+    Route::resource('permissions', PermissionController::class)->names([
+        'index' => 'permissions.index',
+        'create' => 'permissions.create',
+        'store' => 'permissions.store',
+        'edit' => 'permissions.edit',
+        'update' => 'permissions.update',
+        'destroy' => 'permissions.destroy',
+    ]);
+
+    Route::get('roles/{role}/permissions-data', [RoleController::class, 'getPermissionsData'])
+        ->name('roles.permissions.data');
+
+    Route::get('roles/{role}/permissions', [RoleController::class, 'managePermissions'])
+        ->name('roles.permissions');
+
+    Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
+        ->name('roles.permissions.update');
 });
 Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
     Route::get('/', function () {
         $restaurant = app('restaurant');
-        if (!auth()->check()) {
+        if (Auth::check()) {
             return redirect()->route('restaurant.login', ['restaurant' => $restaurant->slug]);
         }
         return redirect()->route('restaurant.dashboard', ['restaurant' => $restaurant->slug]);
@@ -38,11 +60,11 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', function () {
             $restaurant = app('restaurant');
-            if (auth()->user()->role == 'super_admin') {
+            $user = Auth::user();
+            if ($user && $user->role == 'super_admin') {
                 // dd('welcom');
                 // abort(403);
             }
-            // return view('admin.restaurants.dashboard', compact('restaurant'));
             return view('admin.dashboard', compact('restaurant'));
         })->name('restaurant.dashboard');
 
