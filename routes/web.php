@@ -136,3 +136,4 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
         })->name('restaurant.logout');
     });
 });
+// abort(500);

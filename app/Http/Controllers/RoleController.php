@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Permission;
 use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -12,7 +13,9 @@ class RoleController extends Controller
 {
     public function index()
     {
-
+        if (!Auth::user()?->can('view-role')) {
+            abort(403);
+        }
         $roles = Role::all();
         $permissions = Permission::all();
 
@@ -47,12 +50,6 @@ class RoleController extends Controller
 
         return redirect()->route('roles.index')
             ->with('success', 'Role Created successfully');
-    }
-
-    public function edit($id)
-    {
-        $role = Role::findOrFail($id);
-        return view('admin.roles.edit', compact('role'));
     }
 
     public function update(Request $request, $id)
