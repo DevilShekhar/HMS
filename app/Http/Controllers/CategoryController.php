@@ -5,35 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        // $user = Auth::user();
+        $user = Auth::user();
 
         if ($user->role == 'owner') {
 
             $categories = Category::with([
-                    'branch',
-                    'creator'
-                ])
+                'branch',
+                'creator'
+            ])
                 ->where('restaurant_id', $user->restaurant_id)
                 ->latest()
                 ->paginate(10);
-
         } else {
 
-            $branchId = Branch::where(
-                'branch_manager_id',
-                $user->id
-            )->value('id');
+            $branchId = Branch::query()
+                ->where('branch_manager_id', $user->id)
+                ->value('id');
 
             $categories = Category::with([
-                    'branch',
-                    'creator'
-                ])
+                'branch',
+                'creator'
+            ])
                 ->where('branch_id', $branchId)
                 ->latest()
                 ->paginate(10);
@@ -47,13 +47,13 @@ class CategoryController extends Controller
 
     public function create()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $branches = collect();
 
         if ($user->role == 'owner') {
 
-            $branches = Branch::where(
+            $branches = Branch::query()->where(
                 'restaurant_id',
                 $user->restaurant_id
             )->where(
@@ -77,7 +77,7 @@ class CategoryController extends Controller
             'is_active' => 'nullable'
         ]);
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user->role == 'owner') {
 
@@ -86,10 +86,9 @@ class CategoryController extends Controller
             ]);
 
             $branchId = $request->branch_id;
-
         } else {
 
-            $branchId = Branch::where(
+            $branchId = Branch::query()->where(
                 'branch_manager_id',
                 $user->id
             )->value('id');
@@ -137,9 +136,9 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($category);
 
-        $branches = Branch::where(
+        $branches = Branch::query()->where(
             'restaurant_id',
-            auth()->user()->restaurant_id
+            Auth::user()->restaurant_id
         )->get();
 
         return view(
@@ -148,7 +147,7 @@ class CategoryController extends Controller
         );
     }
 
-    public function update(Request $request,$restaurant,$category)
+    public function update(Request $request, $restaurant, $category)
     {
         $category = Category::findOrFail($category);
         $request->validate([
@@ -162,7 +161,7 @@ class CategoryController extends Controller
             'is_active' => $request->is_active ?? 1,
         ];
         if (
-            auth()->user()->role == 'owner' &&
+            Auth::user()->role == 'owner' &&
             $request->filled('branch_id')
         ) {
             $data['branch_id'] = $request->branch_id;
@@ -198,7 +197,7 @@ class CategoryController extends Controller
                 ->delete($category->image);
         }
 
-        $category->delete();
+        $category->delete($category);
 
         return back()->with(
             'success',

@@ -7,6 +7,7 @@ use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -16,7 +17,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $restaurantSlug = $request->route('restaurant');
-        $authUser = auth()->user();
+        $authUser = Auth::user();
 
         $query = User::with('restaurant');
 
@@ -24,7 +25,6 @@ class UserController extends Controller
 
             // Super Admin sees all Owners
             $query->where('role', 'owner');
-
         } elseif ($authUser->role === 'owner') {
 
             // Owner sees Branch Managers, Waiter Heads, Waiters, Chefs
@@ -35,7 +35,6 @@ class UserController extends Controller
                     'waiter',
                     'chef'
                 ]);
-
         } elseif ($authUser->role === 'branch_manager') {
 
             // Branch Manager sees Waiter Heads and Waiters
@@ -44,7 +43,6 @@ class UserController extends Controller
                     'waiter_head',
                     'waiter'
                 ]);
-
         } else {
 
             // Other roles see nothing
@@ -61,7 +59,7 @@ class UserController extends Controller
     public function create($restaurant = null)
     {
         $roles = [];
-        switch (auth()->user()->role) {
+        switch (Auth::user()->role) {
             case 'super_admin':
                 $roles = ['owner'];
                 break;
@@ -83,64 +81,67 @@ class UserController extends Controller
                 ];
                 break;
         }
-        $restaurants = Restaurant::where('status', 1)->get();
-        return view('admin.users.create',
-            compact('roles','restaurants','restaurant')
+        $restaurants = Restaurant::query()->where('status', 1)->get();
+        return view(
+            'admin.users.create',
+            compact('roles', 'restaurants', 'restaurant')
         );
     }
     /**
      * Store User
      */
     public function store(Request $request, $restaurant = null)
-{
-    $validated = $request->validate([
-        'name'          => 'required|max:255',
-        'email'         => 'required|email|unique:users,email',
-        'phone'         => 'required',
-        'gender'        => 'required',
-        'birth_date'    => 'required|date',
-        'address'       => 'required',
-        'role'          => 'required',
-        'password'      => 'required|min:6|confirmed',
-        'profile_photo' => 'nullable|image',
-    ]);
+    {
+        // dd($request->all());
+        $validated = $request->validate([
+            'name'          => 'required|max:255',
+            'email'         => 'required|email|unique:users,email',
+            'phone'         => 'required',
+            'gender'        => 'required',
+            'birth_date'    => 'required|date',
+            'address'       => 'required',
+            'role'          => 'required',
+            'password'      => 'required|min:6|confirmed',
+            'profile_photo' => 'nullable|image',
+        ]);
 
-    $profilePhoto = null;
+        $profilePhoto = null;
 
-    if ($request->hasFile('profile_photo')) {
-        $profilePhoto = $request->file('profile_photo')
-            ->store('profiles', 'public');
-    }
+        if ($request->hasFile('profile_photo')) {
+            $profilePhoto = $request->file('profile_photo')
+                ->store('profiles', 'public');
+        }
 
-    User::create([
-        'name'          => $validated['name'],
-        'email'         => $validated['email'],
-        'phone'         => $validated['phone'],
-        'gender'        => $validated['gender'],
-        'birth_date'    => $validated['birth_date'],
-        'address'       => $validated['address'],
-        'role'          => $validated['role'],
-        'profile_photo' => $profilePhoto,
-        'restaurant_id' => auth()->user()->restaurant_id,
-        'status'        => 'active',
-        'password'      => Hash::make($validated['password']),
-        'created_by'    => auth()->id(),
-    ]);
+        $user =  User::create([
+            'name'          => $validated['name'],
+            'email'         => $validated['email'],
+            'phone'         => $validated['phone'],
+            'gender'        => $validated['gender'],
+            'birth_date'    => $validated['birth_date'],
+            'address'       => $validated['address'],
+            'role'          => $validated['role'],
+            'profile_photo' => $profilePhoto,
+            'restaurant_id' => Auth::id() ? Auth::user()->restaurant_id : null,
+            'status'        => 'active',
+            'password'      => Hash::make($validated['password']),
+            'created_by'    => Auth::id(),
+        ]);
+        $user->assignRole($validated['role']);
+        // dd($user);
+        // Super Admin
+        if (Auth::user()?->role === 'super_admin') {
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'User created successfully.');
+        }
 
-    // Super Admin
-    if (auth()->user()->role === 'super_admin') {
+        // Restaurant Users
         return redirect()
-            ->route('users.index')
+            ->route('restaurant.users.index', [
+                'restaurant' => $restaurant
+            ])
             ->with('success', 'User created successfully.');
     }
-
-    // Restaurant Users
-    return redirect()
-        ->route('restaurant.users.index', [
-            'restaurant' => $restaurant
-        ])
-        ->with('success', 'User created successfully.');
-}
 
     /**
      * Edit Form
@@ -150,7 +151,7 @@ class UserController extends Controller
         $restaurant = $request->route('restaurant'); // null for super admin
         $userId = $request->route('user');
         $user = User::findOrFail($userId);
-        $restaurants = Restaurant::where('status', 1)->get();
+        $restaurants = Restaurant::query()->where('status', 1)->get();
         $roles = [
             'owner',
             'branch_manager',
@@ -158,7 +159,8 @@ class UserController extends Controller
             'waiter',
             'cashier'
         ];
-        return view('admin.users.edit',
+        return view(
+            'admin.users.edit',
             compact(
                 'user',
                 'roles',
@@ -202,27 +204,29 @@ class UserController extends Controller
         } else {
             unset($validated['password']);
         }
-        $validated['updated_by'] = auth()->id();
+        $validated['updated_by'] = Auth::id();
         // For Owner/Branch Manager keep current restaurant
-        if (auth()->user()->role != 'super_admin') {unset($validated['restaurant_id']);
+        if (Auth::user()?->role != 'super_admin') {
+            unset($validated['restaurant_id']);
         }
         $user->update($validated);
-        if (auth()->user()->role == 'super_admin') {
+        if (Auth::user()?->role == 'super_admin') {
             return redirect()->route('users.index')
                 ->with(
                     'success',
                     'User updated successfully.'
                 );
         }
-        return redirect()->route('restaurant.users.index',
+        return redirect()->route(
+            'restaurant.users.index',
             [
-                'restaurant' => optional(auth()->user()->restaurant)->slug
+                'restaurant' => optional(Auth::user()?->restaurant)->slug
             ]
-            )
-        ->with(
-            'success',
-            'User updated successfully.'
-        );
+        )
+            ->with(
+                'success',
+                'User updated successfully.'
+            );
     }
 
     /**
@@ -235,9 +239,9 @@ class UserController extends Controller
         $user = User::findOrFail($userId);
         $user->update([
             'status' => 'inactive',
-            'updated_by' => auth()->id(),
+            'updated_by' => Auth::id(),
         ]);
-        if (auth()->user()->role == 'super_admin') {
+        if (Auth::user()->role == 'super_admin') {
             return redirect()->route('users.index')
                 ->with(
                     'success',
@@ -248,7 +252,7 @@ class UserController extends Controller
             ->route(
                 'restaurant.users.index',
                 [
-                    'restaurant' => auth()->user()->restaurant->slug
+                    'restaurant' => Auth::user()?->restaurant?->slug,
                 ]
             )
             ->with(

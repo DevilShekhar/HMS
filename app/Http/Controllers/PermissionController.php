@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -11,7 +12,9 @@ class PermissionController extends Controller
 {
     public function index()
     {
-
+        if (!Auth::user()?->can('manage-permission')) {
+            abort(403);
+        }
         $permissions = Permission::with('roles')->latest()->get();
         $roles = Role::all();
 
@@ -48,7 +51,7 @@ class PermissionController extends Controller
             ->with('success', 'Permission Created successfully');
     }
 
-    public function edit( $id)
+    public function edit($id)
     {
 
         $permission = Permission::with('roles')->findOrFail($id);

@@ -241,35 +241,47 @@
                                 </a>
                             @endif
                         </li>
-                        {{-- User Management --}}
+
+                        {{-- User Management existing code --}}
+
                         @if (in_array(auth()->user()->role, ['super_admin', 'owner', 'branch_manager']))
-                            <li class="dropdown">
-                                <a href="#" class="nav-link has-dropdown">
-                                    <i class="fas fa-users"></i>
-                                    <span>User Management</span>
-                                </a>
+                            <li class="dropdown"> <a href="#" class="nav-link has-dropdown"> <i
+                                        class="fas fa-users"></i> <span>User Management</span> </a>
+
                                 <ul class="dropdown-menu">
+
                                     @if (auth()->user()->role == 'super_admin')
-                                        <li>
-                                            <a href="{{ route('users.index') }}">
-                                                User List
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('users.create') }}">
-                                                Create User
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('roles.index') }}">
-                                                Manage Role
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('permissions.index') }}">
-                                                Manage Permission
-                                            </a>
-                                        </li>
+                                        @can('view-user')
+                                            <li>
+                                                <a href="{{ route('users.index') }}">
+                                                    User List
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                        @can('create-user')
+                                            <li>
+                                                <a href="{{ route('users.create') }}">
+                                                    Create User
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                        @can('view-role')
+                                            <li>
+                                                <a href="{{ route('roles.index') }}">
+                                                    Manage Role
+                                                </a>
+                                            </li>
+                                        @endcan
+
+                                        @can('view-permission')
+                                            <li>
+                                                <a href="{{ route('permissions.index') }}">
+                                                    Manage Permission
+                                                </a>
+                                            </li>
+                                        @endcan
                                     @elseif($restaurantSlug)
                                         <li>
                                             <a
@@ -279,6 +291,7 @@
                                                 User List
                                             </a>
                                         </li>
+
                                         <li>
                                             <a
                                                 href="{{ route('restaurant.users.create', [
@@ -288,108 +301,125 @@
                                             </a>
                                         </li>
                                     @endif
+
                                 </ul>
                             </li>
+
+
                         @endif
 
+
                         {{-- Restaurants --}}
-                        @if (auth()->user()->role == 'super_admin')
+                        @can('view-restaurant')
                             <li class="{{ request()->routeIs('restaurants.*') ? 'active' : '' }}">
                                 <a href="{{ route('restaurants.index') }}" class="nav-link">
                                     <i data-feather="home"></i>
                                     <span>Restaurants</span>
                                 </a>
                             </li>
-                        @endif
-                        @if (in_array(auth()->user()->role, ['super_admin', 'owner']))
+                        @endcan
+                        {{-- @endif --}}
+                        @can('view-branch')
+                            @php
+                                $route =
+                                    auth()->user()->role === 'super_admin'
+                                        ? route('branches.index')
+                                        : route('restaurant.branches.index', [
+                                            'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                        ]);
+                            @endphp
+
                             <li
                                 class="{{ request()->routeIs('branches.*') || request()->routeIs('restaurant.branches.*') ? 'active' : '' }}">
-                                @if (auth()->user()->role == 'super_admin')
-                                    <a href="{{ route('branches.index') }}" class="nav-link">
-                                    @else
-                                        <a href="{{ route('restaurant.branches.index', ['restaurant' => optional(auth()->user()->restaurant)->slug]) }}"
-                                            class="nav-link">
-                                @endif
-                                <i data-feather="git-branch"></i><span>Branches</span>
+                                <a href="{{ $route }}" class="nav-link">
+                                    <i data-feather="git-branch"></i>
+                                    <span>Branches</span>
                                 </a>
                             </li>
-                        @endif
+                        @endcan
                         {{-- Categories --}}
                         @if (in_array(auth()->user()->role, ['owner', 'branch_manager']))
-                            <li class="dropdown">
-                                <a href="#" class="nav-link has-dropdown">
-                                    <i data-feather="grid"></i>
-                                    <span>Categories</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a
-                                            href="{{ route('restaurant.categories.index', [
-                                                'restaurant' => optional(auth()->user()->restaurant)->slug,
-                                            ]) }}">
-                                            Category List
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="{{ route('restaurant.categories.create', [
-                                                'restaurant' => optional(auth()->user()->restaurant)->slug,
-                                            ]) }}">
-                                            Create Category
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            @can('view-category')
+                                <li class="dropdown">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i data-feather="grid"></i>
+                                        <span>Categories</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.categories.index', [
+                                                    'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                                ]) }}">
+                                                Category List
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.categories.create', [
+                                                    'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                                ]) }}">
+                                                Create Category
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endcan
                         @endif
                         {{-- Menu Management --}}
                         @if (in_array(auth()->user()->role, ['owner', 'branch_manager']))
-                            <li class="dropdown">
-                                <a href="#" class="nav-link has-dropdown">
-                                    <i data-feather="coffee"></i>
-                                    <span>Menu Management</span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a
-                                            href="{{ route('restaurant.menu-items.index', ['restaurant' => optional(auth()->user()->restaurant)->slug]) }}">
-                                            Menu List</a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="{{ route('restaurant.menu-items.create', ['restaurant' => optional(auth()->user()->restaurant)->slug]) }}">
-                                            Add Menu Item </a>
-                                    </li>
-                                </ul>
-                            </li>
+                            @can('view-menu')
+                                <li class="dropdown">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i data-feather="coffee"></i>
+                                        <span>Menu Management</span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.menu-items.index', ['restaurant' => optional(auth()->user()->restaurant)->slug]) }}">
+                                                Menu List</a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.menu-items.create', ['restaurant' => optional(auth()->user()->restaurant)->slug]) }}">
+                                                Add Menu Item </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endcan
                         @endif
                         {{-- Order Management --}}
-                        @if (in_array(auth()->user()->role, ['owner', 'branch_manager', 'waiter_head', 'chef', 'super_admin']))
+                        @can('view-order')
                             <li class="dropdown">
                                 <a href="#" class="nav-link has-dropdown">
                                     <i data-feather="shopping-cart"></i>
                                     <span>Order Management</span>
                                 </a>
                                 @if (auth()->user()->restaurant)
-                            <li>
-                                <a
-                                    href="{{ route('restaurant.orders.index', ['restaurant' => auth()->user()->restaurant->slug]) }}">
-                                    Order List
-                                </a>
-                            </li>
-
-                            <li>
-                                <a
-                                    href="{{ route('restaurant.orders.create', ['restaurant' => auth()->user()->restaurant->slug]) }}">
-                                    Create Order
-                                </a>
-                            </li>
+                                    @can('view-order')
+                                <li>
+                                    <a
+                                        href="{{ route('restaurant.orders.index', ['restaurant' => auth()->user()->restaurant->slug]) }}">
+                                        Order List
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('create-order')
+                                <li>
+                                    <a
+                                        href="{{ route('restaurant.orders.create', ['restaurant' => auth()->user()->restaurant->slug]) }}">
+                                        Create Order
+                                    </a>
+                                </li>
+                            @endcan
+                        @endcan
                         @endif
                         </li>
-                        @endif
                         {{-- Restaurant Info --}}
                         @if (auth()->user()->role != 'super_admin')
                             <li class="menu-header">
-                                Restaurant
+                                Session
                             </li>
                         @endif
                         {{-- Logout --}}
