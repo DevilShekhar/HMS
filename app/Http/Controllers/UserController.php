@@ -121,7 +121,7 @@ class UserController extends Controller
             'role'          => $validated['role'],
             'profile_photo' => $profilePhoto,
             'restaurant_id' => Auth::id() ? Auth::user()->restaurant_id : null,
-            'branch_id' => Auth::id() ? Auth::user()->restaurant_id : null,
+            'branch_id' => Auth::id() ? Auth::user()->branch_id : null,
             'status'        => 'active',
             'password'      => Hash::make($validated['password']),
             'created_by'    => Auth::id(),

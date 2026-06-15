@@ -23,6 +23,8 @@ class Order extends Model
         'subtotal',
         'tax',
         'total',
+        'restaurant_id',
+        'branch_id'
     ];
     public function restaurant()
     {

@@ -46,7 +46,43 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
         ->name('roles.permissions.update');
+
+    Route::get('/chef/check-orders', [OrderController::class, 'checkOrders'])
+        ->name('chef.check-orders');
+    Route::get('/chef/notifications', [OrderController::class, 'notifications'])->name('chef.notifications');
+
+    Route::delete('/notifications/delete/{id}', function ($id) {
+
+        $notification = Auth::user()
+            ->notifications()
+            ->find($id);
+
+        if ($notification) {
+            $notification->delete();
+        }
+
+        return response()->json([
+            'success' => true
+        ]);
+    })->middleware('auth');
+    Route::post('/notifications/read/{id}', function ($id) {
+
+        $notification = Auth::user()
+            ->notifications()
+            ->find($id);
+
+        if ($notification) {
+            $notification->markAsRead();
+        }
+
+        return response()->json([
+            'success' => true
+        ]);
+    })->name('notifications.read');
 });
+Route::post('{restaurant}/orders/{order}/prepare', [OrderController::class, 'markPreparing'])
+    ->name('restaurant.orders.prepare');
+
 Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
     Route::get('/', function () {
         $restaurant = app('restaurant');
@@ -61,7 +97,6 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
         Route::get('/dashboard', function () {
             $user = Auth::user();
             if ($user && $user->role == 'super_admin') {
-
             }
             return view('admin.dashboard');
         })->name('restaurant.dashboard');

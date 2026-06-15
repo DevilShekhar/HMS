@@ -21,7 +21,6 @@ class User extends Authenticatable
         'address',
         'password',
         'role',
-        'branch_id',
         'restaurant_id',
         'branch_id',
         'status',
