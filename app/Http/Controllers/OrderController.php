@@ -9,63 +9,61 @@ use App\Models\MenuItem;
 use App\Models\Restaurant;
 use App\Models\Branch;
 use App\Models\User;
-
+use App\Notifications\NewOrderAssignedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-        public function index()
-        {
+    public function index()
+    {
 
-            $restaurant = app('restaurant');
-    // dd($restaurant);
-            $query = Order::with([
-                'branch',
-                'items',
-                'chef'
-            ])->where(
-                'restaurant_id',
-                $restaurant->id
+        $restaurant = app('restaurant');
+        $query = Order::with([
+            'branch',
+            'items',
+            'chef'
+        ])->where(
+            'restaurant_id',
+            $restaurant->id
+        );
+        if (Auth::user()->role == 'owner') {
+            // show all orders
+        } elseif (Auth::user()->role == 'branch_manager') {
+            $query->where(
+                'branch_id',
+                Auth::user()->branch_id
             );
-            // dd($query);
-
-            if (auth()->user()->role == 'owner') {
-                // show all orders
-            } elseif (auth()->user()->role == 'branch_manager') {
-                $query->where(
-                    'branch_id',
-                    auth()->user()->branch_id
-                );
-            } elseif (auth()->user()->role == 'waiter_head') {
-                $query->where(
-                    'created_by',
-                    auth()->id()
-                );
-            } elseif (auth()->user()->role == 'chef') {
-                $query->where(
-                    'chef_id',
-                    auth()->id()
-                );
-            } else {
-                $query->where(
-                    'branch_id',
-                    auth()->user()->branch_id
-                );
-            }
-
-            $orders = $query
-                ->latest()
-                ->get();
-
-            return view(
-                'admin.orders.index',
-                compact(
-                    'orders',
-                    'restaurant'
-                )
+        } elseif (Auth::user()->role == 'waiter_head') {
+            $query->where(
+                'created_by',
+                Auth::id()
+            );
+        } elseif (Auth::user()->role == 'chef') {
+            $query->where(
+                'chef_id',
+                Auth::id()
+            );
+        } else {
+            $query->where(
+                'branch_id',
+                Auth::user()->branch_id
             );
         }
+
+        $orders = $query
+            ->latest()
+            ->get();
+
+        return view(
+            'admin.orders.index',
+            compact(
+                'orders',
+                'restaurant'
+            )
+        );
+    }
 
 
 
@@ -73,7 +71,7 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
 
-        $categories = Category::where(
+        $categories = Category::query()->where(
             'restaurant_id',
             $restaurant->id
         )
@@ -116,19 +114,19 @@ class OrderController extends Controller
 
         $restaurant = app('restaurant');
 
-        $orderType = auth()->user()->role == 'waiter_head'
+        $orderType = Auth::user()->role == 'waiter_head'
             ? ($request->order_type ?? 'normal')
             : 'normal';
 
-        if (auth()->user()->role == 'owner') {
-            $branchId = Branch::where(
+        if (Auth::user()->role == 'owner') {
+            $branchId = Branch::query()->where(
                 'restaurant_id',
                 $restaurant->id
             )->value('id');
-        } elseif (auth()->user()->role == 'branch_manager') {
-            $branchId = auth()->user()->managedBranch?->id;
+        } elseif (Auth::user()->role == 'branch_manager') {
+            $branchId = Auth::user()->managedBranch?->id;
         } else {
-            $branchId = auth()->user()->branch_id;
+            $branchId = Auth::user()->branch_id;
         }
 
         DB::transaction(function () use (
@@ -138,27 +136,29 @@ class OrderController extends Controller
             $branchId
         ) {
 
-            $chef = User::where('role', 'chef')
-                ->where('branch_id', $branchId)
+            $chef = User::query()->where('role', 'chef')
+                ->where('restaurant_id', $restaurant->id)
                 ->first();
 
             $token = $this->generateToken($orderType);
-
             $order = Order::create([
                 'restaurant_id' => $restaurant->id,
                 'branch_id'     => $branchId,
                 'chef_id'       => $chef?->id,
-                'created_by'    => auth()->id(),
+                'created_by'    => Auth::id(),
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
                 'token_no'      => $token,
+                'table_no'      => $request->table_no,
                 'order_type'    => $orderType,
                 'status'        => 'pending',
                 'subtotal'      => 0,
                 'tax'           => 0,
                 'total'         => 0,
             ]);
-
+            $chef->notify(
+                new NewOrderAssignedNotification($order)
+            );
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -201,28 +201,6 @@ class OrderController extends Controller
             );
     }
 
-    // private function generateToken(
-    //     $type
-    // ) {
-    //     $count =
-    //         Order::count() + 1;
-
-    //     return $type == 'vip'
-    //         ? 'VIP-' .
-    //         str_pad(
-    //             $count,
-    //             3,
-    //             '0',
-    //             STR_PAD_LEFT
-    //         )
-    //         : 'TOK-' .
-    //         str_pad(
-    //             $count,
-    //             3,
-    //             '0',
-    //             STR_PAD_LEFT
-    //         );
-    // }
     private function generateToken($type)
     {
         $lastToken = Order::orderBy('id', 'desc')->value('token_no');
@@ -267,7 +245,7 @@ class OrderController extends Controller
             'items.menuItem'
         )->findOrFail($order);
 
-        $categories = Category::where(
+        $categories = Category::query()->where(
             'restaurant_id',
             $restaurant->id
         )
@@ -296,7 +274,7 @@ class OrderController extends Controller
             $request,
             $order
         ) {
-            $chef = User::where('role', 'chef')
+            $chef = User::query()->where('role', 'chef')
                 ->where('branch_id', $order->branch_id)
                 ->first();
 
@@ -320,7 +298,7 @@ class OrderController extends Controller
                 'chef_id'       => $chef?->id,
             ]);
 
-            OrderItem::where(
+            OrderItem::query()->where(
                 'order_id',
                 $order->id
             )->delete();
@@ -402,5 +380,50 @@ class OrderController extends Controller
             'success',
             'Kitchen Status Updated Successfully'
         );
+    }
+
+    public function checkOrders()
+    {
+        $chefId = Auth::id();
+
+        $order = Order::query()->where('chef_id', $chefId)
+            ->where('status', 'pending')
+            ->where('notification_seen', 0)
+            ->latest()
+            ->first();
+
+        if ($order) {
+
+            $order->update([
+                'notification_seen' => 1
+            ]);
+
+            return response()->json([
+                'has_new_order' => true
+            ]);
+        }
+
+        return response()->json([
+            'has_new_order' => false
+        ]);
+    }
+
+    public function notifications()
+    {
+        $notifications = Auth::user()->unreadNotifications;
+
+        return response()->json($notifications);
+    }
+
+    public function markPreparing($restaurant, $order)
+    {
+        $order = Order::findOrFail($order);
+
+        if ($order->status === 'pending') {
+            $order->status = 'preparing';
+            $order->save();
+        }
+
+        return back()->with('success', 'Order moved to Preparing');
     }
 }

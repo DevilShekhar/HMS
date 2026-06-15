@@ -617,3 +617,106 @@
         </div>
     </section>
 @endsection
+<audio id="notificationSound" preload="auto">
+    <source src="{{ asset('sounds/order-notification.mp3') }}" type="audio/mpeg">
+</audio>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const notificationSound = document.getElementById('notificationSound');
+
+        // Unlock audio after first click anywhere
+        document.addEventListener('click', function unlockAudio() {
+
+            notificationSound.play()
+                .then(() => {
+                    notificationSound.pause();
+                    notificationSound.currentTime = 0;
+                })
+                .catch(err => console.log(err));
+
+            document.removeEventListener('click', unlockAudio);
+
+        }, {
+            once: true
+        });
+
+        setInterval(function() {
+
+            fetch("{{ route('chef.notifications') }}")
+                .then(response => response.json())
+                .then(data => {
+
+                    if (!data.length) {
+                        return;
+                    }
+
+                    let notification = data[0];
+                            console.log(notification.data);
+
+
+                    // Play sound
+                    notificationSound.currentTime = 0;
+                    notificationSound.play()
+                        .catch(err => console.log('Audio blocked:', err));
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'New Order Assigned',
+                        text: notification.data.message +
+                            ' (Token #' + notification.data.token_no + ')',
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            markReadAndDelete(notification.id);
+                            window.location.href =
+                                '/' +
+                                notification.data.restaurant_slug +
+                                '/orders/' +
+                                notification.data.order_id;
+
+                        }
+
+                    });
+
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+        }, 5000);
+        async function markReadAndDelete(id) {
+
+            try {
+
+                await fetch('/notifications/read/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                await fetch('/notifications/delete/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+            } catch (error) {
+                console.error(error);
+            }
+
+        }
+
+    });
+</script>

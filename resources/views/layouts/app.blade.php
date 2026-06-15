@@ -234,6 +234,7 @@
                                 </a>
                             @elseif($BranchSlug)
                                 <a href="{{ route('restaurant.dashboard', [
+                                    'restaurant' => $restaurantSlug,
                                     'branch' => $BranchSlug,
                                 ]) }}"
                                     class="nav-link">

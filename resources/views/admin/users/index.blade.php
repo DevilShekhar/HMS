@@ -10,8 +10,6 @@
                 </div>
                 <div class="premium-head-actions">
                     @can('create-user')
-
-                   
                     @if (auth()->user()->role == 'super_admin')
                         <a href="{{ route('users.create') }}" class="btn premium-btn btn-main-premium">
                             <i class="fas fa-plus"></i>
@@ -58,7 +56,7 @@
                                             @forelse($users as $user)
                                                 <tr>
                                                     <td>{{ $loop->iteration }}</td>
-                                                    <td> {{ $user->restaurant->name ?? '-' }}</td>
+                                                    <td> {{ $user->restaurant?->name ?? '-' }}</td>
                                                     <td>
                                                         @if (!empty($user['profile_photo']))
                                                             <img src="{{ asset('storage/' . $user['profile_photo']) }}"
