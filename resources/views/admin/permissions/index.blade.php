@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@can('view-permission')
+    @extends('layouts.app')
 
-@section('content')
-    @can('manage-permission')
+    @section('content')
         <section class="section premium-dashboard">
             <div class="premium-page-head">
                 <div class="premium-page-title">
@@ -145,5 +145,9 @@
                 });
             </script>
         @endpush
-    @endcan
-@endsection
+    @endsection
+@else
+    @php
+        abort(403);
+    @endphp
+@endcan

@@ -6,6 +6,8 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class BranchController extends Controller
 {
@@ -13,62 +15,60 @@ class BranchController extends Controller
      * Display Branches
      */
     public function index()
-{
-    $user = auth()->user();
+    {
+        $user = Auth::user();
 
-    $query = Branch::with([
-        'restaurant',
-        'owner',
-        'manager'
-    ]);
+        $query = Branch::with([
+            'restaurant',
+            'owner',
+            'manager'
+        ]);
 
-    if ($user->role === 'owner') {
+        if ($user->role === 'owner') {
 
-        $query->where('owner_id', $user->id);
+            $query->where('owner_id', $user->id);
 
-        // Only branch managers created under this owner
-        $managers = User::where('restaurant_id', $user->restaurant_id)
-            ->where('role', 'branch_manager')
-            ->where('created_by', $user->id)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
+            // Only branch managers created under this owner
+            $managers = User::query()->where('restaurant_id', $user->restaurant_id)
+                ->where('role', 'branch_manager')
+                ->where('created_by', $user->id)
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get();
+        } elseif ($user->role === 'super_admin') {
 
-    } elseif ($user->role === 'super_admin') {
+            $managers = User::query()->where('role', 'branch_manager')
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get();
+        } else {
 
-        $managers = User::where('role', 'branch_manager')
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
+            abort(403);
+        }
 
-    } else {
+        $branches = $query
+            ->latest()
+            ->paginate(20);
 
-        abort(403);
+        return view(
+            'admin.branches.index',
+            compact(
+                'branches',
+                'managers'
+            )
+        );
     }
-
-    $branches = $query
-        ->latest()
-        ->paginate(20);
-
-    return view(
-        'admin.branches.index',
-        compact(
-            'branches',
-            'managers'
-        )
-    );
-}
 
     /**
      * Create Form
      */
     public function create()
     {
-        $restaurants = Restaurant::where('status', 1)
+        $restaurants = Restaurant::query()->where('status', 1)
             ->orderBy('name')
             ->get();
 
-        $owners = User::where('role', 'owner')
+        $owners = User::query()->where('role', 'owner')
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
@@ -109,7 +109,7 @@ class BranchController extends Controller
         ]);
 
         $validated['is_active'] = 1;
-
+        $validated['slug'] = Str::slug($validated['name']);
         Branch::create($validated);
 
         return redirect()
@@ -141,16 +141,16 @@ class BranchController extends Controller
     {
         $branch = Branch::findOrFail($id);
 
-        $restaurants = Restaurant::where('status', 1)
+        $restaurants = Restaurant::query()->where('status', 1)
             ->orderBy('name')
             ->get();
 
-        $owners = User::where('role', 'owner')
+        $owners = User::query()->where('role', 'owner')
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
-        $managers = User::where('role', 'branch_manager')
+        $managers = User::query()->where('role', 'branch_manager')
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
@@ -195,6 +195,7 @@ class BranchController extends Controller
             'is_active'         => 'required'
         ]);
 
+        $validated['slug'] = Str::slug($validated['name']);
         $branch->update($validated);
 
         return redirect()
@@ -229,7 +230,7 @@ class BranchController extends Controller
      */
     public function getOwners($restaurantId)
     {
-        $owners = User::where('restaurant_id', $restaurantId)
+        $owners = User::query()->where('restaurant_id', $restaurantId)
             ->where('role', 'owner')
             ->where('status', 'active')
             ->select('id', 'name')
@@ -245,10 +246,10 @@ class BranchController extends Controller
     {
         $owner = User::findOrFail($ownerId);
 
-        $managers = User::where(
-                'restaurant_id',
-                $owner->restaurant_id
-            )
+        $managers = User::query()->where(
+            'restaurant_id',
+            $owner->restaurant_id
+        )
             ->where('role', 'branch_manager')
             ->where('status', 'active')
             ->select('id', 'name')

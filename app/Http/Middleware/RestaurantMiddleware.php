@@ -12,7 +12,11 @@ class RestaurantMiddleware
     {
         $slug = $request->route('restaurant');
 
-        $restaurant = Restaurant::where('slug', $slug)->first();
+        if ($slug instanceof Restaurant) {
+            $restaurant = $slug;
+        } else {
+            $restaurant = Restaurant::query()->where('slug', $slug)->first();
+        }
 
         if (!$restaurant) {
             abort(404);

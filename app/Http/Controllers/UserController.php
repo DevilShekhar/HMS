@@ -92,7 +92,6 @@ class UserController extends Controller
      */
     public function store(Request $request, $restaurant = null)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'name'          => 'required|max:255',
             'email'         => 'required|email|unique:users,email',
@@ -122,12 +121,12 @@ class UserController extends Controller
             'role'          => $validated['role'],
             'profile_photo' => $profilePhoto,
             'restaurant_id' => Auth::id() ? Auth::user()->restaurant_id : null,
+            'branch_id' => Auth::id() ? Auth::user()->restaurant_id : null,
             'status'        => 'active',
             'password'      => Hash::make($validated['password']),
             'created_by'    => Auth::id(),
         ]);
         $user->assignRole($validated['role']);
-        // dd($user);
         // Super Admin
         if (Auth::user()?->role === 'super_admin') {
             return redirect()
@@ -189,6 +188,7 @@ class UserController extends Controller
             'password' => 'nullable|min:6|confirmed',
             'profile_photo' => 'nullable|image',
             'restaurant_id' => 'nullable|exists:restaurants,id',
+            'branch_id' => 'nullable|exists:restaurants,id',
         ]);
         if ($request->hasFile('profile_photo')) {
             if (
@@ -206,8 +206,10 @@ class UserController extends Controller
         }
         $validated['updated_by'] = Auth::id();
         // For Owner/Branch Manager keep current restaurant
+
         if (Auth::user()?->role != 'super_admin') {
             unset($validated['restaurant_id']);
+            unset($validated['branch_id']);
         }
         $user->update($validated);
         if (Auth::user()?->role == 'super_admin') {

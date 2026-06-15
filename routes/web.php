@@ -59,13 +59,11 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
     Route::post('/login', [LoginController::class, 'restaurantLogin'])->name('restaurant.login.submit');
     Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', function () {
-            $restaurant = app('restaurant');
             $user = Auth::user();
             if ($user && $user->role == 'super_admin') {
-                // dd('welcom');
-                // abort(403);
+
             }
-            return view('admin.dashboard', compact('restaurant'));
+            return view('admin.dashboard');
         })->name('restaurant.dashboard');
 
         /*
@@ -135,5 +133,7 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             );
         })->name('restaurant.logout');
     });
+
+    Route::get('/{branch}/login', [LoginController::class, 'showBranchLogin'])->name('branch.login');
+    Route::post('/{branch}/login', [LoginController::class, 'branchLogin'])->name('branch.login.submit');
 });
-// abort(500);
