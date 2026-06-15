@@ -108,6 +108,7 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             'update'  => 'restaurant.menu-items.update',
             'destroy' => 'restaurant.menu-items.destroy',
         ]);
+        Route::get('categories-by-branch/{branch}',[MenuItemController::class, 'categoriesByBranch'])->name('restaurant.categories.by-branch');
         Route::resource('orders', OrderController::class)->names([
             'index'   => 'restaurant.orders.index',
             'create'  => 'restaurant.orders.create',
@@ -116,7 +117,7 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             'edit'    => 'restaurant.orders.edit',
             'update'  => 'restaurant.orders.update',
             'destroy' => 'restaurant.orders.destroy',
-        ]);
+        ]);        
 
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('restaurant.orders.status');
         Route::get('menu-by-category/{categoryId}', [OrderController::class, 'menuByCategory'])->name('restaurant.orders.menu-by-category');
