@@ -398,6 +398,40 @@
                                 </li>
                             @endcan
                         @endif
+                        <li class="dropdown">
+                            <a href="#" lass="nav-link has-dropdown">
+                                <i data-feather="archive"></i>
+                                <span>
+                                    Inventory Management
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="{{ route(
+                                        'restaurant.inventory.index',
+                                        [
+                                            'restaurant' => optional(
+                                                auth()->user()->restaurant
+                                            )->slug
+                                        ]
+                                    ) }}">
+                                        Inventory List
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route(
+                                        'restaurant.inventory.create',
+                                        [
+                                            'restaurant' => optional(
+                                                auth()->user()->restaurant
+                                            )->slug
+                                        ]
+                                    ) }}">
+                                        Add Inventory Item
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         {{-- Order Management --}}
                         @can('view-order')
                             <li class="dropdown">

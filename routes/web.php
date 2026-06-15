@@ -13,7 +13,7 @@ use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\InventoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -117,8 +117,23 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             'edit'    => 'restaurant.orders.edit',
             'update'  => 'restaurant.orders.update',
             'destroy' => 'restaurant.orders.destroy',
-        ]);        
-
+        ]);    
+        Route::resource('inventory', InventoryController::class)->names([
+            'index' => 'restaurant.inventory.index',
+            'create' => 'restaurant.inventory.create',
+            'store' => 'restaurant.inventory.store',
+            'show' => 'restaurant.inventory.show',
+            'edit' => 'restaurant.inventory.edit',
+            'update' => 'restaurant.inventory.update',
+            'destroy' => 'restaurant.inventory.destroy',
+        ]);
+        Route::get('inventory/{inventory}/stock-in',[InventoryController::class, 'stockInForm'])->name('restaurant.inventory.stock-in');
+        Route::post('inventory/{inventory}/stock-in',[InventoryController::class, 'stockInStore'])->name('restaurant.inventory.stock-in.store');
+        // Inventory Stock OUT
+        Route::get('inventory/{inventory}/stock-out',[InventoryController::class, 'stockOutForm'])->name('restaurant.inventory.stock-out');
+        Route::post('inventory/{inventory}/stock-out',[InventoryController::class, 'stockOutStore'])->name('restaurant.inventory.stock-out.store');
+        // Transaction History
+        Route::get('inventory/{inventory}/transactions',[InventoryController::class, 'transactions'])->name('restaurant.inventory.transactions');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('restaurant.orders.status');
         Route::get('menu-by-category/{categoryId}', [OrderController::class, 'menuByCategory'])->name('restaurant.orders.menu-by-category');
         Route::post('orders/{order}/kitchen-status', [OrderController::class, 'updateKitchenStatus'])->name('restaurant.orders.kitchen-status');
