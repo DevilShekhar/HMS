@@ -400,7 +400,7 @@
                             @endcan
                         @endif
                         <li class="dropdown">
-                            <a href="#" lass="nav-link has-dropdown">
+                            <a href="#"  class="nav-link has-dropdown">
                                 <i data-feather="archive"></i>
                                 <span>
                                     Inventory Management
