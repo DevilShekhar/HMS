@@ -1,75 +1,83 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Role Management</span>
-                <h2>Manage Permissions</h2>
-                <p>Role: <b>{{ $role->name }}</b></p>
-            </div>
+
+<section class="section premium-dashboard">
+    <div class="premium-page-head">
+        <div class="premium-page-title">
+            <span class="mini-badge">Role Management</span>
+            <h2>Manage Permissions</h2>
+            <p>Role: <b>{{ $role->name }}</b></p>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="section premium-dashboard pt-0">
+<section class="section premium-dashboard pt-0">
 
-        <form method="POST"
-            action="{{ route('roles.permissions.update', [
+<form method="POST"
+      action="{{ route('roles.permissions.update', ['role' => $role->id]) }}">
+    @csrf
 
-                'role' => $role->id,
-            ]) }}">
+    <!-- HEADER ACTION -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+        <input type="text" id="searchPermission"
+               placeholder="Search permissions..."
+               style="padding:10px 14px;width:300px;border:1px solid #ddd;border-radius:10px;">
 
-            @csrf
+        <button type="button" id="selectAllBtn"
+                style="padding:10px 18px;border:none;border-radius:10px;background:#4f46e5;color:#fff;">
+            Select All
+        </button>
+    </div>
 
-            <div class="card premium-block">
-                <div class="card-header premium-card-header">
-                    <h4>All Permissions</h4>
-                </div>
+    <!-- PERMISSIONS -->
+    <div class="row">
 
-                <div class="card-body">
+        @foreach ($permissions as $groupName => $groupPermissions)
 
-                    <div class="row">
+            @if($groupPermissions->count())
 
-                        @foreach ($permissions as $groupName => $groupPermissions)
-                            @if ($groupPermissions->count() > 0)
-                                <div class="col-12 mb-4">
+            <div class="col-6 mb-4">
 
-                                    <div class="card border">
+                <div style="background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;">
 
-                                        <div class="card-header bg-light">
-                                            <strong>{{ $groupName }}</strong>
-                                        </div>
+                    <!-- GROUP HEADER -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#f8fafc;border-bottom:1px solid #eee;">
+                        <div>
+                            <strong>{{ $groupName }}</strong><br>
+                            <small style="color:#666;">{{ $groupPermissions->count() }} permissions</small>
+                        </div>
 
-                                        <div class="card-body">
+                        <button type="button"
+                                class="group-select-btn"
+                                style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;">
+                            Select Group
+                        </button>
+                    </div>
 
-                                            <div class="row">
+                    <!-- ITEMS -->
+                    <div class="row" style="padding:15px;">
 
-                                                @foreach ($groupPermissions as $permission)
-                                                    <div class="col-md-4 mb-2">
+                        @foreach ($groupPermissions as $permission)
 
-                                                        <label class="d-flex align-items-center gap-2">
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-2 permission-wrapper">
 
-                                                            <input type="checkbox" name="permissions[]"
-                                                                value="{{ $permission->name }}"
-                                                                {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
+                            <label class="permission-item">
 
-                                                            <span>
-                                                                {{ ucwords(str_replace('_', ' ', $permission->name)) }}
-                                                            </span>
+                                <input type="checkbox"
+                                       class="permission-checkbox"
+                                       name="permissions[]"
+                                       value="{{ $permission->name }}"
+                                       {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
 
-                                                        </label>
+                                <span class="permission-label">
+                                    {{ ucwords(str_replace('_',' ', $permission->name)) }}
+                                </span>
 
-                                                    </div>
-                                                @endforeach
+                            </label>
 
-                                            </div>
+                        </div>
 
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            @endif
                         @endforeach
 
                     </div>
@@ -77,17 +85,132 @@
                 </div>
             </div>
 
-            <div class="mt-3">
-                <button class="btn btn-success">
-                    Save Permissions
-                </button>
+            @endif
+        @endforeach
 
-                {{-- <a href="{{ route('roles.index', ['restaurant' => $restaurant->slug]) }}" class="btn btn-secondary">
-                    Back
-                </a> --}}
-            </div>
+    </div>
 
-        </form>
+    <!-- SAVE -->
+    <div style="position:sticky;bottom:15px;text-align:right;">
+        <button type="submit"
+                style="padding:12px 26px;border:none;border-radius:12px;background:#16a34a;color:#fff;font-weight:600;">
+            Save Permissions
+        </button>
+    </div>
 
-    </section>
+</form>
+
+</section>
+
+<!-- ================= CSS ================= -->
+<style>
+
+.permission-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.2s ease;
+    background:#fff;
+    min-height:48px;
+}
+
+.permission-item:hover{
+    border-color:#cbd5e1;
+}
+
+/* small checkbox */
+.permission-checkbox{
+    width:15px;
+    height:15px;
+    cursor:pointer;
+}
+
+/* selected state (mint / lemon green) */
+.permission-item.active{
+    background:#ecfdf3;   /* mint */
+    border-color:#86efac;
+}
+
+.permission-item.active .permission-label{
+    color:#166534;
+    font-weight:600;
+}
+
+.permission-label{
+    font-size:13px;
+    color:#374151;
+}
+
+</style>
+
+<!-- ================= JS ================= -->
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const updateUI = () => {
+        document.querySelectorAll('.permission-checkbox').forEach(cb => {
+            const item = cb.closest('.permission-item');
+            cb.checked ? item.classList.add('active') : item.classList.remove('active');
+        });
+    };
+
+    updateUI();
+
+    // checkbox toggle
+    document.querySelectorAll('.permission-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateUI);
+    });
+
+    // group select
+    document.querySelectorAll('.group-select-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+
+            const box = this.closest('div').parentElement;
+            const checkboxes = box.querySelectorAll('.permission-checkbox');
+
+            const allChecked = [...checkboxes].every(c => c.checked);
+
+            checkboxes.forEach(c => c.checked = !allChecked);
+
+            updateUI();
+        });
+    });
+
+    // global select all
+    document.getElementById('selectAllBtn').addEventListener('click', function () {
+
+        const all = document.querySelectorAll('.permission-checkbox');
+        const allChecked = [...all].every(c => c.checked);
+
+        all.forEach(c => c.checked = !allChecked);
+
+        this.innerText = allChecked ? 'Select All' : 'Unselect All';
+
+        updateUI();
+    });
+
+    // search
+    document.getElementById('searchPermission').addEventListener('input', function () {
+
+        const value = this.value.toLowerCase();
+
+        document.querySelectorAll('.permission-wrapper').forEach(el => {
+
+            const text = el.innerText.toLowerCase();
+
+            el.style.display = text.includes(value) ? '' : 'none';
+
+        });
+
+    });
+
+});
+
+</script>
+
 @endsection

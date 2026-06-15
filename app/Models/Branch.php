@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 class Branch extends Model
 {
     protected $fillable = [
@@ -24,7 +25,8 @@ class Branch extends Model
         'fssai_license',
         'opening_time',
         'closing_time',
-        'is_active'
+        'is_active',
+        'slug'
     ];
 
     public function restaurant()
@@ -34,15 +36,19 @@ class Branch extends Model
 
     public function owner()
     {
-        return $this->belongsTo(User::class,'owner_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function manager()
     {
-        return $this->belongsTo(User::class,'branch_manager_id');
+        return $this->belongsTo(User::class, 'branch_manager_id');
     }
     public function menuItems()
     {
         return $this->hasMany(MenuItem::class);
+    }
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

@@ -212,6 +212,7 @@
 
                     @php
                         $restaurantSlug = auth()->check() ? optional(auth()->user()->restaurant)->slug : null;
+                        $BranchSlug = auth()->check() ? optional(auth()->user()->branch)->slug : null;
                     @endphp
 
                     <div class="sidebar-brand">
@@ -228,6 +229,14 @@
                             class="{{ request()->routeIs('dashboard') || request()->routeIs('restaurant.dashboard') ? 'active' : '' }}">
                             @if (auth()->user()->role == 'super_admin')
                                 <a href="{{ route('dashboard') }}" class="nav-link">
+                                    <i data-feather="monitor"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            @elseif($BranchSlug)
+                                <a href="{{ route('restaurant.dashboard', [
+                                    'branch' => $BranchSlug,
+                                ]) }}"
+                                    class="nav-link">
                                     <i data-feather="monitor"></i>
                                     <span>Dashboard</span>
                                 </a>
@@ -398,23 +407,25 @@
                                 </a>
                                 @if (auth()->user()->restaurant)
                                     @can('view-order')
-                                <li>
-                                    <a
-                                        href="{{ route('restaurant.orders.index', ['restaurant' => auth()->user()->restaurant->slug]) }}">
-                                        Order List
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('create-order')
-                                <li>
-                                    <a
-                                        href="{{ route('restaurant.orders.create', ['restaurant' => auth()->user()->restaurant->slug]) }}">
-                                        Create Order
-                                    </a>
-                                </li>
-                            @endcan
-                        @endcan
-                        @endif
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.orders.index', ['restaurant' => auth()->user()->restaurant->slug]) }}">
+                                                    Order List
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('create-order')
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.orders.create', ['restaurant' => auth()->user()->restaurant->slug]) }}">
+                                                    Create Order
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    @endcan
+                                @endcan
+                            @endif
                         </li>
                         {{-- Restaurant Info --}}
                         @if (auth()->user()->role != 'super_admin')

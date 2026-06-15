@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -83,6 +84,54 @@ class LoginController extends Controller
         return view('auth.login');
     }
 
+    public function showBranchLogin(
+        Restaurant $restaurant,
+        Branch $branch
+    ) {
+
+        if ($branch->restaurant_id != $restaurant->id) {
+            abort(404);
+        }
+
+        return view('auth.login', compact('restaurant', 'branch'));
+    }
+
+    public function branchLogin(Request $request, $restaurant, $branch)
+    {
+        $restaurantModel = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
+
+        $branchModel = Branch::query()->where('slug', $branch)
+            ->where('restaurant_id', $restaurantModel->id)
+            ->firstOrFail();
+
+        $user = User::query()->where('email', $request->email)
+            ->where('id', $branchModel->branch_manager_id)
+            ->first();
+
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'You are not assigned to this branch.'
+            ]);
+        }
+
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password,
+            'status' => 'Active'
+        ])) {
+
+            $request->session()->regenerate();
+
+            return redirect()->route('restaurant.dashboard', [
+                'restaurant' => $restaurantModel->slug
+            ]);
+        }
+
+        return back()->withErrors([
+            'email' => 'Invalid credentials.'
+        ]);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Restaurant Login Submit
@@ -91,19 +140,24 @@ class LoginController extends Controller
 
     public function restaurantLogin(Request $request, $restaurant)
     {
-        $restaurantModel = Restaurant::where('slug', $restaurant)->first();
+        $restaurantModel = Restaurant::query()->where('slug', $restaurant)->first();
 
         if (!$restaurantModel) {
             abort(404);
         }
 
-        $user = User::where('email', $request->email)
+        $user = User::query()->where('email', $request->email)
             ->where('restaurant_id', $restaurantModel->id)
             ->first();
 
         if (!$user) {
             return back()->withErrors([
                 'email' => 'You are not allowed to login to this restaurant.'
+            ]);
+        }
+        if ($user->role === 'branch_manager') {
+            return back()->withErrors([
+                'email' => 'Branch managers must login from their branch login URL.'
             ]);
         }
 
