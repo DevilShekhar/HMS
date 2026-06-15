@@ -48,7 +48,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('roles.permissions.update');
 });
 Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
-// Route::prefix('{restaurant}')->group(function () {
     Route::get('/', function () {
         $restaurant = app('restaurant');
         if (Auth::check()) {
@@ -60,11 +59,9 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
     Route::post('/login', [LoginController::class, 'restaurantLogin'])->name('restaurant.login.submit');
     Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', function () {
-            // $restaurant = app('restaurant');
             $user = Auth::user();
             if ($user && $user->role == 'super_admin') {
-                // dd('welcom');
-                // abort(403);
+
             }
             return view('admin.dashboard');
         })->name('restaurant.dashboard');

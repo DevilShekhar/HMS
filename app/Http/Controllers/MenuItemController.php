@@ -16,8 +16,6 @@ class MenuItemController extends Controller
      */
     public function index()
     {
-
-        // $restaurant = app('restaurant');
         $restaurant = Restaurant::query()->where('slug', request()->route('restaurant'))->firstOrFail();
 
         if (Auth::user()->role == 'owner') {

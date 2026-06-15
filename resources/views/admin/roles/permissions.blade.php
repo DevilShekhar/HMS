@@ -18,7 +18,6 @@
       action="{{ route('roles.permissions.update', ['role' => $role->id]) }}">
     @csrf
 
-    <!-- HEADER ACTION -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
         <input type="text" id="searchPermission"
                placeholder="Search permissions..."
@@ -30,7 +29,6 @@
         </button>
     </div>
 
-    <!-- PERMISSIONS -->
     <div class="row">
 
         @foreach ($permissions as $groupName => $groupPermissions)
@@ -41,7 +39,6 @@
 
                 <div style="background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;">
 
-                    <!-- GROUP HEADER -->
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#f8fafc;border-bottom:1px solid #eee;">
                         <div>
                             <strong>{{ $groupName }}</strong><br>
@@ -55,7 +52,6 @@
                         </button>
                     </div>
 
-                    <!-- ITEMS -->
                     <div class="row" style="padding:15px;">
 
                         @foreach ($groupPermissions as $permission)
@@ -90,7 +86,6 @@
 
     </div>
 
-    <!-- SAVE -->
     <div style="position:sticky;bottom:15px;text-align:right;">
         <button type="submit"
                 style="padding:12px 26px;border:none;border-radius:12px;background:#16a34a;color:#fff;font-weight:600;">
@@ -102,7 +97,6 @@
 
 </section>
 
-<!-- ================= CSS ================= -->
 <style>
 
 .permission-item{
@@ -122,16 +116,14 @@
     border-color:#cbd5e1;
 }
 
-/* small checkbox */
 .permission-checkbox{
     width:15px;
     height:15px;
     cursor:pointer;
 }
 
-/* selected state (mint / lemon green) */
 .permission-item.active{
-    background:#ecfdf3;   /* mint */
+    background:#ecfdf3;
     border-color:#86efac;
 }
 
@@ -147,7 +139,6 @@
 
 </style>
 
-<!-- ================= JS ================= -->
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -161,12 +152,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateUI();
 
-    // checkbox toggle
     document.querySelectorAll('.permission-checkbox').forEach(cb => {
         cb.addEventListener('change', updateUI);
     });
 
-    // group select
     document.querySelectorAll('.group-select-btn').forEach(btn => {
         btn.addEventListener('click', function () {
 
@@ -181,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // global select all
     document.getElementById('selectAllBtn').addEventListener('click', function () {
 
         const all = document.querySelectorAll('.permission-checkbox');
@@ -194,7 +182,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateUI();
     });
 
-    // search
     document.getElementById('searchPermission').addEventListener('input', function () {
 
         const value = this.value.toLowerCase();

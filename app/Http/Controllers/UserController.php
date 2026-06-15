@@ -92,7 +92,6 @@ class UserController extends Controller
      */
     public function store(Request $request, $restaurant = null)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'name'          => 'required|max:255',
             'email'         => 'required|email|unique:users,email',
@@ -127,9 +126,7 @@ class UserController extends Controller
             'password'      => Hash::make($validated['password']),
             'created_by'    => Auth::id(),
         ]);
-        // dd($user);
         $user->assignRole($validated['role']);
-        // dd($user);
         // Super Admin
         if (Auth::user()?->role === 'super_admin') {
             return redirect()
@@ -214,11 +211,6 @@ class UserController extends Controller
             unset($validated['restaurant_id']);
             unset($validated['branch_id']);
         }
-        //         dd([
-        //     'user_branch' => $user->branch_id,
-        //     'auth_branch' => Auth::user()->branch_id ?? null,
-        //     'request_branch' => $request->branch_id,
-        // ]);
         $user->update($validated);
         if (Auth::user()?->role == 'super_admin') {
             return redirect()->route('users.index')
