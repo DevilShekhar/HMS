@@ -55,7 +55,7 @@
                             <td>{{ $key + 1 }}</td>
                             <td>
                                 @if($item->image)
-                                    <img src="{{ asset('storage/'.$item->image) }}" width="60" class="rounded">
+                                    <img src="{{ asset($item->image) }}" width="60" class="rounded">
                                 @else
                                     <span class="badge bg-secondary"> No Image </span>
                                 @endif
