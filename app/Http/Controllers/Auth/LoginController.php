@@ -103,7 +103,6 @@ class LoginController extends Controller
         $branchModel = Branch::query()->where('slug', $branch)
             ->where('restaurant_id', $restaurantModel->id)
             ->firstOrFail();
-
         $user = User::query()->where('email', $request->email)
             ->where('id', $branchModel->branch_manager_id)
             ->first();
@@ -122,9 +121,9 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
 
-            return redirect()->route('restaurant.dashboard', [
-                'restaurant' => $restaurantModel->slug
-            ]);
+            return redirect()->to(
+                $restaurantModel->slug . '/' . $branchModel->slug . '/dashboard'
+            );
         }
 
         return back()->withErrors([

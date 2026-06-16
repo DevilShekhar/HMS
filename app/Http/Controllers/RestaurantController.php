@@ -9,11 +9,11 @@ use Illuminate\Support\Str;
 class RestaurantController extends Controller
 {
     public function index()
-{
-    $restaurants = Restaurant::latest()->paginate(10);
+    {
+        $restaurants = Restaurant::query()->latest()->paginate(10);
 
-    return view('admin.restaurants.index', compact('restaurants'));
-}
+        return view('admin.restaurants.index', compact('restaurants'));
+    }
 
     public function create()
     {
@@ -24,7 +24,7 @@ class RestaurantController extends Controller
     {
         Restaurant::create([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),           
+            'slug' => Str::slug($request->name),
             'status' => $request->status ?? 1,
         ]);
 
@@ -46,7 +46,7 @@ class RestaurantController extends Controller
 
         $restaurant->update([
             'name' => $request->name,
-            'slug' => Str::slug($request->name),            
+            'slug' => Str::slug($request->name),
         ]);
 
         return redirect()
