@@ -14,6 +14,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\TableCategoryController;
+use App\Http\Controllers\RestaurantTableController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -162,6 +164,25 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             'update' => 'restaurant.inventory.update',
             'destroy' => 'restaurant.inventory.destroy',
         ]);
+        Route::resource('table-categories', TableCategoryController::class)->names([
+            'index'   => 'restaurant.table-categories.index',
+            'create'  => 'restaurant.table-categories.create',
+            'store'   => 'restaurant.table-categories.store',
+            'show'    => 'restaurant.table-categories.show',
+            'edit'    => 'restaurant.table-categories.edit',
+            'update'  => 'restaurant.table-categories.update',
+            'destroy' => 'restaurant.table-categories.destroy',
+        ]);
+        Route::resource('tables', RestaurantTableController::class)->names([
+            'index'   => 'restaurant.tables.index',
+            'create'  => 'restaurant.tables.create',
+            'store'   => 'restaurant.tables.store',
+            'show'    => 'restaurant.tables.show',
+            'edit'    => 'restaurant.tables.edit',
+            'update'  => 'restaurant.tables.update',
+            'destroy' => 'restaurant.tables.destroy',
+        ]);
+        Route::get('table-categories-by-branch/{branch}',[RestaurantTableController::class, 'categoriesByBranch'])->name('restaurant.tables.categories-by-branch');
         Route::get('inventory/{inventory}/stock-in',[InventoryController::class, 'stockInForm'])->name('restaurant.inventory.stock-in');
         Route::post('inventory/{inventory}/stock-in',[InventoryController::class, 'stockInStore'])->name('restaurant.inventory.stock-in.store');
         // Inventory Stock OUT

@@ -1,0 +1,148 @@
+<?php
+namespace App\Http\Controllers;
+use App\Models\RestaurantTable;
+use App\Models\TableCategory;
+use App\Models\Branch;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class RestaurantTableController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::user();
+        $query = RestaurantTable::with(['category','branch'])->where('restaurant_id',app('restaurant')->id);
+        if ($user->role == 'owner') {
+            $branchIds = Branch::where(
+                'owner_id',
+                $user->id
+            )->pluck('id');
+            $query->whereIn(
+                'branch_id',
+                $branchIds
+            );
+        }
+        if ($user->role == 'branch_manager') {
+            $branch = Branch::where(
+                'branch_manager_id',
+                $user->id
+            )->first();
+            if ($branch) {
+                $query->where(
+                    'branch_id',
+                    $branch->id
+                );
+            }
+        }
+        $tables = $query->latest()->paginate(20);
+        return view('admin.tables.index',compact('tables'));
+    }
+
+    public function create()
+    {
+        $user = Auth::user();
+        if ($user->role == 'owner') {
+            $branches = Branch::where('owner_id',$user->id)->where('is_active',1)->get();
+            $categories = TableCategory::where('restaurant_id',app('restaurant')->id)->get();
+            return view('admin.tables.create',compact('branches', 'categories'));
+        }
+        if ($user->role == 'branch_manager') {
+            $branch = Branch::where('branch_manager_id',$user->id)->first();
+            $categories = TableCategory::where('branch_id',$branch->id)->get();
+            return view('admin.tables.create',compact('branch', 'categories')
+            );
+        }
+        abort(403);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'cat_id'       => 'required',
+            'branch_id'    => 'required',
+            'table_number' => 'required|max:50',
+            'capacity'     => 'required|integer|min:1'
+        ]);
+        RestaurantTable::create([
+            'cat_id'        => $request->cat_id,
+            'restaurant_id' => app('restaurant')->id,
+            'branch_id'     => $request->branch_id,
+            'table_number'  => $request->table_number,
+            'capacity'      => $request->capacity,
+            'created_by'    => Auth::id(),
+            'updated_by'    => Auth::id(),
+        ]);
+        return redirect()
+            ->route(
+                'restaurant.tables.index',
+                request()->route('restaurant')
+            )
+            ->with(
+                'success',
+                'Table created successfully.'
+            );
+    }
+
+    public function show($restaurant, RestaurantTable $table)
+    {
+        return view('admin.tables.show',compact('table'));
+    }
+
+    public function edit($restaurant, RestaurantTable $table)
+    {
+        $user = Auth::user();
+        if ($user->role == 'owner') {
+            $branches = Branch::where('owner_id',$user->id)->where('is_active',1)->get();
+            $categories = TableCategory::where('restaurant_id',app('restaurant')->id)->get();
+            return view('admin.tables.edit', compact('table','branches','categories'));
+        }
+        if ($user->role == 'branch_manager') {
+            $branch = Branch::where('branch_manager_id',$user->id)->first();
+            $categories = TableCategory::where('branch_id',$branch->id)->get();
+            return view('admin.tables.edit',compact('table', 'branch','categories'));
+        }
+        abort(403);
+    }
+
+    public function update(Request $request,$restaurant,RestaurantTable $table) {
+        $request->validate([
+            'cat_id'       => 'required',
+            'branch_id'    => 'required',
+            'table_number' => 'required|max:50',
+            'capacity'     => 'required|integer|min:1'
+        ]);
+        $table->update([
+            'cat_id'        => $request->cat_id,
+            'branch_id'     => $request->branch_id,
+            'table_number'  => $request->table_number,
+            'capacity'      => $request->capacity,
+            'updated_by'    => Auth::id(),
+        ]);
+        return redirect()
+            ->route(
+                'restaurant.tables.index',
+                $restaurant
+            )
+            ->with(
+                'success',
+                'Table updated successfully.'
+            );
+    }
+    public function destroy($restaurant,RestaurantTable $table) {
+        $table->delete();
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Table deleted successfully.'
+            );
+    }
+    public function categoriesByBranch($restaurant, Branch $branch)
+    {
+        return response()->json(
+            TableCategory::where('branch_id', $branch->id)
+                ->select('id', 'name')
+                ->get()
+        );
+    }
+}
