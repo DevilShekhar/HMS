@@ -240,7 +240,24 @@ Route::prefix('{restaurant}')
                 'update' => 'restaurant.inventory.update',
                 'destroy' => 'restaurant.inventory.destroy',
             ]);
-
+            Route::resource('table-categories', TableCategoryController::class)->names([
+                'index'   => 'restaurant.table-categories.index',
+                'create'  => 'restaurant.table-categories.create',
+                'store'   => 'restaurant.table-categories.store',
+                'show'    => 'restaurant.table-categories.show',
+                'edit'    => 'restaurant.table-categories.edit',
+                'update'  => 'restaurant.table-categories.update',
+                'destroy' => 'restaurant.table-categories.destroy',
+            ]);
+            Route::resource('tables', TableController::class)->names([
+                'index'   => 'restaurant.tables.index',
+                'create'  => 'restaurant.tables.create',
+                'store'   => 'restaurant.tables.store',
+                'show'    => 'restaurant.tables.show',
+                'edit'    => 'restaurant.tables.edit',
+                'update'  => 'restaurant.tables.update',
+                'destroy' => 'restaurant.tables.destroy',
+            ]);
             Route::get('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInForm'])
                 ->name('restaurant.inventory.stock-in');
 
