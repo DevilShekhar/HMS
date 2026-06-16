@@ -46,6 +46,7 @@
                                     <th>Manager</th>
                                     <th>Phone</th>
                                     <th>City</th>
+                                    <th>QR Code</th>
                                     <th>Status</th>
                                     <th width="220">Action</th>
                                 </tr>
@@ -79,6 +80,13 @@
                                         </td>
                                         <td>{{ $branch->phone }}</td>
                                         <td>{{ $branch->city }}</td>
+                                        <td>
+                                            @if($branch->qrcode)
+                                                <img src="{{ asset($branch->qrcode) }}" width="60" height="60" alt="QR Code">
+                                            @else
+                                                <span class="badge bg-secondary">No QR</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             @if ($branch->is_active)
                                                 <span class="badge bg-success">
@@ -125,6 +133,9 @@
                                                         ]) }}">
                                                         <i class="fas fa-user-tie"></i>
                                                     </button>
+                                                    <button type="button"class="btn btn-success btn-sm upload-qrcode-btn" data-toggle="modal" data-target="#uploadQrModal"  data-id="{{ $branch->id }}">
+                                                        <i class="fas fa-qrcode"></i>
+                                                    </button>
                                                 @endif
                                             </div>
                                         </td>
@@ -147,6 +158,39 @@
                 @endif
             </div>
         </section>
+        <div class="modal fade" id="uploadQrModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <form id="uploadQrForm"  method="POST" action="{{ route('branches.upload-qrcode', ['restaurant' => request()->route('restaurant')]) }}" enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="branch_id" id="branch_id">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Upload QR Code
+                            </h5>
+                            <button type="button"  class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>QR Code Image</label>
+                                <input type="file" name="qrcode" class="form-control" accept="image/*" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Close
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         @if (auth()->user()->role == 'owner')
             <div class="modal fade" id="assignManagerModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -194,6 +238,22 @@
                 </script>
             @endpush
         @endif
+        @push('scripts')
+            <script>
+                $(document).ready(function () {
+
+                    $('.upload-qrcode-btn').click(function () {
+
+                        let branchId = $(this).data('id');
+
+                        $('#branch_id').val(branchId);
+
+                        console.log('Branch ID:', branchId);
+                    });
+
+                });
+            </script>
+        @endpush
     @endsection
 @else
     @php

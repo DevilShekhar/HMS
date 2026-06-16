@@ -82,7 +82,7 @@
                                 @enderror
                                 @if($category->image)
                                     <div class="mt-3">
-                                        <img src="{{ asset('storage/'.$category->image) }}" width="120"  class="img-thumbnail">
+                                        <img src="{{ asset($category->image) }}" width="120"  class="img-thumbnail">
                                     </div>
                                 @endif
                             </div>

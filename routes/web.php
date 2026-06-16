@@ -197,9 +197,8 @@ Route::prefix('{restaurant}')
                 'destroy' => 'restaurant.branches.destroy',
             ]);
 
-            Route::post('branches/{branch}/assign-manager', [BranchController::class, 'assignManager'])
-                ->name('restaurant.branches.assign-manager');
-
+            Route::post('branches/{branch}/assign-manager', [BranchController::class, 'assignManager'])->name('restaurant.branches.assign-manager');
+            Route::post('/branches/upload-qrcode',[BranchController::class, 'uploadQrCode'])->name('branches.upload-qrcode');
             Route::resource('categories', CategoryController::class)->names([
                 'index'   => 'restaurant.categories.index',
                 'create'  => 'restaurant.categories.create',

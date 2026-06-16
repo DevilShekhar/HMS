@@ -101,14 +101,23 @@ class UserController extends Controller
             'address'       => 'required',
             'role'          => 'required',
             'password'      => 'required|min:6|confirmed',
-            'profile_photo' => 'nullable|image',
+            'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $profilePhoto = null;
 
         if ($request->hasFile('profile_photo')) {
-            $profilePhoto = $request->file('profile_photo')
-                ->store('profiles', 'public');
+            $file = $request->file('profile_photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Create folder if not exists
+            if (!file_exists(public_path('uploads/profiles'))) {
+                mkdir(public_path('uploads/profiles'), 0777, true);
+            }
+            $file->move(
+                public_path('uploads/profiles'),
+                $filename
+            );
+            $profilePhoto = 'uploads/profiles/' . $filename;
         }
 
         $user =  User::create([
@@ -120,26 +129,23 @@ class UserController extends Controller
             'address'       => $validated['address'],
             'role'          => $validated['role'],
             'profile_photo' => $profilePhoto,
-            'restaurant_id' => Auth::id() ? Auth::user()->restaurant_id : null,
-            'branch_id' => Auth::id() ? Auth::user()->branch_id : null,
+            'restaurant_id' => Auth::user()?->restaurant_id,
+            'branch_id'     => Auth::user()?->branch_id,
             'status'        => 'active',
             'password'      => Hash::make($validated['password']),
             'created_by'    => Auth::id(),
         ]);
         $user->assignRole($validated['role']);
-        // Super Admin
+
         if (Auth::user()?->role === 'super_admin') {
             return redirect()
                 ->route('users.index')
-                ->with('success', 'User created successfully.');
+                ->with('success','User created successfully.');
         }
 
-        // Restaurant Users
         return redirect()
-            ->route('restaurant.users.index', [
-                'restaurant' => $restaurant
-            ])
-            ->with('success', 'User created successfully.');
+            ->route('restaurant.users.index',['restaurant' => $restaurant])
+            ->with('success','User created successfully.');
     }
 
     /**
@@ -186,45 +192,64 @@ class UserController extends Controller
             'role' => 'required',
             'status' => 'required',
             'password' => 'nullable|min:6|confirmed',
-            'profile_photo' => 'nullable|image',
+            'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'restaurant_id' => 'nullable|exists:restaurants,id',
-            'branch_id' => 'nullable|exists:restaurants,id',
+            'branch_id' => 'nullable|exists:branches,id',
         ]);
+        // Upload Profile Photo
         if ($request->hasFile('profile_photo')) {
+            // Delete old image
             if (
                 $user->profile_photo &&
-                Storage::disk('public')->exists($user->profile_photo)
+                file_exists(public_path($user->profile_photo))
             ) {
-                Storage::disk('public')->delete($user->profile_photo);
+                unlink(public_path($user->profile_photo));
             }
-            $validated['profile_photo'] = $request->file('profile_photo')->store('profiles', 'public');
+            $file = $request->file('profile_photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            // Make sure folder exists
+            if (!file_exists(public_path('uploads/profiles'))) {
+                mkdir(public_path('uploads/profiles'), 0777, true);
+            }
+            $file->move(
+                public_path('uploads/profiles'),
+                $filename
+            );
+            $validated['profile_photo'] =
+                'uploads/profiles/' . $filename;
         }
+        // Update password only if entered
         if ($request->filled('password')) {
-            $validated['password'] = Hash::make($request->password);
+
+            $validated['password'] =
+                Hash::make($request->password);
         } else {
             unset($validated['password']);
         }
         $validated['updated_by'] = Auth::id();
-        // For Owner/Branch Manager keep current restaurant
-
+        // Owner / Branch Manager cannot change restaurant & branch
         if (Auth::user()?->role != 'super_admin') {
             unset($validated['restaurant_id']);
             unset($validated['branch_id']);
         }
         $user->update($validated);
         if (Auth::user()?->role == 'super_admin') {
-            return redirect()->route('users.index')
+            return redirect()
+                ->route('users.index')
                 ->with(
                     'success',
                     'User updated successfully.'
                 );
         }
-        return redirect()->route(
-            'restaurant.users.index',
-            [
-                'restaurant' => optional(Auth::user()?->restaurant)->slug
-            ]
-        )
+        return redirect()
+            ->route(
+                'restaurant.users.index',
+                [
+                    'restaurant' => optional(
+                        Auth::user()?->restaurant
+                    )->slug
+                ]
+            )
             ->with(
                 'success',
                 'User updated successfully.'
