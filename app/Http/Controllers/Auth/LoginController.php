@@ -98,37 +98,55 @@ class LoginController extends Controller
 
     public function branchLogin(Request $request, $restaurant, $branch)
     {
-        $restaurantModel = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        $branchModel = Branch::query()->where('slug', $branch)
+        $restaurantModel = Restaurant::query()
+            ->where('slug', $restaurant)
+            ->firstOrFail();
+
+        $branchModel = Branch::query()
+            ->where('slug', $branch)
             ->where('restaurant_id', $restaurantModel->id)
             ->firstOrFail();
-        $user = User::query()->where('email', $request->email)
-            ->where('id', $branchModel->branch_manager_id)
+
+        // Check if user belongs to this branch
+        $user = User::query()
+            ->where('email', $request->email)
+            ->where('restaurant_id', $restaurantModel->id)
+            ->where('branch_id', $branchModel->id)
             ->first();
 
         if (!$user) {
-            return back()->withErrors([
-                'email' => 'You are not assigned to this branch.'
-            ]);
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'email' => 'You are not assigned to this branch.'
+                ]);
         }
 
+        // Login
         if (Auth::attempt([
             'email' => $request->email,
             'password' => $request->password,
-            'status' => 'Active'
+            'status' => 'Active',
         ])) {
 
             $request->session()->regenerate();
 
-            return redirect()->to(
-                $restaurantModel->slug . '/' . $branchModel->slug . '/dashboard'
-            );
+            return redirect()->route('branch.dashboard', [
+                'restaurant' => $restaurantModel->slug,
+                'branch' => $branchModel->slug,
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Invalid credentials.'
-        ]);
+        return back()
+            ->withInput()
+            ->withErrors([
+                'email' => 'Invalid credentials.'
+            ]);
     }
 
     /*
@@ -154,9 +172,9 @@ class LoginController extends Controller
                 'email' => 'You are not allowed to login to this restaurant.'
             ]);
         }
-        if ($user->role === 'branch_manager') {
+        if ($user->branch_id) {
             return back()->withErrors([
-                'email' => 'Branch managers must login from their branch login URL.'
+                'email' => 'Please login using your branch login URL.'
             ]);
         }
 
@@ -169,8 +187,20 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
 
+            // Branch user
+            if ($user->branch_id) {
+
+                $branch = Branch::query()->find($user->branch_id);
+
+                return redirect()->route('branch.dashboard', [
+                    'restaurant' => $restaurantModel->slug,
+                    'branch' => $branch->slug,
+                ]);
+            }
+
+            // Restaurant-level user
             return redirect()->route('restaurant.dashboard', [
-                'restaurant' => $restaurantModel->slug
+                'restaurant' => $restaurantModel->slug,
             ]);
         }
 
