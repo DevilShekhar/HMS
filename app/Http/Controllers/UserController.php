@@ -16,18 +16,15 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $restaurantSlug = $request->route('restaurant');
         $authUser = Auth::user();
 
-        $query = User::with('restaurant');
+        $query = User::query();
 
         if ($authUser->role === 'super_admin') {
 
-            // Super Admin sees all Owners
-            $query->where('role', 'owner');
+            $query->latest();
         } elseif ($authUser->role === 'owner') {
 
-            // Owner sees Branch Managers, Waiter Heads, Waiters, Chefs
             $query->where('restaurant_id', $authUser->restaurant_id)
                 ->whereIn('role', [
                     'branch_manager',
@@ -37,22 +34,25 @@ class UserController extends Controller
                 ]);
         } elseif ($authUser->role === 'branch_manager') {
 
-            // Branch Manager sees Waiter Heads and Waiters
             $query->where('restaurant_id', $authUser->restaurant_id)
+                ->where('branch_id', $authUser->branch_id)
                 ->whereIn('role', [
                     'waiter_head',
-                    'waiter'
+                    'waiter',
+                    'cashier',
+                    'chef'
                 ]);
         } else {
-
-            // Other roles see nothing
-            $query->whereRaw('1 = 0');
+            $query->whereRaw('1 = 0', [], 'and');
         }
 
         $users = $query->latest()->paginate(20);
 
+        $restaurantSlug = $request->route('restaurant');
+
         return view('admin.users.index', compact('users', 'restaurantSlug'));
     }
+
     /**
      * Create Form
      */
