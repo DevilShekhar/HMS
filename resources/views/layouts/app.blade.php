@@ -604,8 +604,8 @@
                                         <li>
                                             <a
                                                 href="{{ route('branch.table-categories.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
+                                                    'restaurant' => auth()->user()->restaurant->slug,
+                                                    'branch' => auth()->user()->branch->slug,
                                                 ]) }}">
                                                 Table Categories
                                             </a>
@@ -614,8 +614,8 @@
                                         <li>
                                             <a
                                                 href="{{ route('branch.tables.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
+                                                    'restaurant' => auth()->user()->restaurant->slug,
+                                                    'branch' => auth()->user()->branch->slug,
                                                 ]) }}">
                                                 Tables
                                             </a>
@@ -624,8 +624,8 @@
                                         <li>
                                             <a
                                                 href="{{ route('branch.tables.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
+                                                    'restaurant' => auth()->user()->restaurant->slug,
+                                                    'branch' => auth()->user()->branch->slug,
                                                 ]) }}">
                                                 Add Table
                                             </a>
@@ -675,8 +675,9 @@
 
                                     <ul class="dropdown-menu">
 
+                                        {{-- Order List --}}
                                         @can('view-order')
-                                            @if (auth()->user()->branch_id)
+                                            @if (auth()->user()->branch_id && currentBranchSlug())
                                                 <li>
                                                     <a
                                                         href="{{ route('branch.orders.index', [
@@ -686,7 +687,7 @@
                                                         Order List
                                                     </a>
                                                 </li>
-                                            @else
+                                            @elseif(currentRestaurantSlug())
                                                 <li>
                                                     <a
                                                         href="{{ route('restaurant.orders.index', [
@@ -698,8 +699,9 @@
                                             @endif
                                         @endcan
 
+                                        {{-- Create Order --}}
                                         @can('create-order')
-                                            @if (auth()->user()->branch_id)
+                                            @if (auth()->user()->branch_id && currentBranchSlug())
                                                 <li>
                                                     <a
                                                         href="{{ route('branch.orders.create', [
@@ -709,7 +711,7 @@
                                                         Create Order
                                                     </a>
                                                 </li>
-                                            @else
+                                            @elseif(currentRestaurantSlug())
                                                 <li>
                                                     <a
                                                         href="{{ route('restaurant.orders.create', [
