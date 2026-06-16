@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\InventoryItem;
 use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class InventoryController extends Controller
@@ -13,28 +14,28 @@ class InventoryController extends Controller
     public function index()
     {
         $restaurant = app('restaurant');
-        $items = InventoryItem::with(['branch','creator','updater'])->where('restaurant_id',$restaurant->id)->latest()->paginate(20);
-        return view( 'admin.inventory.index',compact('items'));
+        $items = InventoryItem::with(['branch', 'creator', 'updater'])->where('restaurant_id', $restaurant->id)->latest()->paginate(20);
+        return view('admin.inventory.index', compact('items'));
     }
     public function create()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $restaurant = app('restaurant');
         if ($user->hasRole('owner')) {
-            $branches = Branch::where('restaurant_id',$restaurant->id)->get();
-            return view('admin.inventory.create',compact('branches'));        
+            $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
+            return view('admin.inventory.create', compact('branches'));
         }
-        $branch = Branch::where('branch_manager_id',$user->id)->firstOrFail();
-        return view('admin.inventory.create',compact('branch'));
+        $branch = Branch::query()->where('branch_manager_id', $user->id)->firstOrFail();
+        return view('admin.inventory.create', compact('branch'));
     }
 
     public function store(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->hasRole('owner')) {
             $branchId = $request->branch_id;
         } else {
-            $branchId = Branch::where('branch_manager_id',$user->id)->value('id');
+            $branchId = Branch::query()->where('branch_manager_id', $user->id)->value('id');
         }
         $request->validate([
             'name' => [
@@ -58,8 +59,8 @@ class InventoryController extends Controller
             'remaining_stock' => $request->total_stock,
             'minimum_stock'   => $request->minimum_stock,
             'is_active'       => 1,
-            'created_by'      => auth()->id(),
-            'updated_by'      => auth()->id(),
+            'created_by'      => Auth::id(),
+            'updated_by'      => Auth::id(),
         ]);
         return redirect()
             ->route(
@@ -77,7 +78,7 @@ class InventoryController extends Controller
             $inventory
         );
 
-        $branches = Branch::where(
+        $branches = Branch::query()->where(
             'restaurant_id',
             app('restaurant')->id
         )->get();
@@ -89,9 +90,10 @@ class InventoryController extends Controller
             )
         );
     }
-    public function update(Request $request,$restaurant,$inventory) {
+    public function update(Request $request, $restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
-        $branchId = auth()->user()->hasRole('owner')? $request->branch_id : $inventory->branch_id;
+        $branchId = Auth::user()->hasRole('owner') ? $request->branch_id : $inventory->branch_id;
         $request->validate([
             'name' => [
                 'required',
@@ -114,7 +116,7 @@ class InventoryController extends Controller
             'total_stock'     => $request->total_stock,
             'remaining_stock' => $request->remaining_stock,
             'minimum_stock'   => $request->minimum_stock,
-            'updated_by'      => auth()->id(),
+            'updated_by'      => Auth::id(),
         ]);
         return redirect()
             ->route(
@@ -126,7 +128,8 @@ class InventoryController extends Controller
                 'Inventory Updated Successfully'
             );
     }
-    public function destroy($restaurant,$inventory) {
+    public function destroy($restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
         $inventory->delete();
         return back()->with(
@@ -134,14 +137,16 @@ class InventoryController extends Controller
             'Inventory Deleted Successfully'
         );
     }
-    public function stockInForm($restaurant,$inventory) {
+    public function stockInForm($restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
         return view(
             'admin.inventory.stock_in',
             compact('inventory')
         );
     }
-    public function stockInStore(Request $request,$restaurant,$inventory) {
+    public function stockInStore(Request $request, $restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
         $request->validate([
             'quantity' => 'required|numeric|min:0.01',
@@ -154,15 +159,15 @@ class InventoryController extends Controller
             'type'              => 'in',
             'quantity'          => $request->quantity,
             'remarks'           => $request->remarks,
-            'created_by'        => auth()->id(),
+            'created_by'        => Auth::id(),
         ]);
-        $inventory->increment('total_stock',$request->quantity);
+        $inventory->increment('total_stock', $request->quantity);
         $inventory->increment(
             'remaining_stock',
             $request->quantity
         );
         $inventory->update([
-            'updated_by' => auth()->id()
+            'updated_by' => Auth::id()
         ]);
         return redirect()
             ->route(
@@ -175,12 +180,16 @@ class InventoryController extends Controller
             );
     }
 
-    public function stockOutForm( $restaurant,$inventory) {
-        $inventory = InventoryItem::findOrFail($inventory );
-        return view('admin.inventory.stock_out',compact('inventory')
+    public function stockOutForm($restaurant, $inventory)
+    {
+        $inventory = InventoryItem::findOrFail($inventory);
+        return view(
+            'admin.inventory.stock_out',
+            compact('inventory')
         );
     }
-    public function stockOutStore(Request $request,$restaurant,$inventory) {
+    public function stockOutStore(Request $request, $restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
         $request->validate([
             'quantity' => 'required|numeric|min:0.01',
@@ -202,14 +211,14 @@ class InventoryController extends Controller
             'type'              => 'out',
             'quantity'          => $request->quantity,
             'remarks'           => $request->remarks,
-            'created_by'        => auth()->id(),
+            'created_by'        => Auth::id(),
         ]);
         $inventory->decrement(
             'remaining_stock',
             $request->quantity
         );
         $inventory->update([
-            'updated_by' => auth()->id()
+            'updated_by' => Auth::id()
         ]);
         return redirect()
             ->route(
@@ -222,15 +231,16 @@ class InventoryController extends Controller
             );
     }
 
-    public function transactions($restaurant,$inventory) {
+    public function transactions($restaurant, $inventory)
+    {
         $inventory = InventoryItem::findOrFail($inventory);
         $transactions = InventoryTransaction::with('creator')
-        ->where(
-            'inventory_item_id',
-            $inventory->id
-        )
-        ->latest()
-        ->paginate(20);
+            ->where(
+                'inventory_item_id',
+                $inventory->id
+            )
+            ->latest()
+            ->paginate(20);
         return view(
             'admin.inventory.transactions',
             compact(

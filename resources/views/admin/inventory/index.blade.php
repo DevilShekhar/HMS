@@ -36,7 +36,7 @@
                             <tr>
                                 <th>#</th>
                                 <th>Branch</th>
-                                <th>Item Name</th>                     
+                                <th>Item Name</th>
                                 <th>Total Stock</th>
                                 <th>Remaining Stock</th>
                                 <th>Minimum Stock</th>
@@ -51,7 +51,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->branch->name ?? '-' }}</td>
-                                    <td>{{ ucfirst($item->name) }}</td>                        
+                                    <td>{{ ucfirst($item->name) }}</td>
                                     <td>
                                         {{ (float)$item->total_stock }}
                                         {{ ucfirst($item->unit) }}
@@ -93,7 +93,7 @@
                                     <td>
                                         <a href="{{ route('restaurant.inventory.stock-in',['restaurant' => request()->route('restaurant'),'inventory' => $item->id]) }}" class="btn btn-success btn-sm">
                                             <i class="fas fa-plus-circle"></i>
-                                        </a>                    
+                                        </a>
                                         <a href="{{ route('restaurant.inventory.transactions',['restaurant' => request()->route('restaurant'),'inventory' => $item->id] ) }}" class="btn btn-secondary btn-sm">
                                             <i class="fas fa-history"></i>
                                         </a>

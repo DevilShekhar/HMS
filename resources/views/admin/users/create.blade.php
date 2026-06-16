@@ -1,26 +1,26 @@
 @extends('layouts.app')
 @section('content')
-<section class="section premium-dashboard">
-    <div class="premium-page-head">
-        <div class="premium-page-title">
-            <span class="mini-badge">User Management</span>
-            <h2>Create User</h2>
-            <p>Add a new user account to the system.</p>
+    <section class="section premium-dashboard">
+        <div class="premium-page-head">
+            <div class="premium-page-title">
+                <span class="mini-badge">User Management</span>
+                <h2>Create User</h2>
+                <p>Add a new user account to the system.</p>
+            </div>
+            <div class="premium-head-actions">
+                <a href="{{ route('users.index') }}" class="btn premium-btn ghost-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back To Users
+                </a>
+            </div>
         </div>
-        <div class="premium-head-actions">
-            <a href="{{ route('users.index') }}"
-               class="btn premium-btn ghost-btn">
-                <i class="fas fa-arrow-left"></i>
-                Back To Users
-            </a>
-        </div>
-    </div>
-</section>
-<section class="section premium-dashboard pt-0">
-        @if(auth()->user()->role == 'super_admin')
-            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">        
-        @else
-            <form action="{{ route('restaurant.users.store', ['restaurant' => $restaurant]) }}"method="POST" enctype="multipart/form-data">
+    </section>
+    <section class="section premium-dashboard pt-0">
+        @if (auth()->user()->role == 'super_admin')
+            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
+            @else
+                <form action="{{ route('restaurant.users.store', ['restaurant' => $restaurant]) }}"method="POST"
+                    enctype="multipart/form-data">
         @endif
         @csrf
         <div class="row">
@@ -36,14 +36,16 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label>Full Name</label>
-                                <input type="text"  name="name" value="{{ old('name') }}" class="form-control premium-input">
+                                <input type="text" name="name" value="{{ old('name') }}"
+                                    class="form-control premium-input">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label>Email Address</label>
-                                <input type="email"  name="email" value="{{ old('email') }}" class="form-control premium-input">
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                    class="form-control premium-input">
                                 @error('email')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -64,7 +66,8 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label>Phone Number</label>
-                                <input type="text" name="phone" value="{{ old('phone') }}" class="form-control premium-input">
+                                <input type="text" name="phone" value="{{ old('phone') }}"
+                                    class="form-control premium-input">
                                 @error('phone')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -83,17 +86,18 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label>Birth Date</label>
-                                <input type="date" name="birth_date" value="{{ old('birth_date') }}" class="form-control premium-input">
+                                <input type="date" name="birth_date" value="{{ old('birth_date') }}"
+                                    class="form-control premium-input">
                                 @error('birth_date')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-                            @if(auth()->user()->role == 'super_admin')
+                            @if (auth()->user()->role == 'super_admin')
                                 <div class="col-md-6 mb-4">
                                     <label>Restaurant</label>
                                     <select name="restaurant_id" class="form-control premium-input">
                                         <option value="">Select Restaurant</option>
-                                        @foreach($restaurants as $restaurant)
+                                        @foreach ($restaurants as $restaurant)
                                             <option value="{{ $restaurant->id }}"
                                                 {{ old('restaurant_id') == $restaurant->id ? 'selected' : '' }}>
                                                 {{ $restaurant->name }}
@@ -119,9 +123,8 @@
                                 <label>Role</label>
                                 <select name="role" class="form-control premium-input">
                                     <option value="">Select Role</option>
-                                    @foreach($roles as $role)
-                                        <option value="{{ $role }}"
-                                            {{ old('role') == $role ? 'selected' : '' }}>
+                                    @foreach ($roles as $role)
+                                        <option value="{{ $role }}" {{ old('role') == $role ? 'selected' : '' }}>
                                             {{ ucwords(str_replace('_', ' ', $role)) }}
                                         </option>
                                     @endforeach
@@ -144,7 +147,7 @@
                     <a href="{{ route('users.index') }}" class="btn btn-light">
                         Cancel
                     </a>
-                    <button type="submit"  class="btn btn-primary"> Create User </button>
+                    <button type="submit" class="btn btn-primary"> Create User </button>
                 </div>
             </div>
             <div class="col-lg-4">
@@ -158,7 +161,8 @@
                         </div>
                     </div>
                     <div class="card-body text-center">
-                        <img src="{{ asset('assets/img/user.png') }}" class="rounded-circle mb-3"  width="120" height="120">
+                        <img src="{{ asset('assets/img/user.png') }}" class="rounded-circle mb-3" width="120"
+                            height="120">
                         <input type="file" name="profile_photo" class="form-control premium-input">
                         @error('profile_photo')
                             <small class="text-danger">{{ $message }}</small>
@@ -170,6 +174,6 @@
                 </div>
             </div>
         </div>
-    </form>
-</section>
+        </form>
+    </section>
 @endsection
