@@ -221,6 +221,15 @@ Route::prefix('{restaurant}')
                     'update'  => 'branch.orders.update',
                     'destroy' => 'branch.orders.destroy',
                 ]);
+                Route::resource('users', UserController::class)->names([
+                'index'   => 'branch.users.index',
+                'create'  => 'branch.users.create',
+                'store'   => 'branch.users.store',
+                'show'    => 'branch.users.show',
+                'edit'    => 'branch.users.edit',
+                'update'  => 'branch.users.update',
+                'destroy' => 'branch.users.destroy',
+            ]);
             });
             Route::resource('users', UserController::class)->names([
                 'index'   => 'restaurant.users.index',
