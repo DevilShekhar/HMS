@@ -15,6 +15,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\TableCategoryController;
+use App\Http\Controllers\RestaurantTableController;
 use App\Models\Restaurant;
 
 Route::get('/', function () {
@@ -249,7 +251,7 @@ Route::prefix('{restaurant}')
                 'update'  => 'restaurant.table-categories.update',
                 'destroy' => 'restaurant.table-categories.destroy',
             ]);
-            Route::resource('tables', TableController::class)->names([
+            Route::resource('tables', RestaurantTableController::class)->names([
                 'index'   => 'restaurant.tables.index',
                 'create'  => 'restaurant.tables.create',
                 'store'   => 'restaurant.tables.store',
