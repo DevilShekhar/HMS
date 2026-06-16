@@ -17,22 +17,38 @@
                         <label>Mobile Number</label>
                         <input type="text" name="mobile_number" class="form-control">
                     </div>
-                    <div class="col-md-4">
-                        <label>Table Number</label>
-                        <input type="text" name="table_no" class="form-control"   required>
-                    </div>
-                </div>
-                @if(auth()->user()->role == 'waiter_head')
-                <div class="row mt-3">
+                    @if(auth()->user()->role == 'waiter_head')
+                
                     <div class="col-md-4">
                         <label>Order Type</label>
                         <select name="order_type" class="form-control">
                             <option value="normal"> Normal </option>
                             <option value="vip">  VIP</option>
                         </select>
-                    </div>
+                    </div>                
+                @endif                    
                 </div>
-                @endif
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <label>Table Category</label>
+                        <select id="table_category" class="form-control">
+                            <option value="">Select Category</option>
+
+                            @foreach($tableCategories as $category)
+                                <option value="{{ $category->id }}">
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Table Number</label>
+                        <select name="table_no" id="table_no" class="form-control">
+                            <option value="">Select Table</option>
+                        </select>
+                    </div>
+                    </div>
                 <hr>
                 <table class="table table-bordered" id="orderTable">
                     <thead>
@@ -86,6 +102,48 @@
         </form>
     </div>
 </div>
+<script>
+$(document).ready(function () {
+    $('#table_category').on('change', function () {
+        let categoryId = $(this).val();
+        $('#table_no').html(
+            '<option value="">Loading...</option>'
+        );
+        let url = "{{ route(
+            'restaurant.orders.tables',
+            [
+                'restaurant' => $restaurant->slug,
+                'categoryId' => 'CATID'
+            ]
+        ) }}";
+        url = url.replace('CATID', categoryId);
+        console.log(url);
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (data) {
+                let options =
+                    '<option value="">Select Table</option>';
+                $.each(data, function (index, table) {
+                    options +=
+                        '<option value="' +
+                        table.table_number +
+                        '">' +
+                        table.table_number +
+                        '</option>';
+                });
+                $('#table_no').html(options);
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                $('#table_no').html(
+                    '<option value="">No Tables Found</option>'
+                );
+            }
+        });
+    });
+});
+</script>
 <script>
 document.addEventListener('change', function(e){
     if(e.target.classList.contains('category')){
