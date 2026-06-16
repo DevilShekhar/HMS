@@ -8,21 +8,36 @@
                     <h2>User List</h2>
                     <p>Manage all users from API server</p>
                 </div>
-                <div class="premium-head-actions">
-                    @can('create-user')
-                    @if (auth()->user()->role == 'super_admin')
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
+
+                @can('create-user')
+                    @if (auth()->user()->role === 'super_admin')
                         <a href="{{ route('users.create') }}" class="btn premium-btn btn-main-premium">
                             <i class="fas fa-plus"></i>
                             Add User
                         </a>
-                    @else
-                        <a href="{{ route('restaurant.users.create', ['restaurant' => $restaurantSlug]) }}"
+                    @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                        <a href="{{ route('branch.users.create', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}"
                             class="btn premium-btn btn-main-premium">
                             <i class="fas fa-plus"></i>
-                            Add User </a>
+                            Add User
+                        </a>
+                    @elseif(!empty($restaurantSlug))
+                        <a href="{{ route('restaurant.users.create', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}"
+                            class="btn premium-btn btn-main-premium">
+                            <i class="fas fa-plus"></i>
+                            Add User
+                        </a>
                     @endif
-                    @endcan
-                </div>
+                @endcan
             </div>
         </section>
         <section class="section premium-dashboard pt-0">
