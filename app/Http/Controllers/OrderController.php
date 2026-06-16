@@ -74,10 +74,12 @@ class OrderController extends Controller
         $restaurant = app('restaurant');
 
         $branchId = Auth::user()->branch_id;
+        $branch = Branch::findOrFail($branchId);
         $categories = Category::where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
 
         $tableCategories = TableCategory::where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
-        return view('admin.orders.create',compact('restaurant','categories','tableCategories'));}
+        return view('admin.orders.create',compact('restaurant','branch','categories','tableCategories'));
+    }
 
     public function menuByCategory($restaurant, $categoryId)
     {
@@ -91,6 +93,13 @@ class OrderController extends Controller
                 ->where('is_active', 1)
                 ->get()
         );
+    }
+    public function getTables($restaurant, $branch, $categoryId)
+    {
+        $restaurant = app('restaurant');
+        $branchId = Auth::user()->branch_id;
+        $tables = RestaurantTable::where('restaurant_id',$restaurant->id)->where('branch_id',$branchId)->where('cat_id',$categoryId)->select('id','table_number')->get();
+        return response()->json($tables);
     }
     public function store(Request $request)
     {
@@ -414,15 +423,5 @@ class OrderController extends Controller
 
         return back()->with('success', 'Order moved to Preparing');
     }
-    public function getTablesByCategory($restaurant, $categoryId)
-    {
-        $restaurant = app('restaurant');
-        $branchId = auth()->user()->branch_id;
-        $tables = RestaurantTable::where('cat_id', $categoryId)
-            ->where('restaurant_id', $restaurant->id)
-            ->where('branch_id', $branchId)
-            ->select('id', 'table_number')
-            ->get();
-        return response()->json($tables);
-    }
+ 
 }

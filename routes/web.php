@@ -221,6 +221,7 @@ Route::prefix('{restaurant}')
                     'update'  => 'branch.orders.update',
                     'destroy' => 'branch.orders.destroy',
                 ]);
+                Route::get('orders/tables/{categoryId}',[OrderController::class, 'getTables'])->name('branch.orders.tables');
                 Route::resource('users', UserController::class)->names([
                 'index'   => 'branch.users.index',
                 'create'  => 'branch.users.create',
