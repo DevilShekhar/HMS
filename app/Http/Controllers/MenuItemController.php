@@ -105,8 +105,9 @@ class MenuItemController extends Controller
     {
         $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name' => 'required',
+            'name' => 'required|max:255',
             'price' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $restaurant = Restaurant::where(
@@ -134,6 +135,26 @@ class MenuItemController extends Controller
             $branchId = $branch->id;
         }
 
+        $image = null;
+
+        if ($request->hasFile('image')) {
+
+            $file = $request->file('image');
+
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            if (!file_exists(public_path('uploads/menu-items'))) {
+                mkdir(public_path('uploads/menu-items'), 0777, true);
+            }
+
+            $file->move(
+                public_path('uploads/menu-items'),
+                $filename
+            );
+
+            $image = 'uploads/menu-items/' . $filename;
+        }
+
         MenuItem::create([
             'restaurant_id' => $restaurant->id,
             'owner_id' => $restaurant->users()
@@ -148,6 +169,7 @@ class MenuItemController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'food_type' => $request->food_type,
+            'image' => $image,
             'is_available' => $request->is_available ?? 1,
             'is_active' => 1,
         ]);
@@ -156,7 +178,10 @@ class MenuItemController extends Controller
             ->route('restaurant.menu-items.index', [
                 'restaurant' => $restaurant->slug
             ])
-            ->with('success', 'Menu Item Added Successfully');
+            ->with(
+                'success',
+                'Menu Item Added Successfully'
+            );
     }
 
     /**
@@ -229,66 +254,81 @@ class MenuItemController extends Controller
      */
     public function update(Request $request, $restaurant, $menu_item)
     {
-    $menuItem = MenuItem::findOrFail($menu_item);
+        $menuItem = MenuItem::findOrFail($menu_item);
 
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name' => 'required|max:255',
+            'price' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
 
-    $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'name'        => 'required',
-        'price'       => 'required|numeric',
-    ]);
+        if (auth()->user()->hasRole('owner')) {
 
-    if (auth()->user()->hasRole('owner')) {
+            $branchId = $request->branch_id;
 
-        $branchId = $request->branch_id;
+        } else {
 
-    } else {
+            $branch = Branch::where(
+                'branch_manager_id',
+                auth()->id()
+            )->firstOrFail();
 
-        $branch = Branch::where(
-            'branch_manager_id',
-            auth()->id()
-        )->firstOrFail();
+            if ($menuItem->branch_id != $branch->id) {
+                abort(403);
+            }
 
-        if ($menuItem->branch_id != $branch->id) {
-            abort(403);
+            $branchId = $branch->id;
         }
 
-        $branchId = $branch->id;
+        $data = [
+            'branch_id' => $branchId,
+            'category_id' => $request->category_id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'food_type' => $request->food_type,
+            'is_available' => $request->is_available ?? 1,
+            'is_active' => $request->is_active ?? 1,
+        ];
+
+        if ($request->hasFile('image')) {
+
+            // Delete old image
+            if (
+                $menuItem->image &&
+                file_exists(public_path($menuItem->image))
+            ) {
+                unlink(public_path($menuItem->image));
+            }
+
+            $file = $request->file('image');
+
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            if (!file_exists(public_path('uploads/menu-items'))) {
+                mkdir(public_path('uploads/menu-items'), 0777, true);
+            }
+
+            $file->move(
+                public_path('uploads/menu-items'),
+                $filename
+            );
+
+            $data['image'] = 'uploads/menu-items/' . $filename;
+        }
+
+        $menuItem->update($data);
+
+        return redirect()
+            ->route('restaurant.menu-items.index', [
+                'restaurant' => $restaurant
+            ])
+            ->with(
+                'success',
+                'Menu Item Updated Successfully'
+            );
     }
-
-    $data = [
-        'branch_id'     => $branchId,
-        'category_id'   => $request->category_id,
-        'name'          => $request->name,
-        'description'   => $request->description,
-        'price'         => $request->price,
-        'food_type'     => $request->food_type,
-        'is_available'  => $request->is_available,
-        'is_active'     => $request->is_active,
-    ];
-
-    if ($request->hasFile('image')) {
-
-        $image = $request->file('image')
-            ->store('menu-items', 'public');
-
-        $data['image'] = $image;
-    }
-
-    $menuItem->update($data);
-
-    return redirect()
-        ->route('restaurant.menu-items.index', [
-            'restaurant' => $restaurant
-        ])
-        ->with(
-            'success',
-            'Menu Item Updated Successfully'
-        );
-
-
-    }
-
     /**
      * Remove the specified resource from storage.
      */

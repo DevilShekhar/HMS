@@ -113,7 +113,7 @@
                         <div class="col-md-6 mb-4">
                             <label>Current Image</label>
                             <br>
-                            <img src="{{ asset('storage/'.$menuItem->image) }}" width="120" class="rounded border">
+                            <img src="{{ asset($menuItem->image) }}" width="120" class="rounded border">
                         </div>
                         @endif
                     </div>
