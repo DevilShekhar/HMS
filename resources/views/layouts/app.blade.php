@@ -494,6 +494,40 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown">
+                                <i data-feather="grid"></i>
+                                <span>Table Management</span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    <a href="{{ route('restaurant.table-categories.index',[
+                                        'restaurant' => optional(auth()->user()->restaurant)->slug
+                                    ]) }}">
+                                        Table Categories
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{{ route('restaurant.tables.index',[
+                                        'restaurant' => optional(auth()->user()->restaurant)->slug
+                                    ]) }}">
+                                        Tables
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{{ route('restaurant.tables.create',[
+                                        'restaurant' => optional(auth()->user()->restaurant)->slug
+                                    ]) }}">
+                                        Add Table
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
                         {{-- Order Management --}}
                         @can('view-order')
                             <li class="dropdown">
