@@ -8,9 +8,10 @@
                 <p>Add a new restaurant table.</p>
             </div>
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.tables.index', 'restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Tables
+                <a href="{{ route('restaurant.tables.index', ['restaurant' => request()->route('restaurant')]) }}"
+                    class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Tables
                 </a>
             </div>
         </div>

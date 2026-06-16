@@ -155,6 +155,7 @@ Route::prefix('{restaurant}')->middleware('restaurant')->group(function () {
             'update'  => 'restaurant.orders.update',
             'destroy' => 'restaurant.orders.destroy',
         ]);    
+        Route::get('orders/table-category/{categoryId}',[OrderController::class, 'getTablesByCategory'])->name('restaurant.orders.tables');
         Route::resource('inventory', InventoryController::class)->names([
             'index' => 'restaurant.inventory.index',
             'create' => 'restaurant.inventory.create',

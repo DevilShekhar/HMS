@@ -9,6 +9,8 @@ use App\Models\MenuItem;
 use App\Models\Restaurant;
 use App\Models\Branch;
 use App\Models\User;
+use App\Models\TableCategory;
+use App\Models\RestaurantTable;
 use App\Notifications\NewOrderAssignedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -71,25 +73,11 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
 
-        $categories = Category::query()->where(
-            'restaurant_id',
-            $restaurant->id
-        )
-            ->where(
-                'is_active',
-                1
-            )
-            ->orderBy('name')
-            ->get();
+        $branchId = Auth::user()->branch_id;
+        $categories = Category::where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
 
-        return view(
-            'admin.orders.create',
-            compact(
-                'restaurant',
-                'categories'
-            )
-        );
-    }
+        $tableCategories = TableCategory::where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
+        return view('admin.orders.create',compact('restaurant','categories','tableCategories'));}
 
     public function menuByCategory($restaurant, $categoryId)
     {
@@ -425,5 +413,16 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'Order moved to Preparing');
+    }
+    public function getTablesByCategory($restaurant, $categoryId)
+    {
+        $restaurant = app('restaurant');
+        $branchId = auth()->user()->branch_id;
+        $tables = RestaurantTable::where('cat_id', $categoryId)
+            ->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $branchId)
+            ->select('id', 'table_number')
+            ->get();
+        return response()->json($tables);
     }
 }
