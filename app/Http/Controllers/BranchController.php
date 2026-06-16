@@ -8,6 +8,7 @@ use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class BranchController extends Controller
 {
@@ -270,5 +271,32 @@ class BranchController extends Controller
                 'success',
                 'Branch manager assigned successfully.'
             );
+    }
+    public function uploadQrCode(Request $request)
+    {
+        $request->validate([
+            'branch_id' => 'required|exists:branches,id',
+            'qrcode'    => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $branch = Branch::findOrFail($request->branch_id);
+
+        if ($request->hasFile('qrcode')) {
+
+            $file = $request->file('qrcode');
+
+            $filename = time().'_'.$file->getClientOriginalName();
+
+            $file->move(
+                public_path('uploads/qrcodes'),
+                $filename
+            );
+
+            $branch->update([
+                'qrcode' => 'uploads/qrcodes/'.$filename
+            ]);
+        }
+
+        return back()->with('success', 'QR uploaded successfully.');
     }
 }

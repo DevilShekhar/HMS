@@ -68,7 +68,7 @@
                                     </td>
                                     <td>
                                         @if ($category->image)
-                                            <img src="{{ asset('storage/' . $category->image) }}" width="50"
+                                            <img src="{{ asset($category->image) }}" width="50"
                                                 height="50" class="rounded">
                                         @else
                                             <span class="badge bg-secondary">

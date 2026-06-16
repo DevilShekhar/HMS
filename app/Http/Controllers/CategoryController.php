@@ -88,18 +88,29 @@ class CategoryController extends Controller
             $branchId = $request->branch_id;
         } else {
 
-            $branchId = Branch::query()->where(
-                'branch_manager_id',
-                $user->id
-            )->value('id');
+            $branchId = Branch::query()
+                ->where('branch_manager_id', $user->id)
+                ->value('id');
         }
 
         $image = null;
 
         if ($request->hasFile('image')) {
 
-            $image = $request->file('image')
-                ->store('categories', 'public');
+            $file = $request->file('image');
+
+            $filename = time() . '_' . $file->getClientOriginalName();
+
+            if (!file_exists(public_path('uploads/categories'))) {
+                mkdir(public_path('uploads/categories'), 0777, true);
+            }
+
+            $file->move(
+                public_path('uploads/categories'),
+                $filename
+            );
+
+            $image = 'uploads/categories/' . $filename;
         }
 
         Category::create([
@@ -124,7 +135,6 @@ class CategoryController extends Controller
                 'Category created successfully.'
             );
     }
-
     public function show(Category $category)
     {
         return view(
@@ -167,21 +177,28 @@ class CategoryController extends Controller
             $data['branch_id'] = $request->branch_id;
         }
         if ($request->hasFile('image')) {
+            // Delete old image
             if (
                 $category->image &&
-                Storage::disk('public')->exists($category->image)
+                file_exists(public_path($category->image))
             ) {
-                Storage::disk('public')->delete($category->image);
+                unlink(public_path($category->image));
             }
-            $data['image'] = $request->file('image')
-                ->store('categories', 'public');
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            if (!file_exists(public_path('uploads/categories'))) {
+                mkdir(public_path('uploads/categories'), 0777, true);
+            }
+            $file->move(
+                public_path('uploads/categories'),
+                $filename
+            );
+            $data['image'] = 'uploads/categories/' . $filename;
         }
         $category->update($data);
         return redirect()
-            ->route('restaurant.categories.index', [
-                'restaurant' => $restaurant
-            ])
-            ->with('success', 'Category updated successfully.');
+            ->route('restaurant.categories.index',['restaurant' => $restaurant])
+            ->with('success','Category updated successfully.');
     }
 
     public function destroy(Category $category)

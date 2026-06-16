@@ -58,8 +58,9 @@
                                                     <td>{{ $loop->iteration }}</td>
                                                     <td> {{ $user->restaurant?->name ?? '-' }}</td>
                                                     <td>
-                                                        @if (!empty($user['profile_photo']))
-                                                            <img src="{{ asset('storage/' . $user['profile_photo']) }}"
+                                                   
+                                                          @if($user->profile_photo)
+                                                            <img src="{{ asset($user->profile_photo) }}"
                                                                 width="45" height="45"
                                                                 style="border-radius:50%;object-fit:cover;">
                                                         @else

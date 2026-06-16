@@ -23,6 +23,7 @@ class Branch extends Model
         'longitude',
         'gst_number',
         'fssai_license',
+        'qrcode',
         'opening_time',
         'closing_time',
         'is_active',
