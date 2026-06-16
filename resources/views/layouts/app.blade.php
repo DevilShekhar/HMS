@@ -456,7 +456,6 @@
                             $branchSlug = optional(auth()->user()->branch)->slug;
                         @endphp
 
-                        @if (in_array(auth()->user()->role, ['owner', 'branch_manager']))
                             @can('view-menu')
                                 <li class="dropdown">
                                     <a href="#" class="nav-link has-dropdown">
@@ -509,7 +508,6 @@
                                     </ul>
                                 </li>
                             @endcan
-                        @endif
 
                         @php
                             $restaurantSlug = request()->route('restaurant');
