@@ -7,11 +7,37 @@
                 <h2>Edit Menu Item</h2>
                 <p>Update menu item details.</p>
             </div>
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.menu-items.index', ['restaurant' => request()->route('restaurant') ]) }}" class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Menu Items
-                </a>
+
+                @if (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('menu-items.index') }}" class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Menu Items
+                    </a>
+                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                    <a href="{{ route('branch.menu-items.index', [
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Menu Items
+                    </a>
+                @elseif(!empty($restaurantSlug))
+                    <a href="{{ route('restaurant.menu-items.index', [
+                        'restaurant' => $restaurantSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Menu Items
+                    </a>
+                @endif
+
             </div>
         </div>
     </section>

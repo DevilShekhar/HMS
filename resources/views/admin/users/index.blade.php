@@ -73,11 +73,10 @@
                                                     <td>{{ $loop->iteration }}</td>
                                                     <td> {{ $user->restaurant?->name ?? '-' }}</td>
                                                     <td>
-                                                   
-                                                          @if($user->profile_photo)
-                                                            <img src="{{ asset($user->profile_photo) }}"
-                                                                width="45" height="45"
-                                                                style="border-radius:50%;object-fit:cover;">
+
+                                                        @if ($user->profile_photo)
+                                                            <img src="{{ asset($user->profile_photo) }}" width="45"
+                                                                height="45" style="border-radius:50%;object-fit:cover;">
                                                         @else
                                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($user['name']) }}"
                                                                 width="45" height="45" style="border-radius:50%;">
@@ -99,26 +98,70 @@
                                                     </td>
                                                     <td>
                                                         <div class="d-flex">
+
+                                                            @php
+                                                                $restaurantSlug = request()->route('restaurant');
+                                                                $branchSlug = request()->route('branch');
+                                                            @endphp
+
+
+                                                            {{-- EDIT BUTTON --}}
                                                             @if (auth()->user()->role == 'super_admin')
                                                                 <a href="{{ route('users.edit', $user->id) }}"
-                                                                    class="btn btn-sm btn-primary"> Edit</a>
-                                                            @else
-                                                                <a href="{{ route('restaurant.users.edit', ['restaurant' => auth()->user()->restaurant->slug, 'user' => $user->id]) }}"
-                                                                    class="btn btn-sm btn-primary"> Edit </a>
+                                                                    class="btn btn-sm btn-primary">
+                                                                    Edit
+                                                                </a>
+                                                            @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                                                                <a href="{{ route('branch.users.edit', [
+                                                                    'restaurant' => $restaurantSlug,
+                                                                    'branch' => $branchSlug,
+                                                                    'user' => $user->id,
+                                                                ]) }}"
+                                                                    class="btn btn-sm btn-primary">
+                                                                    Edit
+                                                                </a>
+                                                            @elseif(!empty($restaurantSlug))
+                                                                <a href="{{ route('restaurant.users.edit', [
+                                                                    'restaurant' => $restaurantSlug,
+                                                                    'user' => $user->id,
+                                                                ]) }}"
+                                                                    class="btn btn-sm btn-primary">
+                                                                    Edit
+                                                                </a>
                                                             @endif
+
+
+
+                                                            {{-- DELETE BUTTON --}}
                                                             @if (auth()->user()->role == 'super_admin')
                                                                 <form action="{{ route('users.destroy', $user->id) }}"
                                                                     method="POST" class="delete-form">
-                                                                @else
+                                                                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
                                                                     <form
-                                                                        action="{{ route('restaurant.users.destroy', ['restaurant' => auth()->user()->restaurant->slug, 'user' => $user->id]) }}"
+                                                                        action="{{ route('branch.users.destroy', [
+                                                                            'restaurant' => $restaurantSlug,
+                                                                            'branch' => $branchSlug,
+                                                                            'user' => $user->id,
+                                                                        ]) }}"
                                                                         method="POST" class="delete-form">
+                                                                    @elseif(!empty($restaurantSlug))
+                                                                        <form
+                                                                            action="{{ route('restaurant.users.destroy', [
+                                                                                'restaurant' => $restaurantSlug,
+                                                                                'user' => $user->id,
+                                                                            ]) }}"
+                                                                            method="POST" class="delete-form">
                                                             @endif
+
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger"> <i
-                                                                    class="fas fa-trash"></i> </button>
+
+                                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+
                                                             </form>
+
                                                         </div>
                                                     </td>
                                                 </tr>

@@ -137,15 +137,36 @@ class UserController extends Controller
         ]);
         $user->assignRole($validated['role']);
 
-        if (Auth::user()?->role === 'super_admin') {
+        // Super Admin
+        if (Auth::user()->role === 'super_admin') {
+
             return redirect()
                 ->route('users.index')
-                ->with('success','User created successfully.');
+                ->with('success', 'User created successfully.');
         }
 
-        return redirect()
-            ->route('restaurant.users.index',['restaurant' => $restaurant])
-            ->with('success','User created successfully.');
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
     }
 
     /**
@@ -157,13 +178,29 @@ class UserController extends Controller
         $userId = $request->route('user');
         $user = User::findOrFail($userId);
         $restaurants = Restaurant::query()->where('status', 1)->get();
-        $roles = [
-            'owner',
-            'branch_manager',
-            'waiter_head',
-            'waiter',
-            'cashier'
-        ];
+        $roles = [];
+        switch (Auth::user()->role) {
+            case 'super_admin':
+                $roles = ['owner'];
+                break;
+            case 'owner':
+                $roles = [
+                    'branch_manager',
+                    'waiter_head',
+                    'waiter',
+                    'cashier',
+                    'chef'
+                ];
+                break;
+            case 'branch_manager':
+                $roles = [
+                    'waiter_head',
+                    'waiter',
+                    'cashier',
+                    'chef'
+                ];
+                break;
+        }
         return view(
             'admin.users.edit',
             compact(
@@ -233,27 +270,36 @@ class UserController extends Controller
             unset($validated['branch_id']);
         }
         $user->update($validated);
-        if (Auth::user()?->role == 'super_admin') {
+        // Super Admin
+        if (Auth::user()->role === 'super_admin') {
+
             return redirect()
                 ->route('users.index')
-                ->with(
-                    'success',
-                    'User updated successfully.'
-                );
+                ->with('success', 'User created successfully.');
         }
-        return redirect()
-            ->route(
-                'restaurant.users.index',
-                [
-                    'restaurant' => optional(
-                        Auth::user()?->restaurant
-                    )->slug
-                ]
-            )
-            ->with(
-                'success',
-                'User updated successfully.'
-            );
+
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
     }
 
     /**
@@ -268,23 +314,34 @@ class UserController extends Controller
             'status' => 'inactive',
             'updated_by' => Auth::id(),
         ]);
-        if (Auth::user()->role == 'super_admin') {
-            return redirect()->route('users.index')
-                ->with(
-                    'success',
-                    'User deactivated successfully.'
-                );
+        if (Auth::user()->role === 'super_admin') {
+
+            return redirect()
+                ->route('users.index')
+                ->with('success', 'User created successfully.');
         }
-        return redirect()
-            ->route(
-                'restaurant.users.index',
-                [
-                    'restaurant' => Auth::user()?->restaurant?->slug,
-                ]
-            )
-            ->with(
-                'success',
-                'User deactivated successfully.'
-            );
+
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.users.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'User created successfully.');
+        }
     }
 }

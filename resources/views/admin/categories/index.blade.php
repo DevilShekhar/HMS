@@ -9,20 +9,30 @@
             </div>
             @php
                 $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
             @endphp
 
             <div class="premium-head-actions">
 
-                @if ($restaurantSlug)
-                    <a href="{{ route('restaurant.categories.create', [
+                @if (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('categories.create') }}" class="btn premium-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Category
+                    </a>
+                @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                    <a href="{{ route('branch.categories.create', [
                         'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
                     ]) }}"
                         class="btn premium-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
-                @else
-                    <a href="{{ route('categories.create') }}" class="btn premium-btn">
+                @elseif (!empty($restaurantSlug))
+                    <a href="{{ route('restaurant.categories.create', [
+                        'restaurant' => $restaurantSlug,
+                    ]) }}"
+                        class="btn premium-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
@@ -68,8 +78,8 @@
                                     </td>
                                     <td>
                                         @if ($category->image)
-                                            <img src="{{ asset($category->image) }}" width="50"
-                                                height="50" class="rounded">
+                                            <img src="{{ asset($category->image) }}" width="50" height="50"
+                                                class="rounded">
                                         @else
                                             <span class="badge bg-secondary">
                                                 No Image
@@ -106,28 +116,71 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <a href="{{ route('restaurant.categories.show', [
-                                                'restaurant' => request()->route('restaurant'),
-                                                'category' => $category->id,
-                                            ]) }}"
-                                                class="btn btn-info btn-sm">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('restaurant.categories.edit', [
-                                                'restaurant' => request()->route('restaurant'),
-                                                'category' => $category->id,
-                                            ]) }}"
-                                                class="btn btn-warning btn-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form
-                                                action="{{ route('restaurant.categories.destroy', ['restaurant' => request()->route('restaurant'), 'category' => $category->id]) }}"
-                                                method="POST" onsubmit="return confirm('Are you sure?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm"> <i
-                                                        class="fas fa-trash"></i></button>
+
+                                            @php
+                                                $restaurantSlug = request()->route('restaurant');
+                                                $branchSlug = request()->route('branch');
+                                            @endphp
+
+
+                                            {{-- SUPER ADMIN --}}
+                                            @if (auth()->user()->role === 'super_admin')
+                                                <a href="{{ route('categories.edit', $category->id) }}"
+                                                    class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+
+                                                <form action="{{ route('categories.destroy', $category->id) }}"
+                                                    method="POST" onsubmit="return confirm('Are you sure?')">
+
+                                                    {{-- BRANCH LEVEL --}}
+                                                @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                                                    <a href="{{ route('branch.categories.edit', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'branch' => $branchSlug,
+                                                        'category' => $category->id,
+                                                    ]) }}"
+                                                        class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+
+                                                    <form
+                                                        action="{{ route('branch.categories.destroy', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'branch' => $branchSlug,
+                                                            'category' => $category->id,
+                                                        ]) }}"
+                                                        method="POST" onsubmit="return confirm('Are you sure?')">
+
+
+                                                        {{-- RESTAURANT LEVEL --}}
+                                                    @elseif (!empty($restaurantSlug))
+                                                        <a href="{{ route('restaurant.categories.edit', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'category' => $category->id,
+                                                        ]) }}"
+                                                            class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+
+                                                        <form
+                                                            action="{{ route('restaurant.categories.destroy', [
+                                                                'restaurant' => $restaurantSlug,
+                                                                'category' => $category->id,
+                                                            ]) }}"
+                                                            method="POST" onsubmit="return confirm('Are you sure?')">
+                                            @endif
+
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>

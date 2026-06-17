@@ -101,10 +101,38 @@
 
                 <div class="mt-4 d-flex gap-2 align-items-center">
 
-                    <a href="{{ route('restaurant.orders.index', ['restaurant' => $restaurant->slug]) }}"
-                        class="btn btn-primary">
-                        Back To Orders
-                    </a>
+                    @php
+                        $restaurantSlug = request()->route('restaurant');
+                        $branchSlug = request()->route('branch');
+                    @endphp
+
+                    <div class="premium-head-actions">
+
+                        @if (auth()->user()->role === 'super_admin')
+                            <a href="{{ route('orders.index') }}" class="btn premium-btn ghost-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Orders
+                            </a>
+                        @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                            <a href="{{ route('branch.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}"
+                                class="btn premium-btn ghost-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Orders
+                            </a>
+                        @elseif(!empty($restaurantSlug))
+                            <a href="{{ route('restaurant.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}"
+                                class="btn premium-btn ghost-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Orders
+                            </a>
+                        @endif
+
+                    </div>
 
                     @if ($order->status == 'pending')
                         <form method="POST"

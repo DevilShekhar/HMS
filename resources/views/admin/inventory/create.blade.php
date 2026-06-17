@@ -11,16 +11,38 @@
                     Add new inventory stock item.
                 </p>
             </div>
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Inventory
-                </a>
+
+                @if ($branchSlug)
+                    <a href="{{ route('branch.inventory.index', [
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Inventory
+                    </a>
+                @else
+                    <a href="{{ route('restaurant.inventory.index', [
+                        'restaurant' => $restaurantSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Inventory
+                    </a>
+                @endif
+
             </div>
         </div>
     </section>
     <section class="section premium-dashboard pt-0">
-        <form action="{{ route('restaurant.inventory.store', ['restaurant' => request()->route('restaurant')]) }}" method="POST">
+        <form action="{{ route('restaurant.inventory.store', ['restaurant' => request()->route('restaurant')]) }}"
+            method="POST">
             @csrf
             <div class="card premium-block">
 
@@ -34,12 +56,12 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        @if(auth()->user()->hasRole('owner'))
+                        @if (auth()->user()->hasRole('owner'))
                             <div class="col-md-6 mb-4">
                                 <label>Branch</label>
                                 <select name="branch_id" class="form-control premium-input">
                                     <option value=""> Select Branch</option>
-                                    @foreach($branches as $branch)
+                                    @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}"
                                             {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
                                             {{ $branch->name }}
@@ -56,12 +78,14 @@
                             <input type="hidden" name="branch_id" value="{{ $branch->id }}">
                             <div class="col-md-6 mb-4">
                                 <label>Branch</label>
-                                <input type="text" class="form-control premium-input" value="{{ $branch->name }}" readonly>
+                                <input type="text" class="form-control premium-input" value="{{ $branch->name }}"
+                                    readonly>
                             </div>
                         @endif
                         <div class="col-md-6 mb-4">
                             <label>Item Name</label>
-                            <input type="text" name="name" value="{{ old('name') }}" class="form-control premium-input"  placeholder="Oil, Rice, Atta, Tomato">
+                            <input type="text" name="name" value="{{ old('name') }}"
+                                class="form-control premium-input" placeholder="Oil, Rice, Atta, Tomato">
                             @error('name')
                                 <small class="text-danger">
                                     {{ $message }}
@@ -87,7 +111,8 @@
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Total Stock</label>
-                            <input type="number" step="0.01" name="total_stock" value="{{ old('total_stock') }}" class="form-control premium-input">
+                            <input type="number" step="0.01" name="total_stock" value="{{ old('total_stock') }}"
+                                class="form-control premium-input">
                             @error('total_stock')
                                 <small class="text-danger">
                                     {{ $message }}
@@ -96,7 +121,8 @@
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Minimum Stock</label>
-                            <input type="number" step="0.01" name="minimum_stock" value="{{ old('minimum_stock') }}" class="form-control premium-input">
+                            <input type="number" step="0.01" name="minimum_stock" value="{{ old('minimum_stock') }}"
+                                class="form-control premium-input">
                             @error('minimum_stock')
                                 <small class="text-danger">
                                     {{ $message }}
@@ -107,8 +133,7 @@
                 </div>
             </div>
             <div class="mt-4">
-                <button type="submit"
-                        class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                     Create Inventory Item
                 </button>
             </div>

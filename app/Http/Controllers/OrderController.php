@@ -74,10 +74,11 @@ class OrderController extends Controller
         $restaurant = app('restaurant');
 
         $branchId = Auth::user()->branch_id;
-        $categories = Category::where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
+        $categories = Category::query()->where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
 
-        $tableCategories = TableCategory::where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
-        return view('admin.orders.create',compact('restaurant','categories','tableCategories'));}
+        $tableCategories = TableCategory::query()->where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
+        return view('admin.orders.create', compact('restaurant', 'categories', 'tableCategories'));
+    }
 
     public function menuByCategory($restaurant, $categoryId)
     {
@@ -106,15 +107,20 @@ class OrderController extends Controller
             ? ($request->order_type ?? 'normal')
             : 'normal';
 
-        if (Auth::user()->role == 'owner') {
-            $branchId = Branch::query()->where(
-                'restaurant_id',
-                $restaurant->id
-            )->value('id');
-        } elseif (Auth::user()->role == 'branch_manager') {
-            $branchId = Auth::user()->managedBranch?->id;
+        $user = Auth::user();
+
+        if ($user->role == 'owner') {
+
+            $branchId = Branch::query()
+                ->where('restaurant_id', $restaurant->id)
+                ->value('id');
+        } elseif ($user->branch_id) {
+
+            $branchId = $user->branch_id;
         } else {
-            $branchId = Auth::user()->branch_id;
+
+            // Restaurant level users
+            $branchId = null;
         }
 
         DB::transaction(function () use (
@@ -144,9 +150,11 @@ class OrderController extends Controller
                 'tax'           => 0,
                 'total'         => 0,
             ]);
-            $chef->notify(
-                new NewOrderAssignedNotification($order)
-            );
+            if ($chef) {
+                $chef->notify(
+                    new NewOrderAssignedNotification($order)
+                );
+            }
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -178,15 +186,36 @@ class OrderController extends Controller
             ]);
         });
 
+        // After transaction
+
+        $user = Auth::user();
+
+
+        if ($user->branch_id) {
+
+            return redirect()
+                ->route('branch.orders.index', [
+                    'restaurant' => $restaurant->slug,
+                    'branch'     => $user->branch?->slug,
+                ])
+                ->with('success', 'Order created successfully.');
+        }
+
+
+        if ($user->restaurant_id) {
+
+            return redirect()
+                ->route('restaurant.orders.index', [
+                    'restaurant' => $restaurant->slug,
+                ])
+                ->with('success', 'Order created successfully.');
+        }
+
+
+        // Super admin
         return redirect()
-            ->route(
-                'restaurant.orders.index',
-                $restaurant->slug
-            )
-            ->with(
-                'success',
-                'Order Created Successfully'
-            );
+            ->route('orders.index')
+            ->with('success', 'Order created successfully.');
     }
 
     private function generateToken($type)
@@ -204,7 +233,7 @@ class OrderController extends Controller
         return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
     }
 
-    public function show($restaurant, $order)
+    public function show($restaurant, $branch = null, $order)
     {
         $restaurant = app('restaurant');
 
@@ -225,7 +254,7 @@ class OrderController extends Controller
     }
 
 
-    public function edit($restaurant, $order)
+    public function edit($restaurant, $branch = null, $order)
     {
         $restaurant = app('restaurant');
 
@@ -290,7 +319,11 @@ class OrderController extends Controller
                 'order_id',
                 $order->id
             )->delete();
-
+            if ($chef) {
+                $chef->notify(
+                    new NewOrderAssignedNotification($order)
+                );
+            }
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -321,15 +354,38 @@ class OrderController extends Controller
             ]);
         });
 
-        return redirect()
-            ->route(
-                'restaurant.orders.index',
-                $restaurant
-            )
-            ->with(
-                'success',
-                'Order Updated Successfully'
-            );
+        // Branch Manager
+        $user = Auth::user();
+
+        if ($user->role === 'super_admin') {
+
+            return redirect()
+                ->route('orders.index')
+                ->with('success', 'Order updated successfully.');
+        }
+
+
+        // Any branch user (branch_manager, waiter_head, waiter, chef, etc.)
+        if ($user->branch_id) {
+
+            return redirect()
+                ->route('branch.orders.index', [
+                    'restaurant' => $user->restaurant?->slug,
+                    'branch'     => $user->branch?->slug,
+                ])
+                ->with('success', 'Order updated successfully.');
+        }
+
+
+        // Restaurant level user (owner, restaurant staff)
+        if ($user->restaurant_id) {
+
+            return redirect()
+                ->route('restaurant.orders.index', [
+                    'restaurant' => $user->restaurant?->slug,
+                ])
+                ->with('success', 'Order updated successfully.');
+        }
     }
     public function destroy(
         $restaurant,
@@ -417,8 +473,8 @@ class OrderController extends Controller
     public function getTablesByCategory($restaurant, $categoryId)
     {
         $restaurant = app('restaurant');
-        $branchId = auth()->user()->branch_id;
-        $tables = RestaurantTable::where('cat_id', $categoryId)
+        $branchId = Auth::user()->branch_id;
+        $tables = RestaurantTable::query()->where('cat_id', $categoryId)
             ->where('restaurant_id', $restaurant->id)
             ->where('branch_id', $branchId)
             ->select('id', 'table_number')

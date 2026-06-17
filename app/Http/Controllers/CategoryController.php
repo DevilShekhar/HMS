@@ -123,37 +123,57 @@ class CategoryController extends Controller
             'is_active'     => $request->is_active ?? 1,
         ]);
 
-        return redirect()
-            ->route(
-                'restaurant.categories.index',
-                [
-                    'restaurant' => request()->route('restaurant')
-                ]
-            )
-            ->with(
-                'success',
-                'Category created successfully.'
-            );
+        if (Auth::user()->role === 'super_admin') {
+
+            return redirect()
+                ->route('categories.index')
+                ->with('success', 'Category created successfully.');
+        }
+
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.categories.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'Category created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.categories.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'Category created successfully.');
+        }
     }
-    public function show(Category $category)
+    public function edit($restaurant, $branch = null, $category = null)
     {
-        return view(
-            'admin.categories.show',
-            compact('category')
-        );
-    }
-    public function edit($restaurant, $category)
-    {
+        if ($category === null) {
+            $category = $branch;
+            $branch = null;
+        }
+
         $category = Category::findOrFail($category);
 
-        $branches = Branch::query()->where(
-            'restaurant_id',
-            Auth::user()->restaurant_id
-        )->get();
+        $branches = Branch::query()
+            ->where('restaurant_id', Auth::user()->restaurant_id)
+            ->get();
 
         return view(
             'admin.categories.edit',
-            compact('category', 'branches')
+            compact(
+                'category',
+                'branches',
+                'restaurant',
+                'branch'
+            )
         );
     }
 
@@ -196,12 +216,39 @@ class CategoryController extends Controller
             $data['image'] = 'uploads/categories/' . $filename;
         }
         $category->update($data);
-        return redirect()
-            ->route('restaurant.categories.index',['restaurant' => $restaurant])
-            ->with('success','Category updated successfully.');
+        if (Auth::user()->role === 'super_admin') {
+
+            return redirect()
+                ->route('categories.index')
+                ->with('success', 'Category created successfully.');
+        }
+
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.categories.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'Category created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.categories.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'Category created successfully.');
+        }
     }
 
-    public function destroy(Category $category)
+    public function destroy($restaurant, $branch, Category $category)
+
     {
         if (
             $category->image &&
@@ -216,9 +263,36 @@ class CategoryController extends Controller
 
         $category->delete($category);
 
-        return back()->with(
-            'success',
-            'Category deleted successfully.'
-        );
+        // SUPER ADMIN
+        if (auth()->user()->role === 'super_admin') {
+
+            return redirect()
+                ->route('categories.index')
+                ->with('success', 'Category deleted successfully.');
+        }
+
+
+        $restaurantSlug = request()->route('restaurant');
+        $branchSlug = request()->route('branch');
+
+
+        // BRANCH LEVEL
+        if (!empty($restaurantSlug) && !empty($branchSlug)) {
+
+            return redirect()
+                ->route('branch.categories.index', [
+                    'restaurant' => $restaurantSlug,
+                    'branch' => $branchSlug,
+                ])
+                ->with('success', 'Category deleted successfully.');
+        }
+
+
+        // RESTAURANT LEVEL
+        return redirect()
+            ->route('restaurant.categories.index', [
+                'restaurant' => $restaurantSlug,
+            ])
+            ->with('success', 'Category deleted successfully.');
     }
 }

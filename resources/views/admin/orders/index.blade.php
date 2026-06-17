@@ -8,11 +8,32 @@
                     <h2>Orders</h2>
                     <p> Manage restaurant orders and track status. </p>
                 </div>
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
+
                 <div class="premium-head-actions">
-                    <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurant->slug]) }}"
-                        class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create Order
-                    </a>
+
+                    @if ($branchSlug)
+                        <a href="{{ route('branch.orders.create', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create Order
+                        </a>
+                    @else
+                        <a href="{{ route('restaurant.orders.create', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create Order
+                        </a>
+                    @endif
+
                 </div>
             </div>
         </section>
@@ -110,14 +131,65 @@
                                         <td>{{ $order->chef?->name ?? 'Not Assigned' }}</td>
                                         <td>
                                             <div class="d-flex gap-2">
-                                                <a href="{{ route('restaurant.orders.show', [$restaurant->slug, $order->id]) }}"
-                                                    class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('restaurant.orders.edit', [$restaurant->slug, $order->id]) }}"
-                                                    class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                    {{-- Branch View --}}
+                                                    <a href="{{ route('branch.orders.show', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'branch' => $branchSlug,
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @elseif(!empty($restaurantSlug))
+                                                    {{-- Restaurant View --}}
+                                                    <a href="{{ route('restaurant.orders.show', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @else
+                                                    {{-- Super Admin View --}}
+                                                    <a href="{{ route('orders.show', [
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @endif
+                                                @php
+                                                    $restaurantSlug = request()->route('restaurant');
+                                                    $branchSlug = request()->route('branch');
+                                                @endphp
+
+                                                {{-- Edit --}}
+                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                    <a href="{{ route('branch.orders.edit', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'branch' => $branchSlug,
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @elseif(!empty($restaurantSlug))
+                                                    <a href="{{ route('restaurant.orders.edit', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('orders.edit', [
+                                                        'order' => $order->id,
+                                                    ]) }}"
+                                                        class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
