@@ -223,14 +223,14 @@ Route::prefix('{restaurant}')
                 ]);
                 Route::get('orders/tables/{categoryId}',[OrderController::class, 'getTables'])->name('branch.orders.tables');
                 Route::resource('users', UserController::class)->names([
-                'index'   => 'branch.users.index',
-                'create'  => 'branch.users.create',
-                'store'   => 'branch.users.store',
-                'show'    => 'branch.users.show',
-                'edit'    => 'branch.users.edit',
-                'update'  => 'branch.users.update',
-                'destroy' => 'branch.users.destroy',
-            ]);
+                    'index'   => 'branch.users.index',
+                    'create'  => 'branch.users.create',
+                    'store'   => 'branch.users.store',
+                    'show'    => 'branch.users.show',
+                    'edit'    => 'branch.users.edit',
+                    'update'  => 'branch.users.update',
+                    'destroy' => 'branch.users.destroy',
+                ]);
             });
             Route::resource('users', UserController::class)->names([
                 'index'   => 'restaurant.users.index',
@@ -253,7 +253,7 @@ Route::prefix('{restaurant}')
             ]);
 
             Route::post('branches/{branch}/assign-manager', [BranchController::class, 'assignManager'])->name('restaurant.branches.assign-manager');
-            Route::post('/branches/upload-qrcode',[BranchController::class, 'uploadQrCode'])->name('branches.upload-qrcode');
+            Route::post('/branches/upload-qrcode', [BranchController::class, 'uploadQrCode'])->name('branches.upload-qrcode');
             Route::resource('categories', CategoryController::class)->names([
                 'index'   => 'restaurant.categories.index',
                 'create'  => 'restaurant.categories.create',
@@ -337,8 +337,11 @@ Route::prefix('{restaurant}')
 
             Route::post('orders/{order}/kitchen-status', [OrderController::class, 'updateKitchenStatus'])
                 ->name('restaurant.orders.kitchen-status');
-
-            Route::post('/logout', function () {
+            Route::get(
+                '{branch}/inventory/{inventory}/edit',
+                [InventoryController::class, 'edit']
+            )->name('branch.inventory.edit');
+            Route::post('/logout', function (){
 
                 $user = Auth::user();
 

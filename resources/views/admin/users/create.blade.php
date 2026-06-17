@@ -7,11 +7,37 @@
                 <h2>Create User</h2>
                 <p>Add a new user account to the system.</p>
             </div>
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+
             <div class="premium-head-actions">
-                <a href="{{ route('users.index') }}" class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Users
-                </a>
+
+                @if (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('users.index') }}" class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Users
+                    </a>
+                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                    <a href="{{ route('branch.users.index', [
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Users
+                    </a>
+                @elseif(!empty($restaurantSlug))
+                    <a href="{{ route('restaurant.users.index', [
+                        'restaurant' => $restaurantSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Users
+                    </a>
+                @endif
+
             </div>
         </div>
     </section>
@@ -144,9 +170,6 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <a href="{{ route('users.index') }}" class="btn btn-light">
-                        Cancel
-                    </a>
                     <button type="submit" class="btn btn-primary"> Create User </button>
                 </div>
             </div>

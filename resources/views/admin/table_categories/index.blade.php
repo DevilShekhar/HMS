@@ -7,16 +7,42 @@
                 <h2>Table Categories</h2>
                 <p>Manage restaurant table categories.</p>
             </div>
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.table-categories.create', ['restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn">
-                    <i class="fas fa-plus"></i>
-                    Add Table Category
-                </a>
+
+                @if (!empty($restaurantSlug) && !empty($branchSlug))
+                    <a href="{{ route('branch.table-categories.create', [
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
+                    ]) }}"
+                        class="btn premium-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Table Category
+                    </a>
+                @elseif(!empty($restaurantSlug))
+                    <a href="{{ route('restaurant.table-categories.create', [
+                        'restaurant' => $restaurantSlug,
+                    ]) }}"
+                        class="btn premium-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Table Category
+                    </a>
+                @else
+                    <a href="{{ route('table-categories.create') }}" class="btn premium-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Table Category
+                    </a>
+                @endif
+
             </div>
         </div>
     </section>
     <section class="section premium-dashboard pt-0">
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
@@ -47,7 +73,7 @@
                             @forelse($categories as $category)
                                 <tr>
                                     <td>
-                                        {{ $loop->iteration + (($categories->currentPage() - 1) * $categories->perPage()) }}
+                                        {{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}
                                     </td>
                                     <td>
                                         <strong>{{ $category->name }}</strong>
@@ -63,16 +89,76 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <a href="{{ route('restaurant.table-categories.edit', ['restaurant' => request()->route('restaurant'),'table_category' => $category->id]) }}" class="btn btn-warning btn-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('restaurant.table-categories.destroy', ['restaurant' => request()->route('restaurant'),'table_category' => $category->id ]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this table category?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+
+                                            @php
+                                                $restaurantSlug = request()->route('restaurant');
+                                                $branchSlug = request()->route('branch');
+                                            @endphp
+
+                                            {{-- Edit --}}
+                                            @if (auth()->user()->role === 'super_admin')
+                                                <a href="{{ route('table-categories.edit', [
+                                                    'table_category' => $category->id,
+                                                ]) }}"
+                                                    class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                                                <a href="{{ route('branch.table-categories.edit', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'branch' => $branchSlug,
+                                                    'table_category' => $category->id,
+                                                ]) }}"
+                                                    class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @elseif(!empty($restaurantSlug))
+                                                <a href="{{ route('restaurant.table-categories.edit', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'table_category' => $category->id,
+                                                ]) }}"
+                                                    class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endif
+
+
+                                            {{-- Delete --}}
+                                            @if (auth()->user()->role === 'super_admin')
+                                                <form
+                                                    action="{{ route('table-categories.destroy', [
+                                                        'table_category' => $category->id,
+                                                    ]) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                                                    <form
+                                                        action="{{ route('branch.table-categories.destroy', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'branch' => $branchSlug,
+                                                            'table_category' => $category->id,
+                                                        ]) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                                    @elseif(!empty($restaurantSlug))
+                                                        <form
+                                                            action="{{ route('restaurant.table-categories.destroy', [
+                                                                'restaurant' => $restaurantSlug,
+                                                                'table_category' => $category->id,
+                                                            ]) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                            @endif
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -88,7 +174,7 @@
                         </tbody>
                     </table>
                 </div>
-                @if($categories->hasPages())
+                @if ($categories->hasPages())
                     <div class="mt-4">
                         {{ $categories->links() }}
                     </div>

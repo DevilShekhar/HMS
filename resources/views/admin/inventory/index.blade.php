@@ -11,11 +11,32 @@
                     Manage restaurant inventory stock.
                 </p>
             </div>
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.inventory.create', ['restaurant' => request()->route('restaurant') ]) }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Add Inventory Item
-                </a>
+                @can('create-inventory')
+                    @if ($branchSlug)
+                        <a href="{{ route('branch.inventory.create', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Inventory Item
+                        </a>
+                    @else
+                        <a href="{{ route('restaurant.inventory.create', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}"
+                            class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add Inventory Item
+                        </a>
+                    @endif
+                @endcan
             </div>
         </div>
     </section>
@@ -25,7 +46,7 @@
                 <h4>Inventory List</h4>
             </div>
             <div class="card-body">
-                @if(session('success'))
+                @if (session('success'))
                     <div class="alert alert-success">
                         {{ session('success') }}
                     </div>
@@ -53,28 +74,28 @@
                                     <td>{{ $item->branch->name ?? '-' }}</td>
                                     <td>{{ ucfirst($item->name) }}</td>
                                     <td>
-                                        {{ (float)$item->total_stock }}
+                                        {{ (float) $item->total_stock }}
                                         {{ ucfirst($item->unit) }}
                                     </td>
                                     <td>
-                                        @if($item->remaining_stock <= $item->minimum_stock)
+                                        @if ($item->remaining_stock <= $item->minimum_stock)
                                             <span class="badge bg-danger">
-                                                {{ (float)$item->remaining_stock }}
+                                                {{ (float) $item->remaining_stock }}
                                                 {{ ucfirst($item->unit) }}
                                             </span>
                                         @else
                                             <span class="badge bg-success">
-                                                {{ (float)$item->remaining_stock }}
+                                                {{ (float) $item->remaining_stock }}
                                                 {{ ucfirst($item->unit) }}
                                             </span>
                                         @endif
                                     </td>
                                     <td>
-                                        {{ (float)$item->minimum_stock }}
+                                        {{ (float) $item->minimum_stock }}
                                         {{ ucfirst($item->unit) }}
                                     </td>
                                     <td>
-                                        @if($item->remaining_stock == 0)
+                                        @if ($item->remaining_stock == 0)
                                             <span class="badge bg-danger">
                                                 Out Of Stock
                                             </span>
@@ -91,28 +112,113 @@
                                     <td>{{ $item->creator->name ?? '-' }}</td>
                                     <td>{{ $item->updater->name ?? '-' }}</td>
                                     <td>
-                                        <a href="{{ route('restaurant.inventory.stock-in',['restaurant' => request()->route('restaurant'),'inventory' => $item->id]) }}" class="btn btn-success btn-sm">
-                                            <i class="fas fa-plus-circle"></i>
-                                        </a>
-                                        <a href="{{ route('restaurant.inventory.transactions',['restaurant' => request()->route('restaurant'),'inventory' => $item->id] ) }}" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-history"></i>
-                                        </a>
-                                        <a href="{{ route('restaurant.inventory.edit', ['restaurant' => request()->route('restaurant'),'inventory' => $item->id] ) }}" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('restaurant.inventory.destroy',['restaurant' => request()->route('restaurant'),'inventory' => $item->id ])}}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm"  onclick="return confirm('Delete this item?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+
+                                        @if (request()->route('branch'))
+                                            {{-- Branch Stock In --}}
+                                            <a href="{{ route('restaurant.inventory.stock-in', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'branch' => request()->route('branch'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-success btn-sm">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </a>
+
+                                            {{-- Branch Transactions --}}
+                                            <a href="{{ route('restaurant.inventory.transactions', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'branch' => request()->route('branch'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-history"></i>
+                                            </a>
+
+
+                                            {{-- Branch Edit --}}
+                                            <a href="{{ route('branch.inventory.edit', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'branch' => request()->route('branch'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+
+                                            {{-- Branch Delete --}}
+                                            <form
+                                                action="{{ route('branch.inventory.destroy', [
+                                                    'restaurant' => request()->route('restaurant'),
+                                                    'branch' => request()->route('branch'),
+                                                    'inventory' => $item->id,
+                                                ]) }}"
+                                                method="POST" class="d-inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Delete this item?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+
+                                            </form>
+                                        @else
+                                            {{-- Restaurant Stock In --}}
+                                            <a href="{{ route('restaurant.inventory.stock-in', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-success btn-sm">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </a>
+
+
+                                            {{-- Restaurant Transactions --}}
+                                            <a href="{{ route('restaurant.inventory.transactions', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-secondary btn-sm">
+                                                <i class="fas fa-history"></i>
+                                            </a>
+
+
+                                            {{-- Restaurant Edit --}}
+                                            <a href="{{ route('restaurant.inventory.edit', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'inventory' => $item->id,
+                                            ]) }}"
+                                                class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+
+                                            {{-- Restaurant Delete --}}
+                                            <form
+                                                action="{{ route('restaurant.inventory.destroy', [
+                                                    'restaurant' => request()->route('restaurant'),
+                                                    'inventory' => $item->id,
+                                                ]) }}"
+                                                method="POST" class="d-inline">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Delete this item?')">
+                                                    <i class="fas": trash"></i>
+                                                </button>
+
+                                            </form>
+                                        @endif
+
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9"
-                                        class="text-center">
+                                    <td colspan="9" class="text-center">
                                         No Inventory Items Found
                                     </td>
                                 </tr>

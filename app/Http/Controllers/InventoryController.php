@@ -17,25 +17,42 @@ class InventoryController extends Controller
         $items = InventoryItem::with(['branch', 'creator', 'updater'])->where('restaurant_id', $restaurant->id)->latest()->paginate(20);
         return view('admin.inventory.index', compact('items'));
     }
-    public function create()
+    public function create($restaurant, $branch = null)
     {
-        $user = Auth::user();
         $restaurant = app('restaurant');
-        if ($user->hasRole('owner')) {
-            $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
-            return view('admin.inventory.create', compact('branches'));
+
+        // If branch URL exists
+        if ($branch) {
+
+            $branchModel = Branch::query()->where('slug', $branch)
+                ->where('restaurant_id', $restaurant->id)
+                ->firstOrFail();
+
+            return view('admin.inventory.create', [
+                'branch' => $branchModel
+            ]);
         }
-        $branch = Branch::query()->where('branch_manager_id', $user->id)->firstOrFail();
-        return view('admin.inventory.create', compact('branch'));
+
+
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)
+            ->get();
+
+        return view('admin.inventory.create', [
+            'branches' => $branches
+        ]);
     }
 
     public function store(Request $request)
     {
         $user = Auth::user();
+        $user = Auth::user();
+
         if ($user->hasRole('owner')) {
             $branchId = $request->branch_id;
+        } elseif ($user->branch_id) {
+            $branchId = $user->branch_id;
         } else {
-            $branchId = Branch::query()->where('branch_manager_id', $user->id)->value('id');
+            $branchId = null;
         }
         $request->validate([
             'name' => [
@@ -62,26 +79,65 @@ class InventoryController extends Controller
             'created_by'      => Auth::id(),
             'updated_by'      => Auth::id(),
         ]);
-        return redirect()
-            ->route(
-                'restaurant.inventory.index',
-                ['restaurant' => app('restaurant')->slug]
-            )
-            ->with(
-                'success',
-                'Inventory Item Added Successfully'
-            );
+        $user = Auth::user();
+
+        if ($user->role === 'super_admin') {
+
+            return redirect()
+                ->route('inventory.index')
+                ->with('success', 'Inventory Item created successfully.');
+        }
+
+
+        // Any branch user
+        if ($user->branch_id) {
+
+            return redirect()
+                ->route('branch.inventory.index', [
+                    'restaurant' => $user->restaurant?->slug,
+                    'branch'     => $user->branch?->slug,
+                ])
+                ->with('success', 'Inventory Item created successfully.');
+        }
+
+
+        // Restaurant level user
+        if ($user->restaurant_id) {
+
+            return redirect()
+                ->route('restaurant.inventory.index', [
+                    'restaurant' => $user->restaurant?->slug,
+                ])
+                ->with('success', 'Inventory Item created successfully.');
+        }
     }
-    public function edit($restaurant, $inventory)
+    public function edit($restaurant, $branch = null, $inventory = null)
     {
-        $inventory = InventoryItem::findOrFail(
-            $inventory
-        );
+
+        if ($inventory === null) {
+            $inventory = $branch;
+            $branch = null;
+        }
+
+        $inventory = InventoryItem::findOrFail($inventory);
+
+        if ($branch) {
+
+            $userBranch = Branch::query()->where(
+                'branch_manager_id',
+                Auth::id()
+            )->firstOrFail();
+
+            if ($inventory->branch_id != $userBranch->id) {
+                abort(403);
+            }
+        }
 
         $branches = Branch::query()->where(
             'restaurant_id',
             app('restaurant')->id
         )->get();
+
         return view(
             'admin.inventory.edit',
             compact(
@@ -118,15 +174,35 @@ class InventoryController extends Controller
             'minimum_stock'   => $request->minimum_stock,
             'updated_by'      => Auth::id(),
         ]);
-        return redirect()
-            ->route(
-                'restaurant.inventory.index',
-                ['restaurant' => $restaurant]
-            )
-            ->with(
-                'success',
-                'Inventory Updated Successfully'
-            );
+        if (Auth::user()->role === 'super_admin') {
+
+            return redirect()
+                ->route('inventory.index')
+                ->with('success', 'Table Category created successfully.');
+        }
+
+
+        // Branch Manager
+        if (Auth::user()->role === 'branch_manager') {
+
+
+            return redirect()
+                ->route('branch.inventory.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                    'branch' => Auth::user()->branch?->slug,
+                ])
+                ->with('success', 'Table Category created successfully.');
+        }
+
+
+        // Owner
+        if (Auth::user()->role === 'owner') {
+            return redirect()
+                ->route('restaurant.inventory.index', [
+                    'restaurant' => Auth::user()->restaurant?->slug,
+                ])
+                ->with('success', 'Table Category created successfully.');
+        }
     }
     public function destroy($restaurant, $inventory)
     {

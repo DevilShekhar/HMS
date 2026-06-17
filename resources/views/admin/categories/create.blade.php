@@ -10,22 +10,32 @@
 
             @php
                 $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
             @endphp
 
             <div class="premium-head-actions">
 
-                @if ($restaurantSlug)
+                @if (auth()->user()->role === 'super_admin')
+                    <a href="{{ route('categories.index') }}" class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Category
+                    </a>
+                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                    <a href="{{ route('branch.categories.index', [
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
+                    ]) }}"
+                        class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Category
+                    </a>
+                @elseif(!empty($restaurantSlug))
                     <a href="{{ route('restaurant.categories.index', [
                         'restaurant' => $restaurantSlug,
                     ]) }}"
                         class="btn premium-btn ghost-btn">
                         <i class="fas fa-arrow-left"></i>
-                        Back To Categories
-                    </a>
-                @else
-                    <a href="{{ route('categories.index') }}" class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Categories
+                        Back To Category
                     </a>
                 @endif
 
