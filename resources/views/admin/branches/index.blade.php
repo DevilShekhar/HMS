@@ -158,6 +158,7 @@
                 @endif
             </div>
         </section>
+         @if (auth()->user()->role == 'owner')
         <div class="modal fade" id="uploadQrModal" tabindex="-1" role="dialog">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -191,7 +192,7 @@
                 </div>
             </div>
         </div>
-        @if (auth()->user()->role == 'owner')
+
             <div class="modal fade" id="assignManagerModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">

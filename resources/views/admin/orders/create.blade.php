@@ -33,7 +33,7 @@
                             <select id="table_category" class="form-control">
                                 <option value="">Select Category</option>
 
-                                @foreach ($tableCategories as $category)
+                                @foreach($tableCategories as $category)
                                     <option value="{{ $category->id }}">
                                         {{ $category->name }}
                                     </option>
@@ -43,9 +43,9 @@
 
                         <div class="col-md-4">
                             <label>Table Number</label>
-                            <select name="table_no" id="table_no" class="form-control">
-                                <option value="">Select Table</option>
-                            </select>
+                         <select name="table_no" id="table_no" class="form-control">
+                            <option value="">Select Table</option>
+                        </select>
                         </div>
                     </div>
                     <hr>
@@ -102,48 +102,44 @@
             </form>
         </div>
     </div>
-    {{-- <script>
-$(document).ready(function () {
-    $('#table_category').on('change', function () {
-        let categoryId = $(this).val();
-        $('#table_no').html(
-            '<option value="">Loading...</option>'
-        );
-        let url = "{{ route(
-            'restaurant.orders.tables',
-            [
-                'restaurant' => $restaurant->slug,
-                'categoryId' => 'CATID'
-            ]
-        ) }}";
-        url = url.replace('CATID', categoryId);
-        console.log(url);
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function (data) {
-                let options =
-                    '<option value="">Select Table</option>';
-                $.each(data, function (index, table) {
-                    options +=
-                        '<option value="' +
-                        table.table_number +
-                        '">' +
-                        table.table_number +
-                        '</option>';
-                });
-                $('#table_no').html(options);
-            },
-            error: function (xhr) {
-                console.log(xhr.responseText);
-                $('#table_no').html(
-                    '<option value="">No Tables Found</option>'
-                );
-            }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tableCategory = document.getElementById('table_category');
+            const tableNo = document.getElementById('table_no');
+            tableCategory.addEventListener('change', function () {
+                let categoryId = this.value;
+                if (!categoryId) {
+                    tableNo.innerHTML =
+                        '<option value="">Select Table</option>';
+                    return;
+                }
+                let url =
+                    "{{ route('branch.orders.tables', [
+                        'restaurant' => $restaurant->slug,
+                        'branch' => $branch->slug,
+                        'categoryId' => 'CATID']) 
+                    }}";
+                url = url.replace('CATID', categoryId);
+                console.log(url);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        let options =
+                            '<option value="">Select Table</option>';
+                        data.forEach(table => {
+                            options +=
+                                '<option value="' + table.table_number +'">' + table.table_number +'</option>';
+                        });
+                        tableNo.innerHTML = options;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        tableNo.innerHTML =
+                            '<option value="">No Tables Found</option>';
+                    });
+            });
         });
-    });
-});
-    </script> --}}
+    </script>
     <script>
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('category')) {
