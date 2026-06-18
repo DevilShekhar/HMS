@@ -131,7 +131,7 @@
                                                 </a>
 
                                                 <form action="{{ route('categories.destroy', $category->id) }}"
-                                                    method="POST" onsubmit="return confirm('Are you sure?')">
+                                                    method="POST"  class="delete-form">
 
                                                     {{-- BRANCH LEVEL --}}
                                                 @elseif (!empty($restaurantSlug) && !empty($branchSlug))
@@ -150,7 +150,7 @@
                                                             'branch' => $branchSlug,
                                                             'category' => $category->id,
                                                         ]) }}"
-                                                        method="POST" onsubmit="return confirm('Are you sure?')">
+                                                        method="POST"  class="delete-form">
 
 
                                                         {{-- RESTAURANT LEVEL --}}
@@ -168,7 +168,7 @@
                                                                 'restaurant' => $restaurantSlug,
                                                                 'category' => $category->id,
                                                             ]) }}"
-                                                            method="POST" onsubmit="return confirm('Are you sure?')">
+                                                            method="POST"  class="delete-form">
                                             @endif
 
 
@@ -198,3 +198,47 @@
         </div>
     </section>
 @endsection
+@if (session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+    </script>
+@endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        document.querySelectorAll('.delete-form').forEach(form => {
+
+            form.addEventListener('submit', function(e) {
+
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Deactivate Category?',
+                    text: 'This action can be reverted later.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+
+                });
+
+            });
+
+        });
+
+    });
+</script>

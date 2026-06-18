@@ -15,6 +15,7 @@
 
                 <div class="premium-head-actions">
 
+                    @can('create-order')
                     @if ($branchSlug)
                         <a href="{{ route('branch.orders.create', [
                             'restaurant' => $restaurantSlug,
@@ -33,7 +34,7 @@
                             Create Order
                         </a>
                     @endif
-
+                    @endcan
                 </div>
             </div>
         </section>
@@ -165,6 +166,7 @@
                                                 @endphp
 
                                                 {{-- Edit --}}
+                                                @can('edit-order')
                                                 @if (!empty($restaurantSlug) && !empty($branchSlug))
                                                     <a href="{{ route('branch.orders.edit', [
                                                         'restaurant' => $restaurantSlug,
@@ -190,6 +192,7 @@
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endif
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>
@@ -207,6 +210,50 @@
             </div>
         </section>
     @endsection
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Category?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
+        });
+    </script>
 @else
     @php
         abort(403);

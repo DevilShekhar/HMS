@@ -28,6 +28,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Role Name</th>
+                                    <th>Status</th>
                                     <th width="250">Action</th>
                                 </tr>
                             </thead>
@@ -44,15 +45,24 @@
                                                 {{ ucwords(str_replace('_', ' ', $roleItem->name)) }}
                                             </strong>
                                         </td>
+                                        <td>
+                                            @if ($roleItem->status == 1)
+                                                <span class="badge bg-success">Active</span>
+                                            @else
+                                                <span class="badge bg-danger">Inactive</span>
+                                            @endif
+                                        </td>
 
                                         <td>
+                                            @if($roleItem->status == 1)
                                             <a href="{{ route('roles.permissions', $roleItem->id) }}"
                                                 class="btn btn-sm btn-primary">
                                                 Manage Permission
                                             </a>
 
+
                                             <form action="{{ route('roles.destroy', $roleItem->id) }}" method="POST"
-                                                style="display:inline;">
+                                                class="delete-form" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
 
@@ -60,6 +70,7 @@
                                                     Delete
                                                 </button>
                                             </form>
+                                            @endif
                                         </td>
                                     </tr>
 
@@ -257,9 +268,21 @@
                     });
                 });
             </script>
-
         @endcan
     @endsection
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
 @else
     @php
         abort(403);

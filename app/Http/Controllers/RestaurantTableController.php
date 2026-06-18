@@ -48,14 +48,20 @@ class RestaurantTableController extends Controller
             $categories = TableCategory::query()->where('restaurant_id', app('restaurant')->id)->get();
             return view('admin.tables.create', compact('branches', 'categories'));
         }
-        if ($user->role == 'branch_manager') {
-            $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
-            $categories = TableCategory::query()->where('branch_id', $branch->id)->get();
+        if ($user->branch_id) {
+
+            $branch = Branch::findOrFail($user->branch_id);
+
+            $categories = TableCategory::query()
+                ->where('branch_id', $branch->id)
+                ->get();
+
             return view(
                 'admin.tables.create',
                 compact('branch', 'categories')
             );
         }
+
         abort(403);
     }
 
@@ -73,6 +79,7 @@ class RestaurantTableController extends Controller
             'branch_id'     => $request->branch_id,
             'table_number'  => $request->table_number,
             'capacity'      => $request->capacity,
+            'status' => 1,
             'created_by'    => Auth::id(),
             'updated_by'    => Auth::id(),
         ]);
@@ -85,7 +92,7 @@ class RestaurantTableController extends Controller
 
 
         // Branch Manager
-        if (Auth::user()->role === 'branch_manager') {
+        if (Auth::user()->branch_id) {
 
 
             return redirect()
@@ -173,38 +180,40 @@ class RestaurantTableController extends Controller
                 ->with('success', 'Tables created successfully.');
         }
     }
-public function destroy($restaurant, $branch = null, RestaurantTable $table)
+    public function destroy($restaurant, RestaurantTable $table)
     {
-        $table->delete();
+        $table->update([
+            'status' => 0,
+            'updated_by' => Auth::id(),
+        ]);
+
+
         if (Auth::user()->role === 'super_admin') {
 
             return redirect()
                 ->route('tables.index')
-                ->with('success', 'Tables created successfully.');
+                ->with('success', 'Table deactivated successfully.');
         }
 
 
-        // Branch Manager
-        if (Auth::user()->role === 'branch_manager') {
-
+        // Any branch user (branch_manager, waiter_head, waiter etc.)
+        if (Auth::user()->branch_id) {
 
             return redirect()
                 ->route('branch.tables.index', [
                     'restaurant' => Auth::user()->restaurant?->slug,
                     'branch' => Auth::user()->branch?->slug,
                 ])
-                ->with('success', 'Tables created successfully.');
+                ->with('success', 'Table deactivated successfully.');
         }
 
 
-        // Owner
-        if (Auth::user()->role === 'owner') {
-            return redirect()
-                ->route('restaurant.tables.index', [
-                    'restaurant' => Auth::user()->restaurant?->slug,
-                ])
-                ->with('success', 'Tables created successfully.');
-        }
+        // Restaurant user (owner)
+        return redirect()
+            ->route('restaurant.tables.index', [
+                'restaurant' => Auth::user()->restaurant?->slug,
+            ])
+            ->with('success', 'Table deactivated successfully.');
     }
     public function categoriesByBranch($restaurant, Branch $branch)
     {

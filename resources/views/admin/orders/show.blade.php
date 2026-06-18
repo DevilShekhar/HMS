@@ -4,149 +4,144 @@
     <div class="section">
         <div class="card">
             <div class="card-header">
-                <h4>Order Details</h4>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4>Order Details</h4>
+                    <div>
+                        @if ($order->status == 'pending')
+                            <span class="badge bg-warning">Pending</span>
+                        @elseif($order->status == 'preparing')
+                            <span class="badge bg-info">Preparing</span>
+                        @elseif($order->status == 'completed')
+                            <span class="badge bg-success">Completed</span>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <div class="card-body">
 
+                <!-- Order Info -->
+                <div class="row mb-2">
+                    <div class="col-md-2">
+                        <strong>Order ID:</strong><br>
+                        {{ $order->id }}
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Token No:</strong><br>
+                        <span class="fw-bold">{{ $order->token_no }}</span>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Table No:</strong><br>
+                        {{ $order->table_no ?? ($order->table?->name ?? 'Take Away') }}
+                    </div>
+                </div>
+
                 <div class="row mb-4">
-                    <div class="col-md-4">
-                        <strong>Order ID:</strong>
-                        #{{ $order->id }}
+                    <div class="col-md-2">
+                        <strong>Customer Name:</strong><br>
+                        {{ $order->customer->name ?? ($order->customer_name ?? 'Walk-in Customer') }}
                     </div>
-
-                    <div class="col-md-4">
-                        <strong>Token No:</strong>
-                        {{ $order->token_no }}
-                    </div>
-
-                    <div class="col-md-4">
-                        <strong>Status:</strong>
-
-
-                        @if ($order->status == 'pending')
-                            <span class="badge bg-warning text-dark">
-                                Pending
-                            </span>
-                        @elseif($order->status == 'preparing')
-                            <span class="badge bg-info">
-                                Preparing
-                            </span>
-                        @endif
+                    <div class="col-md-2">
+                        <strong>Mobile:</strong><br>
+                        {{ $order->mobile_number ?? 'N/A' }}
                     </div>
                 </div>
 
                 <div class="row mb-4">
                     <div class="col-md-6">
-                        <strong>Customer:</strong><br>
-                        {{ $order->customer->name ?? 'Walk In Customer' }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <strong>Table:</strong><br>
-                        {{ $order->table->name ?? 'Take Away' }}
+                        <strong>Order Date:</strong><br>
+                        {{ $order->created_at->format('d M Y, h:i A') }}
                     </div>
                 </div>
 
                 <hr>
 
-                <h5>Order Items</h5>
+                <!-- Order Items -->
+                <h5 class="mb-3">Order Items</h5>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered">
-
-                        <thead>
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>Item</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Total</th>
+                                <th>Item Name</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Amount</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             @foreach ($order->items as $item)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-
-                                    <td>
-                                        {{ $item->menuItem->name ?? '-' }}
-                                    </td>
-
-                                    <td>{{ $item->quantity }}</td>
-
-                                    <td>₹{{ number_format($item->price, 2) }}</td>
-
-                                    <td>
-                                        ₹{{ number_format($item->quantity * $item->price, 2) }}
-                                    </td>
+                                    <td>{{ $item->menuItem->name ?? '-' }}</td>
+                                    <td class="text-center">{{ $item->quantity }}</td>
+                                    <td class="text-end">₹{{ number_format($item->price, 2) }}</td>
+                                    <td class="text-end">₹{{ number_format($item->subtotal, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
-
                     </table>
                 </div>
 
-                @php
-                    $grandTotal = $order->items->sum('subtotal');
-                @endphp
-
-                <div class="text-right mt-4">
-                    <h4>
+                <!-- Grand Total -->
+                <div class="text-end mt-4">
+                    <h5>
                         Grand Total :
-                        ₹{{ number_format($grandTotal, 2) }}
-                    </h4>
+                        <strong>₹{{ number_format($order->total ?? $order->items->sum('subtotal'), 2) }}</strong>
+                    </h5>
                 </div>
 
-                <div class="mt-4 d-flex gap-2 align-items-center">
+                <hr class="my-4">
 
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap gap-2">
                     @php
                         $restaurantSlug = request()->route('restaurant');
                         $branchSlug = request()->route('branch');
                     @endphp
 
-                    <div class="premium-head-actions">
+                    <!-- Back Button -->
+                    @if (auth()->user()->role === 'super_admin')
+                        <a href="{{ route('orders.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Orders
+                        </a>
+                    @elseif($branchSlug)
+                        <a href="{{ route('branch.orders.index', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
+                            class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Orders
+                        </a>
+                    @elseif($restaurantSlug)
+                        <a href="{{ route('restaurant.orders.index', ['restaurant' => $restaurantSlug]) }}"
+                            class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Orders
+                        </a>
+                    @endif
 
-                        @if (auth()->user()->role === 'super_admin')
-                            <a href="{{ route('orders.index') }}" class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Orders
-                            </a>
-                        @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                            <a href="{{ route('branch.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                                'branch' => $branchSlug,
-                            ]) }}"
-                                class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Orders
-                            </a>
-                        @elseif(!empty($restaurantSlug))
-                            <a href="{{ route('restaurant.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                            ]) }}"
-                                class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Orders
-                            </a>
-                        @endif
-
-                    </div>
-
+                    <!-- Status Actions -->
                     @if ($order->status == 'pending')
                         <form method="POST"
                             action="{{ route('restaurant.orders.prepare', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
                             class="m-0">
                             @csrf
-
-                            <button class="btn btn-success">
+                            <button type="submit" class="btn btn-success">
                                 Mark as Preparing
                             </button>
                         </form>
                     @endif
 
+                    @if ($order->status == 'preparing')
+                        <form method="POST"
+                            action="{{ route('restaurant.orders.completed', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
+                            class="m-0">
+                            @csrf
+                            <button type="submit" class="btn btn-success">
+                                Mark as Completed
+                            </button>
+                        </form>
+                    @endif
                 </div>
+
             </div>
         </div>
     </div>

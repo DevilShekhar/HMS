@@ -153,13 +153,12 @@
                                                     'branch' => request()->route('branch'),
                                                     'inventory' => $item->id,
                                                 ]) }}"
-                                                method="POST" class="d-inline">
+                                                method="POST" class="d-inline delete-form">
 
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Delete this item?')">
+                                                <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
 
@@ -201,16 +200,15 @@
                                                     'restaurant' => request()->route('restaurant'),
                                                     'inventory' => $item->id,
                                                 ]) }}"
-                                                method="POST" class="d-inline">
+                                                method="POST" class="d-inline delete-form">
 
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Delete this item?')">
-                                                    <i class="fas": trash"></i>
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-trash"></i>
                                                 </button>
-
+                                                
                                             </form>
                                         @endif
 
@@ -233,3 +231,47 @@
         </div>
     </section>
 @endsection
+@if (session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: "{{ session('success') }}",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+    </script>
+@endif
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        document.querySelectorAll('.delete-form').forEach(form => {
+
+            form.addEventListener('submit', function(e) {
+
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Deactivate Category?',
+                    text: 'This action can be reverted later.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+
+                });
+
+            });
+
+        });
+
+    });
+</script>

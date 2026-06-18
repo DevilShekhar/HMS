@@ -16,7 +16,7 @@ class RoleController extends Controller
         if (!Auth::user()?->can('view-role')) {
             abort(403);
         }
-        $roles = Role::all();
+        $roles = Role::query()->get();
         $permissions = Permission::all();
 
         $role = null;
@@ -46,6 +46,8 @@ class RoleController extends Controller
         Role::create([
             'name' => $request->name,
             'guard_name' => 'web',
+            'status' => 1,
+
         ]);
 
         return redirect()->route('roles.index')
@@ -73,10 +75,11 @@ class RoleController extends Controller
     public function destroy($role)
     {
         $role = Role::findOrFail($role);
-        $role->delete();
 
-        return redirect()->route('roles.index')
-            ->with('success', 'Role Deleted successfully');
+        $role->update(['status' => 0]);
+        return redirect()
+            ->route('roles.index')
+            ->with('success', 'Role Inactivated successfully');
     }
 
     public function managePermissions(Role $role)

@@ -100,13 +100,9 @@
                                     </td>
                                     <td>
                                         @if ($item->is_active)
-                                            <span class="badge bg-success">
-                                                Active
-                                            </span>
+                                            <span class="badge bg-success">Active</span>
                                         @else
-                                            <span class="badge bg-danger">
-                                                Inactive
-                                            </span>
+                                            <span class="badge bg-danger">Inactive</span>
                                         @endif
                                     </td>
                                     <td>
@@ -148,21 +144,20 @@
                                                         'branch' => $branchSlug,
                                                         'menu_item' => $item->id,
                                                     ]) }}"
-                                                    style="display:inline">
+                                                    style="display:inline" class="delete-form">
                                                 @elseif(!empty($restaurantSlug))
                                                     <form id="delete-form-{{ $item->id }}" method="POST"
                                                         action="{{ route('restaurant.menu-items.destroy', [
                                                             'restaurant' => $restaurantSlug,
                                                             'menu_item' => $item->id,
                                                         ]) }}"
-                                                        style="display:inline">
+                                                        style="display:inline" class="delete-form">
                                             @endif
 
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="button" onclick="deleteMenuItem({{ $item->id }})"
-                                                class="btn btn-sm btn-danger">
+                                            <button type="submit" class="btn btn-sm btn-danger">
 
                                                 <i class="fas fa-trash"></i>
 
@@ -186,24 +181,48 @@
             </div>
         </div>
     </section>
-    <script>
-        function deleteMenuItem(id) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This menu item will be deactivated.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
 
-                if (result.isConfirmed) {
-                    document.getElementById(
-                        'delete-form-' + id
-                    ).submit();
-                }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Category?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
 
             });
-        }
+
+        });
     </script>
 @endsection

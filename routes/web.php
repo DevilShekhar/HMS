@@ -115,6 +115,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('{restaurant}/orders/{order}/prepare', [OrderController::class, 'markPreparing'])
     ->name('restaurant.orders.prepare');
+Route::post('{restaurant}/orders/{order}/completed', [OrderController::class, 'markCompleted'])
+    ->name('restaurant.orders.completed');
 
 
 Route::prefix('{restaurant}')
@@ -221,7 +223,7 @@ Route::prefix('{restaurant}')
                     'update'  => 'branch.orders.update',
                     'destroy' => 'branch.orders.destroy',
                 ]);
-                Route::get('orders/tables/{categoryId}',[OrderController::class, 'getTables'])->name('branch.orders.tables');
+                Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTables'])->name('branch.orders.tables');
                 Route::resource('users', UserController::class)->names([
                     'index'   => 'branch.users.index',
                     'create'  => 'branch.users.create',
@@ -341,7 +343,7 @@ Route::prefix('{restaurant}')
                 '{branch}/inventory/{inventory}/edit',
                 [InventoryController::class, 'edit']
             )->name('branch.inventory.edit');
-            Route::post('/logout', function (){
+            Route::post('/logout', function () {
 
                 $user = Auth::user();
 

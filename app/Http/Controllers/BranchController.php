@@ -193,7 +193,7 @@ class BranchController extends Controller
             'fssai_license'     => 'nullable|max:100',
             'opening_time'      => 'nullable',
             'closing_time'      => 'nullable',
-            'is_active'         => 'required'
+            'is_active'         => 'nullable'
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);

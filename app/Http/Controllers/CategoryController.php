@@ -247,9 +247,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function destroy($restaurant, $branch, Category $category)
-
-    {
+public function destroy($restaurant, Category $category)    {
         if (
             $category->image &&
             Storage::disk('public')->exists(
@@ -261,14 +259,16 @@ class CategoryController extends Controller
                 ->delete($category->image);
         }
 
-        $category->delete($category);
+        $category->update([
+            'is_active' => 0
+        ]);
 
         // SUPER ADMIN
-        if (auth()->user()->role === 'super_admin') {
+        if (Auth::user()->role === 'super_admin') {
 
             return redirect()
                 ->route('categories.index')
-                ->with('success', 'Category deleted successfully.');
+                ->with('success', 'Category deavtivated successfully.');
         }
 
 
@@ -284,7 +284,7 @@ class CategoryController extends Controller
                     'restaurant' => $restaurantSlug,
                     'branch' => $branchSlug,
                 ])
-                ->with('success', 'Category deleted successfully.');
+                ->with('success', 'Category deavtivated successfully.');
         }
 
 
@@ -293,6 +293,6 @@ class CategoryController extends Controller
             ->route('restaurant.categories.index', [
                 'restaurant' => $restaurantSlug,
             ])
-            ->with('success', 'Category deleted successfully.');
+            ->with('success', 'Category deavtivated successfully.');
     }
 }

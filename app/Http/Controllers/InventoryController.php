@@ -207,10 +207,14 @@ class InventoryController extends Controller
     public function destroy($restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
-        $inventory->delete();
+
+        $inventory->update([
+            'is_active' => 0
+        ]);
+
         return back()->with(
             'success',
-            'Inventory Deleted Successfully'
+            'Inventory Deactivated Successfully'
         );
     }
     public function stockInForm($restaurant, $inventory)

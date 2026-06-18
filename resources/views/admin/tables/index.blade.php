@@ -61,6 +61,7 @@
                                 <th>Category</th>
                                 <th>Branch</th>
                                 <th>Capacity</th>
+                                <th>Status</th>
                                 <th width="180">Action</th>
                             </tr>
                         </thead>
@@ -81,6 +82,13 @@
                                     </td>
                                     <td>
                                         {{ $table->capacity }}
+                                    </td>
+                                    <td>
+                                        @if ($table->status == 1)
+                                            <span class="badge bg-success">Active</span>
+                                        @else
+                                            <span class="badge bg-danger">Inactive</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
@@ -126,20 +134,20 @@
                                                         'branch' => $branchSlug,
                                                         'table' => $table->id,
                                                     ]) }}"
-                                                    method="POST" onsubmit="return confirm('Delete this table?')">
+                                                    method="POST" class="delete-form">
                                                 @elseif(!empty($restaurantSlug))
                                                     <form
                                                         action="{{ route('restaurant.tables.destroy', [
                                                             'restaurant' => $restaurantSlug,
                                                             'table' => $table->id,
                                                         ]) }}"
-                                                        method="POST" onsubmit="return confirm('Delete this table?')">
+                                                        method="POST" class="delete-form">
                                                     @else
                                                         <form
                                                             action="{{ route('tables.destroy', [
                                                                 'table' => $table->id,
                                                             ]) }}"
-                                                            method="POST" onsubmit="return confirm('Delete this table?')">
+                                                            method="POST" class="delete-form">
                                             @endif
 
                                             @csrf
@@ -170,4 +178,48 @@
             </div>
         </div>
     </section>
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Category?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
+        });
+    </script>
 @endsection
