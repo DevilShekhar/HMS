@@ -10,8 +10,7 @@
                 </div>
                 <div class="premium-head-actions">
                     @if (auth()->user()->role == 'super_admin')
-                        <a href="{{ route('branches.create') }}"
-                           class="btn premium-btn">
+                        <a href="{{ route('branches.create') }}" class="btn premium-btn">
                             <i class="fas fa-plus"></i>
                             Add Branch
                         </a>
@@ -81,8 +80,9 @@
                                         <td>{{ $branch->phone }}</td>
                                         <td>{{ $branch->city }}</td>
                                         <td>
-                                            @if($branch->qrcode)
-                                                <img src="{{ asset($branch->qrcode) }}" width="60" height="60" alt="QR Code">
+                                            @if ($branch->qrcode)
+                                                <img src="{{ asset($branch->qrcode) }}" width="60" height="60"
+                                                    alt="QR Code">
                                             @else
                                                 <span class="badge bg-secondary">No QR</span>
                                             @endif
@@ -99,20 +99,23 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="d-flex gap-1">
+                                            <div class="d-flex align-items-center flex-nowrap gap-1">
                                                 @if (auth()->user()->role == 'super_admin')
                                                     <a href="{{ route('branches.show', $branch->id) }}"
                                                         class="btn btn-info btn-sm">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+
                                                     <a href="{{ route('branches.edit', $branch->id) }}"
                                                         class="btn btn-warning btn-sm">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+
                                                     <form action="{{ route('branches.destroy', $branch->id) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure?')">
+                                                        class="delete-form m-0 p-0">
                                                         @csrf
                                                         @method('DELETE')
+
                                                         <button type="submit" class="btn btn-danger btn-sm">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
@@ -122,9 +125,10 @@
                                                         'restaurant' => request()->route('restaurant'),
                                                         'branch' => $branch->id,
                                                     ]) }}"
-                                                        class="btn btn-info btn-sm ">
+                                                        class="btn btn-info btn-sm">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+
                                                     <button type="button" class="btn btn-primary btn-sm assign-manager-btn"
                                                         data-toggle="modal" data-target="#assignManagerModal"
                                                         data-url="{{ route('restaurant.branches.assign-manager', [
@@ -133,7 +137,10 @@
                                                         ]) }}">
                                                         <i class="fas fa-user-tie"></i>
                                                     </button>
-                                                    <button type="button"class="btn btn-success btn-sm upload-qrcode-btn" data-toggle="modal" data-target="#uploadQrModal"  data-id="{{ $branch->id }}">
+
+                                                    <button type="button" class="btn btn-success btn-sm upload-qrcode-btn"
+                                                        data-toggle="modal" data-target="#uploadQrModal"
+                                                        data-id="{{ $branch->id }}">
                                                         <i class="fas fa-qrcode"></i>
                                                     </button>
                                                 @endif
@@ -158,40 +165,42 @@
                 @endif
             </div>
         </section>
-         @if (auth()->user()->role == 'owner')
-        <div class="modal fade" id="uploadQrModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
+        @if (auth()->user()->role == 'owner')
+            <div class="modal fade" id="uploadQrModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
 
-                    <form id="uploadQrForm"  method="POST" action="{{ route('branches.upload-qrcode', ['restaurant' => request()->route('restaurant')]) }}" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="branch_id" id="branch_id">
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                Upload QR Code
-                            </h5>
-                            <button type="button"  class="close" data-dismiss="modal">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group">
-                                <label>QR Code Image</label>
-                                <input type="file" name="qrcode" class="form-control" accept="image/*" required>
+                        <form id="uploadQrForm" method="POST"
+                            action="{{ route('branches.upload-qrcode', ['restaurant' => request()->route('restaurant')]) }}"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="branch_id" id="branch_id">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    Upload QR Code
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                Close
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                Upload
-                            </button>
-                        </div>
-                    </form>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>QR Code Image</label>
+                                    <input type="file" name="qrcode" class="form-control" accept="image/*" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                    Close
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    Upload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
             <div class="modal fade" id="assignManagerModal" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -241,9 +250,9 @@
         @endif
         @push('scripts')
             <script>
-                $(document).ready(function () {
+                $(document).ready(function() {
 
-                    $('.upload-qrcode-btn').click(function () {
+                    $('.upload-qrcode-btn').click(function() {
 
                         let branchId = $(this).data('id');
 
@@ -256,6 +265,50 @@
             </script>
         @endpush
     @endsection
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Branch?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
+        });
+    </script>
 @else
     @php
         abort(403);

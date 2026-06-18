@@ -64,6 +64,7 @@
                                 <th width="60">#</th>
                                 <th>Category Name</th>
                                 <th>Branch</th>
+                                <th>Status</th>
                                 <th>Created By</th>
                                 <th>Created Date</th>
                                 <th width="180">Action</th>
@@ -80,6 +81,13 @@
                                     </td>
                                     <td>
                                         {{ optional($category->branch)->name ?? '-' }}
+                                    </td>
+                                    <td>
+                                        @if ($category->status == 1)
+                                            <span class="badge bg-success">Active</span>
+                                        @else
+                                            <span class="badge bg-danger">Inactive</span>
+                                        @endif
                                     </td>
                                     <td>
                                         {{ optional($category->creator)->name ?? '-' }}
@@ -129,8 +137,7 @@
                                                     action="{{ route('table-categories.destroy', [
                                                         'table_category' => $category->id,
                                                     ]) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                                    method="POST" class="delete-form">
                                                 @elseif(!empty($restaurantSlug) && !empty($branchSlug))
                                                     <form
                                                         action="{{ route('branch.table-categories.destroy', [
@@ -138,16 +145,14 @@
                                                             'branch' => $branchSlug,
                                                             'table_category' => $category->id,
                                                         ]) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                                        method="POST" class="delete-form">
                                                     @elseif(!empty($restaurantSlug))
                                                         <form
                                                             action="{{ route('restaurant.table-categories.destroy', [
                                                                 'restaurant' => $restaurantSlug,
                                                                 'table_category' => $category->id,
                                                             ]) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this table category?')">
+                                                            method="POST" class="delete-form">
                                             @endif
 
                                             @csrf
@@ -182,4 +187,48 @@
             </div>
         </div>
     </section>
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Category?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
+        });
+    </script>
 @endsection

@@ -11,6 +11,7 @@ class RestaurantTable extends Model
         'branch_id',
         'table_number',
         'capacity',
+        'status',
         'created_by',
         'updated_by'
     ];

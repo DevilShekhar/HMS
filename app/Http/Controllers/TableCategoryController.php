@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TableCategory;
 use App\Models\Branch;
+use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,101 +29,103 @@ class TableCategoryController extends Controller
     }
 
     public function create()
-    {
-        if (!Auth::user()) {
-            abort(403);
-        }
+{
+    $user = Auth::user();
 
-        $user = Auth::user();
+    if ($user->branch_id) {
 
-        // Branch users
-        if ($user->branch_id) {
+        $branch = Branch::findOrFail($user->branch_id);
 
-            $branch = Branch::query()->find($user->branch_id);
-
-            return view(
-                'admin.table_categories.create',
-                compact('branch')
-            );
-        }
-
-        // Restaurant users
-        $branches = Branch::query()->where(
-            'restaurant_id',
-            app('restaurant')->id
-        )->where('is_active', 1)->get();
-
-        return view(
-            'admin.table_categories.create',
-            compact('branches')
-        );
+        return view('admin.table_categories.create', compact('branch'));
     }
+
+
+    // Restaurant owner
+    $branches = Branch::query()->where('restaurant_id', app('restaurant')->id)
+        ->where('is_active', 1)
+        ->get();
+
+    return view('admin.table_categories.create', compact('branches'));
+}
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+
         $request->validate([
             'name' => 'required|max:255',
-            'branch_id' => Auth::user()->branch_id ? 'required' : 'nullable',
+            'branch_id' => 'required',
         ]);
+
 
         TableCategory::create([
             'restaurant_id' => app('restaurant')->id,
-            'branch_id' => $request->branch_id ?? null,
-            'name' => $request->name,
-            'created_by' => Auth::id(),
-            'updated_by' => Auth::id(),
+            'branch_id'     => $request->branch_id,
+            'name'          => $request->name,
+            'created_by'    => Auth::id(),
+            'updated_by'    => Auth::id(),
         ]);
 
-        if (Auth::user()->branch_id) {
+
+        if ($user->branch_id) {
 
             return redirect()
                 ->route('branch.table-categories.index', [
                     'restaurant' => request()->route('restaurant'),
-                    'branch'     => Auth::user()->branch->slug,
-                ])
-                ->with('success', 'Table Category created successfully.');
-        } else {
-
-            return redirect()
-                ->route('restaurant.table-categories.index', [
-                    'restaurant' => request()->route('restaurant'),
+                    'branch'     => $user->branch->slug,
                 ])
                 ->with('success', 'Table Category created successfully.');
         }
+
+
+        return redirect()
+            ->route('restaurant.table-categories.index', [
+                'restaurant' => request()->route('restaurant'),
+            ])
+            ->with('success', 'Table Category created successfully.');
     }
 
-    public function edit($restaurant, $branch, TableCategory $tableCategory)
+    public function edit($restaurant, $branch = null, $tableCategory = null)
     {
-        $user = Auth::user();
-
-        $branchModel = Branch::query()->where('slug', $branch)
-            ->firstOrFail();
-
-
-        if ($user->role == 'branch_manager') {
-
-            if ($branchModel->branch_manager_id != $user->id) {
-                abort(403);
-            }
+        if ($tableCategory === null && $branch !== null) {
+            $tableCategory = $branch;
         }
 
 
-        if ($tableCategory->branch_id != $branchModel->id) {
-            abort(403);
+        if (!$tableCategory instanceof TableCategory) {
+
+            $tableCategory = TableCategory::findOrFail($tableCategory);
         }
+
+
+        $branchModel = Branch::query()->find($tableCategory->branch_id);
 
 
         return view('admin.table_categories.edit', [
             'tableCategory' => $tableCategory,
-            'branch' => $branchModel
+            'branches'      => collect([$branchModel]),
+            'branch'        => $branchModel,
         ]);
     }
-    public function update(Request $request, $restaurant, TableCategory $tableCategory)
+    public function update(Request $request, $restaurant, $branch = null, $tableCategory = null)
     {
+
+        if ($tableCategory === null) {
+            $tableCategory = $branch;
+        }
+
+
+        if (!$tableCategory instanceof TableCategory) {
+            $tableCategory = TableCategory::findOrFail($tableCategory);
+        }
+
+
         $request->validate([
             'branch_id' => 'required',
             'name'      => 'required|max:255',
         ]);
+
 
         $tableCategory->update([
             'branch_id'  => $request->branch_id,
@@ -131,7 +134,6 @@ class TableCategoryController extends Controller
         ]);
 
 
-        // Branch Manager redirect
         if (Auth::user()->branch_id) {
 
             return redirect()
@@ -143,7 +145,7 @@ class TableCategoryController extends Controller
         }
 
 
-        // Owner redirect
+        // Restaurant owner
         return redirect()
             ->route('restaurant.table-categories.index', [
                 'restaurant' => $restaurant,
@@ -151,31 +153,34 @@ class TableCategoryController extends Controller
             ->with('success', 'Updated successfully.');
     }
 
-    public function destroy($restaurant, $branch, TableCategory $tableCategory,$id)
+    public function destroy($restaurant, $branch = null, TableCategory $tableCategory = null)
     {
+        // Handle route model binding issue
+        if ($tableCategory === null && $branch instanceof TableCategory) {
+            $tableCategory = $branch;
+            $branch = null;
+        }
+
         $user = Auth::user();
 
+        // Branch manager permission check
         if ($user->role == 'branch_manager') {
 
-            $branchModel = Branch::query()->where('slug', $branch)
-                ->where('branch_manager_id', $user->id)
-                ->firstOrFail();
+            $branchModel = Branch::findOrFail($tableCategory->branch_id);
 
-
-            if ($tableCategory->branch_id != $branchModel->id) {
+            if ($branchModel->branch_manager_id != $user->id) {
                 abort(403);
             }
         }
 
-
-        $tableCategory->delete($id);
-
+        // Soft delete
+        $tableCategory->update([
+            'status' => 0,
+            'updated_by' => Auth::id(),
+        ]);
 
         return redirect()
-            ->route('branch.table-categories.index', [
-                'restaurant' => $restaurant,
-                'branch'     => $branch,
-            ])
-            ->with('success', 'Deleted successfully.');
+            ->back()
+            ->with('success', 'Table Category Deactivated successfully.');
     }
 }

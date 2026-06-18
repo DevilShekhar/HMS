@@ -60,6 +60,7 @@
                                                             <span class="badge badge-danger">Inactive</span>
                                                         @endif
                                                     </td>
+                                                    @if($restaurant->status == 1)
                                                     <td>
                                                         <div class="d-flex">
                                                             <a href="{{ route('restaurants.edit', $restaurant->id) }}"
@@ -76,6 +77,7 @@
                                                             </form>
                                                         </div>
                                                     </td>
+                                                    @endif
                                                 </tr>
                                             @empty
                                                 <tr>

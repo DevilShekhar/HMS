@@ -28,6 +28,8 @@ class NewOrderAssignedNotification extends Notification
             'order_id'      => $this->order->id,
             'token_no'      => $this->order->token_no,
             'customer_name' => $this->order->customer_name,
+            'restaurant_slug' => $this->order->restaurant->slug,
+            'branch_slug'     => $this->order->branch?->slug,
             'message'       => 'New Order Assigned',
         ];
     }

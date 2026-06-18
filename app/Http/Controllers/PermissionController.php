@@ -16,7 +16,7 @@ class PermissionController extends Controller
             abort(403);
         }
         $permissions = Permission::with('roles')->latest()->get();
-        $roles = Role::all();
+        $roles = Role::query()->get();
 
         return view('admin.permissions.index', compact(
             'permissions',
@@ -43,11 +43,12 @@ class PermissionController extends Controller
         $permission = Permission::create([
             'name' => $request->name,
             'guard_name' => 'web',
+            'status' => 1,
         ]);
 
 
 
-         return redirect()->route('permissions.index')
+        return redirect()->route('permissions.index')
             ->with('success', 'Permission Created successfully');
     }
 
@@ -83,7 +84,7 @@ class PermissionController extends Controller
             'guard_name' => 'web',
         ]);
 
-         return redirect()->route('permissions.index')
+        return redirect()->route('permissions.index')
             ->with('success', 'Permisison Updated successfully');
     }
 
@@ -93,7 +94,9 @@ class PermissionController extends Controller
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permission->delete();
+        $permission->update([
+            'status' => 0
+        ]);
 
         return back()->with('success', 'Permission deleted successfully');
     }

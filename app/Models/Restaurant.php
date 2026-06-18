@@ -8,7 +8,8 @@ class Restaurant extends Model
 {
     protected $fillable = [
         'name',
-        'slug'
+        'slug',
+        'status'
     ];
 
     public function users()

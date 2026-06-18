@@ -135,6 +135,27 @@
                                     @enderror
                                 </div>
                             @endif
+                            <!-- Branch Selection with Search -->
+                            @if (auth()->user()->role == 'super_admin' || auth()->user()->role == 'owner')
+                                <div class="col-md-6 mb-4">
+                                    <label>Branch <span class="text-danger">*</span></label>
+                                    <select name="branch_id" id="branch_id" class="form-control premium-input" required>
+                                        <option value="">Select Branch</option>
+                                        @foreach ($branches as $branch)
+                                            <option value="{{ $branch->id }}"
+                                                {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                                {{ $branch->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('branch_id')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @else
+                                <!-- Auto assign for Branch Manager -->
+                                <input type="hidden" name="branch_id" value="{{ auth()->user()->branch_id ?? '' }}">
+                            @endif
                             <div class="col-md-6 mb-4">
                                 <label>Status</label>
                                 <select name="status" class="form-control premium-input">
@@ -199,4 +220,17 @@
         </div>
         </form>
     </section>
+
+
+    @push('scripts')
+        <script>
+            $(document).ready(function() {
+                $('#branch_id').select2({
+                    placeholder: "Select and search branch",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        </script>
+    @endpush
 @endsection

@@ -43,7 +43,16 @@
     </section>
     <section class="section premium-dashboard pt-0">
         <form
-            action="{{ route('restaurant.table-categories.update', ['restaurant' => request()->route('restaurant'), 'table_category' => $tableCategory->id]) }}"
+            action="{{ request()->route('branch')
+                ? route('branch.table-categories.update', [
+                    'restaurant' => request()->route('restaurant'),
+                    'branch' => request()->route('branch'),
+                    'table_category' => $tableCategory->id,
+                ])
+                : route('restaurant.table-categories.update', [
+                    'restaurant' => request()->route('restaurant'),
+                    'table_category' => $tableCategory->id,
+                ]) }}"
             method="POST">
             @csrf
             @method('PUT')
@@ -83,16 +92,22 @@
                                         @enderror
                                     </div>
                                 @endif
-                                @if (auth()->user()->role == 'branch_manager')
-                                    <input type="hidden" name="branch_id" value="{{ $branch->id }}">
-                                    <div class="col-md-6 mb-4">
-                                        <label class="form-label">
-                                            Branch
-                                        </label>
-                                        <input type="text" class="form-control premium-input" value="{{ $branch->name }}"
-                                            readonly>
-                                    </div>
-                                @endif
+                                @if(request()->route('branch'))
+    <input type="hidden"
+           name="branch_id"
+           value="{{ $branch->id }}">
+
+    <div class="col-md-6 mb-4">
+        <label class="form-label">
+            Branch
+        </label>
+
+        <input type="text"
+               class="form-control premium-input"
+               value="{{ $branch->name }}"
+               readonly>
+    </div>
+@endif
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label">
                                         Table Category Name

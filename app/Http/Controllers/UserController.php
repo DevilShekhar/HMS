@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use App\Models\User;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
@@ -26,31 +27,26 @@ class UserController extends Controller
         } elseif ($authUser->role === 'owner') {
 
             $query->where('restaurant_id', $authUser->restaurant_id)
-                ->whereIn('role', [
-                    'branch_manager',
-                    'waiter_head',
-                    'waiter',
-                    'chef'
-                ]);
+                ->where('role', '!=', 'super_admin');
         } elseif ($authUser->role === 'branch_manager') {
 
             $query->where('restaurant_id', $authUser->restaurant_id)
                 ->where('branch_id', $authUser->branch_id)
-                ->whereIn('role', [
-                    'waiter_head',
-                    'waiter',
-                    'cashier',
-                    'chef'
-                ]);
+                ->where('role', '!=', 'super_admin');
         } else {
+
             $query->whereRaw('1 = 0', [], 'and');
         }
+
 
         $users = $query->latest()->paginate(20);
 
         $restaurantSlug = $request->route('restaurant');
 
-        return view('admin.users.index', compact('users', 'restaurantSlug'));
+        return view('admin.users.index', compact(
+            'users',
+            'restaurantSlug'
+        ));
     }
 
     /**
@@ -82,9 +78,19 @@ class UserController extends Controller
                 break;
         }
         $restaurants = Restaurant::query()->where('status', 1)->get();
+        $branches = [];
+
+        // Owner can select any branch of his restaurant
+        if (Auth::user()->role === 'owner') {
+
+            $branches = Branch::query()->where(
+                'restaurant_id',
+                Auth::user()->restaurant_id
+            )->get();
+        }
         return view(
             'admin.users.create',
-            compact('roles', 'restaurants', 'restaurant')
+            compact('roles', 'restaurants', 'restaurant', 'branches')
         );
     }
     /**
@@ -101,6 +107,9 @@ class UserController extends Controller
             'address'       => 'required',
             'role'          => 'required',
             'password'      => 'required|min:6|confirmed',
+            'branch_id'     => Auth::user()->role === 'owner'
+                ? 'required|exists:branches,id'
+                : 'nullable',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -129,8 +138,11 @@ class UserController extends Controller
             'address'       => $validated['address'],
             'role'          => $validated['role'],
             'profile_photo' => $profilePhoto,
-            'restaurant_id' => Auth::user()?->restaurant_id,
-            'branch_id'     => Auth::user()?->branch_id,
+            'restaurant_id' => Auth::user()->restaurant_id,
+
+            'branch_id' => Auth::user()->role === 'owner'
+                ? $validated['branch_id']
+                : Auth::user()->branch_id,
             'status'        => 'active',
             'password'      => Hash::make($validated['password']),
             'created_by'    => Auth::id(),

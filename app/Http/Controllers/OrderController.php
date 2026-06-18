@@ -66,23 +66,27 @@ class OrderController extends Controller
             )
         );
     }
-
-
-
     public function create()
     {
         $restaurant = app('restaurant');
 
         $branchId = Auth::user()->branch_id;
-        $categories = Category::query()->where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
 
-        $tableCategories = TableCategory::query()->where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
-        return view('admin.orders.create', compact('restaurant', 'categories', 'tableCategories'));
         $branch = Branch::findOrFail($branchId);
-        $categories = Category::where('restaurant_id', $restaurant->id)->where('is_active', 1)->orderBy('name')->get();
 
-        $tableCategories = TableCategory::where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->get();
-        return view('admin.orders.create',compact('restaurant','branch','categories','tableCategories'));
+        $categories = Category::query()->where('restaurant_id', $restaurant->id)
+            ->where('is_active', 1)
+            ->orderBy('name')
+            ->get();
+
+        $tableCategories = TableCategory::query()->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $branchId)
+            ->get();
+
+        return view(
+            'admin.orders.create',
+            compact('restaurant', 'branch', 'categories', 'tableCategories')
+        );
     }
 
     public function menuByCategory($restaurant, $categoryId)
@@ -102,7 +106,7 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
         $branchId = Auth::user()->branch_id;
-        $tables = RestaurantTable::where('restaurant_id',$restaurant->id)->where('branch_id',$branchId)->where('cat_id',$categoryId)->select('id','table_number')->get();
+        $tables = RestaurantTable::query()->where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->where('cat_id', $categoryId)->select('id', 'table_number')->get();
         return response()->json($tables);
     }
     public function store(Request $request)
@@ -245,16 +249,23 @@ class OrderController extends Controller
         return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
     }
 
-    public function show($restaurant, $branch = null, $order)
+    public function show($restaurant, $branch = null, $order = null)
     {
-        $restaurant = app('restaurant');
 
+        if ($order === null && is_numeric($branch)) {
+            $order = $branch;
+            $branch = null;
+        }
+
+        $restaurant = app('restaurant');
 
         $order = Order::with([
             'branch',
             'items.menuItem',
             'creator'
-        ])->findOrFail($order);
+        ])
+            ->where('restaurant_id', $restaurant->id)
+            ->findOrFail($order);
 
         return view(
             'admin.orders.show',
@@ -264,7 +275,6 @@ class OrderController extends Controller
             )
         );
     }
-
 
     public function edit($restaurant, $branch = null, $order)
     {
@@ -377,7 +387,6 @@ class OrderController extends Controller
         }
 
 
-        // Any branch user (branch_manager, waiter_head, waiter, chef, etc.)
         if ($user->branch_id) {
 
             return redirect()
@@ -389,7 +398,6 @@ class OrderController extends Controller
         }
 
 
-        // Restaurant level user (owner, restaurant staff)
         if ($user->restaurant_id) {
 
             return redirect()
@@ -482,6 +490,17 @@ class OrderController extends Controller
 
         return back()->with('success', 'Order moved to Preparing');
     }
+    public function markCompleted($restaurant, $order)
+    {
+        $order = Order::findOrFail($order);
+
+        if ($order->status === 'preparing') {
+            $order->status = 'completed';
+            $order->save();
+        }
+
+        return back()->with('success', 'Order Mark As Completed');
+    }
     public function getTablesByCategory($restaurant, $categoryId)
     {
         $restaurant = app('restaurant');
@@ -493,5 +512,4 @@ class OrderController extends Controller
             ->get();
         return response()->json($tables);
     }
- 
 }

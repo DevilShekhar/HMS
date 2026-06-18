@@ -56,10 +56,14 @@ class RestaurantController extends Controller
 
     public function destroy($id)
     {
-        Restaurant::findOrFail($id)->delete();
+        $restaurant = Restaurant::findOrFail($id);
+
+        $restaurant->update([
+            'status' => 0
+        ]);
 
         return redirect()
             ->route('restaurants.index')
-            ->with('success', 'Restaurant deleted successfully');
+            ->with('success', 'Restaurant deactivated successfully');
     }
 }

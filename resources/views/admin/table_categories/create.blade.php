@@ -77,7 +77,7 @@
                                         @enderror
                                     </div>
                                 @endif
-                                @if (auth()->user()->role == 'branch_manager')
+                                @if (isset($branch))
                                     <input type="hidden" name="branch_id" value="{{ $branch->id }}">
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">Branch</label>

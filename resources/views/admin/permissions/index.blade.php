@@ -40,6 +40,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Permission</th>
+                                                <th>Status</th>
                                                 <th width="200">Action</th>
                                             </tr>
                                         </thead>
@@ -51,6 +52,13 @@
 
                                                     <td>
                                                         <strong>{{ $permission->name }}</strong>
+                                                    </td>
+                                                    <td>
+                                                        @if ($permission->status == 1)
+                                                            <span class="badge bg-success">Active</span>
+                                                        @else
+                                                            <span class="badge bg-danger">Inactive</span>
+                                                        @endif
                                                     </td>
 
                                                     <td>

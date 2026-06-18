@@ -21,7 +21,6 @@ class MenuItemController extends Controller
         if (Auth::user()->role == 'owner') {
             $menuItems = MenuItem::with(['branch', 'category'])
                 ->where('restaurant_id', $restaurant->id)
-                ->where('is_active', 1)
                 ->latest()
                 ->get();
         } else {
@@ -379,19 +378,31 @@ class MenuItemController extends Controller
      */
     public function destroy($restaurant, $branch = null, $menu_item = null)
     {
+        // Restaurant level route
+        if ($menu_item === null) {
+            $menu_item = $branch;
+            $branch = null;
+        }
+
         $menuItem = MenuItem::findOrFail($menu_item);
 
         $menuItem->update([
             'is_active' => 0
         ]);
 
+        if ($branch) {
+            return redirect()
+                ->route('branch.menu-items.index', [
+                    'restaurant' => $restaurant,
+                    'branch' => $branch,
+                ])
+                ->with('success', 'Menu Item Deactivated Successfully');
+        }
+
         return redirect()
             ->route('restaurant.menu-items.index', [
                 'restaurant' => $restaurant
             ])
-            ->with(
-                'success',
-                'Menu Item Deleted Successfully'
-            );
+            ->with('success', 'Menu Item Deactivated Successfully');
     }
 }
