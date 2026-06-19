@@ -73,7 +73,6 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'is_active' => 'nullable'
         ]);
 
@@ -93,33 +92,12 @@ class CategoryController extends Controller
                 ->value('id');
         }
 
-        $image = null;
-
-        if ($request->hasFile('image')) {
-
-            $file = $request->file('image');
-
-            $filename = time() . '_' . $file->getClientOriginalName();
-
-            if (!file_exists(public_path('uploads/categories'))) {
-                mkdir(public_path('uploads/categories'), 0777, true);
-            }
-
-            $file->move(
-                public_path('uploads/categories'),
-                $filename
-            );
-
-            $image = 'uploads/categories/' . $filename;
-        }
-
         Category::create([
             'restaurant_id' => $user->restaurant_id,
             'branch_id'     => $branchId,
             'created_by'    => $user->id,
             'name'          => $request->name,
             'description'   => $request->description,
-            'image'         => $image,
             'is_active'     => $request->is_active ?? 1,
         ]);
 
@@ -183,7 +161,6 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
         $data = [
             'name' => $request->name,
@@ -195,25 +172,6 @@ class CategoryController extends Controller
             $request->filled('branch_id')
         ) {
             $data['branch_id'] = $request->branch_id;
-        }
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if (
-                $category->image &&
-                file_exists(public_path($category->image))
-            ) {
-                unlink(public_path($category->image));
-            }
-            $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if (!file_exists(public_path('uploads/categories'))) {
-                mkdir(public_path('uploads/categories'), 0777, true);
-            }
-            $file->move(
-                public_path('uploads/categories'),
-                $filename
-            );
-            $data['image'] = 'uploads/categories/' . $filename;
         }
         $category->update($data);
         if (Auth::user()->role === 'super_admin') {
@@ -248,17 +206,6 @@ class CategoryController extends Controller
     }
 
 public function destroy($restaurant, Category $category)    {
-        if (
-            $category->image &&
-            Storage::disk('public')->exists(
-                $category->image
-            )
-        ) {
-
-            Storage::disk('public')
-                ->delete($category->image);
-        }
-
         $category->update([
             'is_active' => 0
         ]);

@@ -24,8 +24,9 @@ class Order extends Model
         'tax',
         'total',
         'restaurant_id',
-        'branch_id'
+        'branch_id', 'payment_method',
     ];
+
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
@@ -38,13 +39,14 @@ class Order extends Model
 
     public function customer()
     {
-        return $this->belongsTo(User::class,'customer_id');
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
+
     public function creator()
     {
         return $this->belongsTo(
@@ -52,11 +54,17 @@ class Order extends Model
             'created_by'
         );
     }
+
     public function chef()
     {
         return $this->belongsTo(
             User::class,
             'chef_id'
         );
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(RestaurantTable::class, 'table_no', 'table_number');
     }
 }

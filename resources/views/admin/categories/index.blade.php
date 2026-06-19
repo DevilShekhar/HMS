@@ -62,7 +62,6 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Image</th>
                                 <th>Category</th>
                                 <th>Branch</th>
                                 <th>Created By</th>
@@ -75,16 +74,6 @@
                                 <tr>
                                     <td>
                                         {{ $loop->iteration + ($categories->currentPage() - 1) * $categories->perPage() }}
-                                    </td>
-                                    <td>
-                                        @if ($category->image)
-                                            <img src="{{ asset($category->image) }}" width="50" height="50"
-                                                class="rounded">
-                                        @else
-                                            <span class="badge bg-secondary">
-                                                No Image
-                                            </span>
-                                        @endif
                                     </td>
                                     <td>
                                         <strong>

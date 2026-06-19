@@ -12,7 +12,6 @@ class Category extends Model
         'created_by',
         'name',
         'description',
-        'image',
         'is_active',
     ];
 

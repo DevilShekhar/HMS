@@ -103,13 +103,6 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-4">
-                                <label>Category Image</label>
-                                <input type="file"name="image" class="form-control premium-input">
-                                @error('image')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-4">
                                 <label>Status</label>
                                 <select name="is_active" class="form-control premium-input">
                                     <option value="1">Active</option>

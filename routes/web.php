@@ -117,7 +117,21 @@ Route::post('{restaurant}/orders/{order}/prepare', [OrderController::class, 'mar
     ->name('restaurant.orders.prepare');
 Route::post('{restaurant}/orders/{order}/completed', [OrderController::class, 'markCompleted'])
     ->name('restaurant.orders.completed');
+Route::post('{restaurant}/orders/{order}/delivered', [OrderController::class, 'markDelivered'])
+    ->name('restaurant.orders.delivered');
 
+Route::get('{restaurant}/orders/status/{status}', [OrderController::class, 'statusOrders'])
+    ->name('restaurant.orders.statusorder');
+Route::post('{restaurant}/orders/payment', [OrderController::class, 'makePayment'])->name('restaurant.orders.payment');
+
+Route::post('{restaurant}/{branch}/orders/payment', [OrderController::class, 'makePayment'])->name('branch.orders.payment');
+Route::get('/notifications', function () {
+
+    return Auth::user()
+        ->unreadNotifications()
+        ->where('data->type', 'order-status-notification')
+        ->get();
+})->name('notifications.index');
 
 Route::prefix('{restaurant}')
     ->where(['restaurant' => '[a-zA-Z0-9\-]+'])
@@ -137,7 +151,7 @@ Route::prefix('{restaurant}')
                 'restaurant' => $restaurant->slug
             ]);
         });
-
+        Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTablesByCategory'])->name('restaurant.orders.tables');
         Route::get('/login', [LoginController::class, 'showRestaurantLogin'])
             ->name('restaurant.login');
 

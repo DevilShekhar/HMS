@@ -16,24 +16,24 @@
                 <div class="premium-head-actions">
 
                     @can('create-order')
-                    @if ($branchSlug)
-                        <a href="{{ route('branch.orders.create', [
-                            'restaurant' => $restaurantSlug,
-                            'branch' => $branchSlug,
-                        ]) }}"
-                            class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Create Order
-                        </a>
-                    @else
-                        <a href="{{ route('restaurant.orders.create', [
-                            'restaurant' => $restaurantSlug,
-                        ]) }}"
-                            class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Create Order
-                        </a>
-                    @endif
+                        @if ($branchSlug)
+                            <a href="{{ route('branch.orders.create', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}"
+                                class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Create Order
+                            </a>
+                        @else
+                            <a href="{{ route('restaurant.orders.create', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}"
+                                class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Create Order
+                            </a>
+                        @endif
                     @endcan
                 </div>
             </div>
@@ -63,10 +63,12 @@
                                     <th>Customer</th>
                                     <th>Mobile</th>
                                     <th>Table No</th>
+                                    <th>Table Category</th>
                                     <th>Order Type</th>
                                     <th>Status</th>
+                                    <th>Payment Method</th>
                                     <th>Total</th>
-                                    <th>assign</th>
+                                    <th>Assign</th>
                                     <th width="180">
                                         Action
                                     </th>
@@ -95,6 +97,10 @@
                                             {{ $order->table_no ?? '-' }}
                                         </td>
                                         <td>
+                                                {{ $order->table?->category?->name ?? '-' }}
+
+                                        </td>
+                                        <td>
                                             @if ($order->order_type == 'vip')
                                                 <span class="badge bg-warning text-dark">
                                                     VIP
@@ -105,18 +111,22 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td class="text-white">
                                             @if ($order->status == 'pending')
                                                 <span class="badge bg-warning text-dark">
                                                     Pending
                                                 </span>
-                                            @elseif($order->status == 'preparing')
+                                            @elseif($order->status == 'prepared')
                                                 <span class="badge bg-info">
-                                                    Preparing
+                                                    Prepared
                                                 </span>
                                             @elseif($order->status == 'completed')
                                                 <span class="badge bg-success">
                                                     Completed
+                                                </span>
+                                            @elseif($order->status == 'delivered')
+                                                <span class="badge bg-primary">
+                                                    Delivered
                                                 </span>
                                             @elseif($order->status == 'cancelled')
                                                 <span class="badge bg-danger">
@@ -126,6 +136,13 @@
                                                 <span class="badge bg-secondary">
                                                     {{ ucfirst($order->status) }}
                                                 </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($order->status == 'completed')
+                                                {{ strtoupper($order->payment_method ?? 'N/A') }}
+                                            @else
+                                                -
                                             @endif
                                         </td>
                                         <td> ₹{{ number_format($order->total, 2) }} </td>
@@ -167,31 +184,41 @@
 
                                                 {{-- Edit --}}
                                                 @can('edit-order')
-                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                    <a href="{{ route('branch.orders.edit', [
-                                                        'restaurant' => $restaurantSlug,
-                                                        'branch' => $branchSlug,
-                                                        'order' => $order->id,
-                                                    ]) }}"
-                                                        class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @elseif(!empty($restaurantSlug))
-                                                    <a href="{{ route('restaurant.orders.edit', [
-                                                        'restaurant' => $restaurantSlug,
-                                                        'order' => $order->id,
-                                                    ]) }}"
-                                                        class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('orders.edit', [
-                                                        'order' => $order->id,
-                                                    ]) }}"
-                                                        class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @endif
+                                                    @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                        <a href="{{ route('branch.orders.edit', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'branch' => $branchSlug,
+                                                            'order' => $order->id,
+                                                        ]) }}"
+                                                            class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @elseif(!empty($restaurantSlug))
+                                                        <a href="{{ route('restaurant.orders.edit', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'order' => $order->id,
+                                                        ]) }}"
+                                                            class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('orders.edit', [
+                                                            'order' => $order->id,
+                                                        ]) }}"
+                                                            class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @endif
+                                                @endcan
+                                                @can('make-payment')
+                                                    @if ($order->status == 'delivered')
+                                                        <button type="button" class="btn btn-success btn-sm paymentBtn"
+                                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                            data-order="{{ $order->id }}"
+                                                            data-qr="{{ asset($order->branch?->qrcode) }}">
+                                                            Make Payment
+                                                        </button>
+                                                    @endif
                                                 @endcan
                                             </div>
                                         </td>
@@ -208,7 +235,122 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section>.
+        <div class="modal fade" id="paymentModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    @if (auth()->user()->branch_id)
+                        <form method="POST"
+                            action="{{ route('branch.orders.payment', [
+                                'restaurant' => $restaurant->slug,
+                                'branch' => auth()->user()->branch->slug,
+                            ]) }}">
+                        @else
+                            <form method="POST"
+                                action="{{ route('restaurant.orders.payment', [
+                                    'restaurant' => $restaurant->slug,
+                                ]) }}">
+                    @endif
+
+                    @csrf
+
+
+                    <input type="hidden" name="order_id" id="order_id">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Make Payment
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <label class="form-label">
+                            Payment Method
+                        </label>
+
+                        <select name="payment_method" id="payment_method" class="form-control" required>
+
+                            <option value="">
+                                Select Payment Method
+                            </option>
+
+                            <option value="cash">
+                                Cash
+                            </option>
+
+                            <option value="upi">
+                                UPI
+                            </option>
+
+                            <option value="card">
+                                Card
+                            </option>
+
+                        </select>
+
+                        <div id="upiSection" class="mt-3" style="display:none;">
+
+                            <h6>
+                                Scan QR Code
+                            </h6>
+
+                            <img id="branchQr" src="" class="img-fluid border rounded">
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-primary">
+                            Confirm Payment
+                        </button>
+
+                    </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+
+                document.querySelectorAll('.paymentBtn').forEach(btn => {
+
+                    btn.addEventListener('click', function() {
+
+                        document.getElementById('order_id').value =
+                            this.dataset.order;
+
+                        document.getElementById('branchQr').src =
+                            this.dataset.qr;
+                    });
+
+                });
+
+                document.getElementById('payment_method')
+                    .addEventListener('change', function() {
+
+                        let upiSection =
+                            document.getElementById('upiSection');
+
+                        if (this.value === 'upi') {
+
+                            upiSection.style.display = 'block';
+
+                        } else {
+
+                            upiSection.style.display = 'none';
+
+                        }
+                    });
+
+            });
+        </script>
     @endsection
     @if (session('success'))
         <script>

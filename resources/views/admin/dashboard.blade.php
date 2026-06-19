@@ -624,78 +624,93 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
 
-    const notificationSound = document.getElementById('notificationSound');
+        const notificationSound = document.getElementById('notificationSound');
 
-    document.addEventListener('click', function unlockAudio() {
-        notificationSound.play().then(() => {
-            notificationSound.pause();
-            notificationSound.currentTime = 0;
-        }).catch(() => {});
-        document.removeEventListener('click', unlockAudio);
-    }, { once: true });
-
-    setInterval(function() {
-        fetch("{{ route('chef.notifications') }}")
-            .then(response => response.json())
-            .then(data => {
-                if (!data.length) return;
-
-                let notification = data[0];
-                let nData = notification.data;
-
-                // Play sound
+        document.addEventListener('click', function unlockAudio() {
+            notificationSound.play().then(() => {
+                notificationSound.pause();
                 notificationSound.currentTime = 0;
-                notificationSound.play().catch(() => {});
+            }).catch(() => {});
+            document.removeEventListener('click', unlockAudio);
+        }, {
+            once: true
+        });
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'New Order Assigned',
-                    text: `${nData.message} (Token #${nData.token_no})`,
-                    confirmButtonText: 'View Order',
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        markReadAndDelete(notification.id);
+        setInterval(function() {
+            fetch("{{ route('notifications.index') }}")
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Notifications:", data);
 
-                        let url = '/' + nData.restaurant_slug;
+                    if (!data.length) return;
 
-                        if (nData.branch_slug) {
-                            url += '/' + nData.branch_slug;
+                    let notification = data[0];
+                    let nData = notification.data;
+
+                    // Play sound
+                    notificationSound.currentTime = 0;
+                    notificationSound.play().catch(() => {});
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: nData.status === 'prepared' ? 'Order Prepared' :
+                            'Order Update',
+                        text: `${nData.message} (Token #${nData.token_no})`,
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+
+                            // Remove notification from database
+                            await markReadAndDelete(notification.id);
+
+                            let url = '/' + nData.restaurant_slug;
+
+                            if (nData.branch_slug) {
+                                url += '/' + nData.branch_slug;
+                            }
+
+                            url += '/orders/' + nData.order_id;
+
+                            window.location.href = url;
                         }
 
-                        url += '/orders/' + nData.order_id;
+                    });
+                })
+                .catch(console.error);
+        }, 5000);
 
-                        window.location.href = url;
+        async function markReadAndDelete(id) {
+
+            try {
+
+                await fetch('/notifications/read/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-            })
-            .catch(console.error);
-    }, 5000);
 
-    async function markReadAndDelete(id) {
-        try {
-            await fetch('/notifications/read/' + id, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
 
-            await fetch('/notifications/delete/' + id, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-        } catch (e) {
-            console.error(e);
+                await fetch('/notifications/delete/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+
+                console.log("Notification deleted:", id);
+
+            } catch (e) {
+                console.error("Notification delete error:", e);
+            }
         }
-    }
-});
+    });
 </script>

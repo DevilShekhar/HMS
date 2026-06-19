@@ -9,10 +9,12 @@
                     <div>
                         @if ($order->status == 'pending')
                             <span class="badge bg-warning">Pending</span>
-                        @elseif($order->status == 'preparing')
-                            <span class="badge bg-info">Preparing</span>
+                        @elseif($order->status == 'prepared')
+                            <span class="badge bg-info">Prepared</span>
                         @elseif($order->status == 'completed')
                             <span class="badge bg-success">Completed</span>
+                        @elseif($order->status == 'delivered')
+                            <span class="badge bg-primary">Delivered</span>
                         @endif
                     </div>
                 </div>
@@ -119,23 +121,32 @@
                     @endif
 
                     <!-- Status Actions -->
-                    @if ($order->status == 'pending')
+                    @if ($order->status == 'pending' && auth()->user()->role == 'chef')
                         <form method="POST"
                             action="{{ route('restaurant.orders.prepare', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
                             class="m-0">
                             @csrf
                             <button type="submit" class="btn btn-success">
-                                Mark as Preparing
+                                Mark as Prepared
                             </button>
                         </form>
                     @endif
-
-                    @if ($order->status == 'preparing')
+                    @if ($order->status == 'prepared' && in_array(auth()->user()->role, ['waiter', 'waiter-head']))
+                        <form method="POST"
+                            action="{{ route('restaurant.orders.delivered', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
+                            class="m-0">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">
+                                Mark as Delivered
+                            </button>
+                        </form>
+                    @endif
+                    @if ($order->status == 'delivered' && auth()->user()->role == ['waiter', 'waiter-head', 'owner'])
                         <form method="POST"
                             action="{{ route('restaurant.orders.completed', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
                             class="m-0">
                             @csrf
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-info">
                                 Mark as Completed
                             </button>
                         </form>
