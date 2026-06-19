@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\TableCategory;
 use App\Models\RestaurantTable;
 use App\Notifications\NewOrderAssignedNotification;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,10 +39,10 @@ class OrderController extends Controller
                 Auth::user()->branch_id
             );
         } elseif (Auth::user()->role == 'waiter_head') {
-            $query->where(
-                'created_by',
-                Auth::id()
-            );
+            // $query->where(
+            //     'created_by',
+            //     Auth::id()
+            // );
         } elseif (Auth::user()->role == 'chef') {
             $query->where(
                 'chef_id',
@@ -70,22 +71,38 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
 
-        $branchId = Auth::user()->branch_id;
+        $user = Auth::user();
 
-        $branch = Branch::findOrFail($branchId);
+        $branchId = $user->branch_id;
+
+        $branch = $branchId ? Branch::query()->find($branchId) : null;
 
         $categories = Category::query()->where('restaurant_id', $restaurant->id)
             ->where('is_active', 1)
             ->orderBy('name')
             ->get();
+        $menuItems = MenuItem::with(['branch', 'category'])
+            ->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $branch->id)
+            ->where('is_active', 1)
+            ->latest()
+            ->get();
 
         $tableCategories = TableCategory::query()->where('restaurant_id', $restaurant->id)
-            ->where('branch_id', $branchId)
+            ->when($branchId, function ($q) use ($branchId) {
+                $q->where('branch_id', $branchId);
+            })
             ->get();
 
         return view(
             'admin.orders.create',
-            compact('restaurant', 'branch', 'categories', 'tableCategories')
+            compact(
+                'restaurant',
+                'branch',
+                'categories',
+                'tableCategories',
+                'menuItems'
+            )
         );
     }
 
@@ -106,7 +123,35 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
         $branchId = Auth::user()->branch_id;
-        $tables = RestaurantTable::query()->where('restaurant_id', $restaurant->id)->where('branch_id', $branchId)->where('cat_id', $categoryId)->select('id', 'table_number')->get();
+
+        $tables = RestaurantTable::query()
+            ->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $branchId)
+            ->where('cat_id', $categoryId)
+            ->get()
+            ->map(function ($table) use ($restaurant, $branchId) {
+
+                $occupied = Order::query()
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('branch_id', $branchId)
+                    ->where('table_no', $table->table_number)
+                    ->latest()
+                    ->first();
+
+                $occupied = $occupied && in_array($occupied->status, [
+                    'pending',
+                    'preparing',
+                    'prepared',
+                    'delivered'
+                ]);
+
+                return [
+                    'id' => $table->id,
+                    'table_number' => $table->table_number,
+                    'occupied' => $occupied,
+                ];
+            });
+// dd($tables);
         return response()->json($tables);
     }
     public function store(Request $request)
@@ -150,7 +195,11 @@ class OrderController extends Controller
                 ->where('restaurant_id', $restaurant->id)
                 ->first();
 
-            $token = $this->generateToken($orderType);
+            $token = $this->generateToken(
+                $orderType,
+                $restaurant->id,
+                $branchId
+            );
             $order = Order::create([
                 'restaurant_id' => $restaurant->id,
                 'branch_id'     => $branchId,
@@ -234,21 +283,55 @@ class OrderController extends Controller
             ->with('success', 'Order created successfully.');
     }
 
-    private function generateToken($type)
-    {
-        $lastToken = Order::orderBy('id', 'desc')->value('token_no');
+    // private function generateToken($type)
+    // {
+    //     $lastToken = Order::orderBy('id', 'desc')->value('token_no');
 
-        $number = $lastToken
-            ? (int) str_replace(['TOK-', 'VIP-'], '', $lastToken)
-            : 0;
+    //     $number = $lastToken
+    //         ? (int) str_replace(['TOK-', 'VIP-'], '', $lastToken)
+    //         : 0;
 
-        $number++;
+    //     $number++;
 
-        $prefix = $type == 'vip' ? 'VIP-' : 'TOK-';
+    //     $prefix = $type == 'vip' ? 'VIP-' : 'TOK-';
 
-        return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
+    //     return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
+    // }
+
+    private function generateToken(
+        $type,
+        $restaurantId,
+        $branchId = null
+    ) {
+        $prefix = $type === 'vip'
+            ? 'VIP-'
+            : 'TOK-';
+
+        $lastOrder = Order::query()
+            ->where('restaurant_id', $restaurantId)
+            ->where('branch_id', $branchId)
+            ->where('order_type', $type)
+            ->latest('id')
+            ->first();
+
+        $lastNumber = 0;
+
+        if ($lastOrder) {
+
+            $lastNumber = (int) preg_replace(
+                '/[^0-9]/',
+                '',
+                $lastOrder->token_no
+            );
+        }
+
+        return $prefix . str_pad(
+            $lastNumber + 1,
+            3,
+            '0',
+            STR_PAD_LEFT
+        );
     }
-
     public function show($restaurant, $branch = null, $order = null)
     {
 
@@ -324,7 +407,9 @@ class OrderController extends Controller
 
             if ($newOrderType != $order->order_type) {
                 $tokenNo = $this->generateToken(
-                    $newOrderType
+                    $newOrderType,
+                    $order->restaurant_id,
+                    $order->branch_id
                 );
             }
 
@@ -484,23 +569,87 @@ class OrderController extends Controller
         $order = Order::findOrFail($order);
 
         if ($order->status === 'pending') {
-            $order->status = 'preparing';
+
+            $order->status = 'prepared';
+            $order->save();
+
+            // Notify waiter after order is prepared
+            $order->restaurant->users()
+                ->whereHas('roles', function ($q) {
+                    $q->where('name', 'waiter');
+                })
+                ->each(function ($user) use ($order) {
+
+                    $user->notify(
+                        new OrderStatusNotification(
+                            $order,
+                            'prepared'
+                        )
+                    );
+                });
+        }
+
+        return back()->with('success', 'Order Mark As Prepared');
+    }
+    public function markDelivered($restaurant, $order)
+    {
+        $order = Order::findOrFail($order);
+
+        if ($order->status === 'prepared') {
+            $order->status = 'delivered';
             $order->save();
         }
 
-        return back()->with('success', 'Order moved to Preparing');
+        return back()->with('success', 'Order Delivered');
     }
     public function markCompleted($restaurant, $order)
     {
         $order = Order::findOrFail($order);
 
-        if ($order->status === 'preparing') {
+        if ($order->status === 'delivered') {
             $order->status = 'completed';
             $order->save();
         }
 
         return back()->with('success', 'Order Mark As Completed');
     }
+
+
+    public function statusOrders(Restaurant $restaurant, $status)
+    {
+        $orders = Order::with(['branch', 'chef'])
+            ->where('restaurant_id', $restaurant->id)
+            ->where('status', $status);
+
+        if (Auth::user()->branch_id) {
+            $orders->where('branch_id', Auth::user()->branch_id);
+        }
+
+        return view('admin.orders.index', [
+            'orders' => $orders->latest()->get(),
+            'restaurant' => $restaurant,
+        ]);
+    }
+
+
+    public function makePayment(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'payment_method' => 'required|in:cash,upi,card',
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+        $order->payment_method = $request->payment_method;
+
+        $order->status = 'completed';
+
+        $order->save();
+
+        return back()->with('success', 'Payment completed successfully.');
+    }
+
     public function getTablesByCategory($restaurant, $categoryId)
     {
         $restaurant = app('restaurant');

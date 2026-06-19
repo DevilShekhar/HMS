@@ -98,20 +98,7 @@
                                         </small>
                                     @enderror
                                 </div>
-                                <div class="col-md-6 mb-4">
-                                    <label>Category Image</label>
-                                    <input type="file" name="image" class="form-control premium-input">
-                                    @error('image')
-                                        <small class="text-danger">
-                                            {{ $message }}
-                                        </small>
-                                    @enderror
-                                    @if ($category->image)
-                                        <div class="mt-3">
-                                            <img src="{{ asset($category->image) }}" width="120" class="img-thumbnail">
-                                        </div>
-                                    @endif
-                                </div>
+
                                 <div class="col-md-6 mb-4">
                                     <label>Status</label>
                                     <select name="is_active" class="form-control premium-input">
