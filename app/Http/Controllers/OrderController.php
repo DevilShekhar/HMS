@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\Models\Branch;
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Restaurant;
-use App\Models\Branch;
-use App\Models\User;
-use App\Models\TableCategory;
 use App\Models\RestaurantTable;
+use App\Models\TableCategory;
+use App\Models\User;
 use App\Notifications\NewOrderAssignedNotification;
 use App\Notifications\OrderStatusNotification;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class OrderController extends Controller
         $query = Order::with([
             'branch',
             'items',
-            'chef'
+            'chef',
         ])->where(
             'restaurant_id',
             $restaurant->id
@@ -39,10 +39,7 @@ class OrderController extends Controller
                 Auth::user()->branch_id
             );
         } elseif (Auth::user()->role == 'waiter_head') {
-            // $query->where(
-            //     'created_by',
-            //     Auth::id()
-            // );
+
         } elseif (Auth::user()->role == 'chef') {
             $query->where(
                 'chef_id',
@@ -67,6 +64,7 @@ class OrderController extends Controller
             )
         );
     }
+
     public function create()
     {
         $restaurant = app('restaurant');
@@ -119,6 +117,7 @@ class OrderController extends Controller
                 ->get()
         );
     }
+
     public function getTables($restaurant, $branch, $categoryId)
     {
         $restaurant = app('restaurant');
@@ -142,7 +141,7 @@ class OrderController extends Controller
                     'pending',
                     'preparing',
                     'prepared',
-                    'delivered'
+                    'delivered',
                 ]);
 
                 return [
@@ -151,15 +150,16 @@ class OrderController extends Controller
                     'occupied' => $occupied,
                 ];
             });
-// dd($tables);
+
         return response()->json($tables);
     }
+
     public function store(Request $request)
     {
         $request->validate([
             'customer_name' => 'required',
             'mobile_number' => 'required',
-            'menu_item_id'  => 'required|array'
+            'menu_item_id' => 'required|array',
         ]);
 
         $restaurant = app('restaurant');
@@ -202,24 +202,25 @@ class OrderController extends Controller
             );
             $order = Order::create([
                 'restaurant_id' => $restaurant->id,
-                'branch_id'     => $branchId,
-                'chef_id'       => $chef?->id,
-                'created_by'    => Auth::id(),
+                'branch_id' => $branchId,
+                'chef_id' => $chef?->id,
+                'created_by' => Auth::id(),
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
-                'token_no'      => $token,
-                'table_no'      => $request->table_no,
-                'order_type'    => $orderType,
-                'status'        => 'pending',
-                'subtotal'      => 0,
-                'tax'           => 0,
-                'total'         => 0,
+                'token_no' => $token,
+                'table_no' => $request->table_no,
+                'order_type' => $orderType,
+                'status' => 'pending',
+                'subtotal' => 0,
+                'tax' => 0,
+                'total' => 0,
             ]);
             if ($chef) {
                 $chef->notify(
                     new NewOrderAssignedNotification($order)
                 );
             }
+            // dd($chef);
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -234,11 +235,11 @@ class OrderController extends Controller
                 $subtotal = $menuItem->price * $qty;
 
                 OrderItem::create([
-                    'order_id'     => $order->id,
+                    'order_id' => $order->id,
                     'menu_item_id' => $menuItem->id,
-                    'quantity'     => $qty,
-                    'price'        => $menuItem->price,
-                    'subtotal'     => $subtotal,
+                    'quantity' => $qty,
+                    'price' => $menuItem->price,
+                    'subtotal' => $subtotal,
                 ]);
 
                 $total += $subtotal;
@@ -246,8 +247,8 @@ class OrderController extends Controller
 
             $order->update([
                 'subtotal' => $total,
-                'tax'      => 0,
-                'total'    => $total,
+                'tax' => 0,
+                'total' => $total,
             ]);
         });
 
@@ -255,17 +256,15 @@ class OrderController extends Controller
 
         $user = Auth::user();
 
-
         if ($user->branch_id) {
 
             return redirect()
                 ->route('branch.orders.index', [
                     'restaurant' => $restaurant->slug,
-                    'branch'     => $user->branch?->slug,
+                    'branch' => $user->branch?->slug,
                 ])
                 ->with('success', 'Order created successfully.');
         }
-
 
         if ($user->restaurant_id) {
 
@@ -275,7 +274,6 @@ class OrderController extends Controller
                 ])
                 ->with('success', 'Order created successfully.');
         }
-
 
         // Super admin
         return redirect()
@@ -325,13 +323,14 @@ class OrderController extends Controller
             );
         }
 
-        return $prefix . str_pad(
+        return $prefix.str_pad(
             $lastNumber + 1,
             3,
             '0',
             STR_PAD_LEFT
         );
     }
+
     public function show($restaurant, $branch = null, $order = null)
     {
 
@@ -345,7 +344,7 @@ class OrderController extends Controller
         $order = Order::with([
             'branch',
             'items.menuItem',
-            'creator'
+            'creator',
         ])
             ->where('restaurant_id', $restaurant->id)
             ->findOrFail($order);
@@ -359,7 +358,7 @@ class OrderController extends Controller
         );
     }
 
-    public function edit($restaurant, $branch = null, $order)
+    public function edit($restaurant, $branch, $order)
     {
         $restaurant = app('restaurant');
 
@@ -383,14 +382,15 @@ class OrderController extends Controller
             )
         );
     }
+
     public function update(Request $request, $restaurant, $order)
     {
         $order = Order::findOrFail($order);
         $request->validate([
             'customer_name' => 'required',
             'mobile_number' => 'required',
-            'table_no'      => 'required',
-            'menu_item_id'  => 'required|array'
+            'table_no' => 'required',
+            'menu_item_id' => 'required|array',
         ]);
         DB::transaction(function () use (
             $request,
@@ -416,10 +416,10 @@ class OrderController extends Controller
             $order->update([
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
-                'table_no'      => $request->table_no,
-                'order_type'    => $newOrderType,
-                'token_no'      => $tokenNo,
-                'chef_id'       => $chef?->id,
+                'table_no' => $request->table_no,
+                'order_type' => $newOrderType,
+                'token_no' => $tokenNo,
+                'chef_id' => $chef?->id,
             ]);
 
             OrderItem::query()->where(
@@ -445,11 +445,11 @@ class OrderController extends Controller
                 $subtotal = $menuItem->price * $qty;
 
                 OrderItem::create([
-                    'order_id'     => $order->id,
+                    'order_id' => $order->id,
                     'menu_item_id' => $menuId,
-                    'quantity'     => $qty,
-                    'price'        => $menuItem->price,
-                    'subtotal'     => $subtotal,
+                    'quantity' => $qty,
+                    'price' => $menuItem->price,
+                    'subtotal' => $subtotal,
                 ]);
 
                 $total += $subtotal;
@@ -457,7 +457,7 @@ class OrderController extends Controller
 
             $order->update([
                 'subtotal' => $total,
-                'total'    => $total,
+                'total' => $total,
             ]);
         });
 
@@ -471,17 +471,15 @@ class OrderController extends Controller
                 ->with('success', 'Order updated successfully.');
         }
 
-
         if ($user->branch_id) {
 
             return redirect()
                 ->route('branch.orders.index', [
                     'restaurant' => $user->restaurant?->slug,
-                    'branch'     => $user->branch?->slug,
+                    'branch' => $user->branch?->slug,
                 ])
                 ->with('success', 'Order updated successfully.');
         }
-
 
         if ($user->restaurant_id) {
 
@@ -492,6 +490,7 @@ class OrderController extends Controller
                 ->with('success', 'Order updated successfully.');
         }
     }
+
     public function destroy(
         $restaurant,
         $order
@@ -504,25 +503,25 @@ class OrderController extends Controller
         Order $order
     ) {
         $order->update([
-            'status' =>
-            $request->status
+            'status' => $request->status,
         ]);
 
         return back();
     }
+
     public function updateKitchenStatus(
         Request $request,
         $restaurant,
         $order
     ) {
         $request->validate([
-            'kitchen_status' => 'required'
+            'kitchen_status' => 'required',
         ]);
 
         $order = Order::findOrFail($order);
 
         $order->update([
-            'kitchen_status' => $request->kitchen_status
+            'kitchen_status' => $request->kitchen_status,
         ]);
 
         return back()->with(
@@ -544,53 +543,61 @@ class OrderController extends Controller
         if ($order) {
 
             $order->update([
-                'notification_seen' => 1
+                'notification_seen' => 1,
             ]);
 
             return response()->json([
-                'has_new_order' => true
+                'has_new_order' => true,
             ]);
         }
 
         return response()->json([
-            'has_new_order' => false
+            'has_new_order' => false,
         ]);
     }
 
     public function notifications()
     {
-        $notifications = Auth::user()->unreadNotifications;
-
-        return response()->json($notifications);
+        return response()->json(
+            Auth::user()->unreadNotifications()
+                ->whereIn('data->type', ['order-notification', 'order-status-notification'])
+                ->latest()
+                ->get()
+        );
     }
 
     public function markPreparing($restaurant, $order)
     {
         $order = Order::findOrFail($order);
 
-        if ($order->status === 'pending') {
-
-            $order->status = 'prepared';
-            $order->save();
-
-            // Notify waiter after order is prepared
-            $order->restaurant->users()
-                ->whereHas('roles', function ($q) {
-                    $q->where('name', 'waiter');
-                })
-                ->each(function ($user) use ($order) {
-
-                    $user->notify(
-                        new OrderStatusNotification(
-                            $order,
-                            'prepared'
-                        )
-                    );
-                });
+        // Security check
+        if ($order->status !== 'pending' || $order->chef_id != Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Not authorized or invalid status',
+            ], 403);
         }
 
-        return back()->with('success', 'Order Mark As Prepared');
+        $order->status = 'prepared';
+        $order->save();
+
+        // Notify Waiters and Waiter Heads
+        $waiters = User::query()->where('restaurant_id', $order->restaurant_id)
+            ->whereIn('role', ['waiter', 'waiter_head'])
+            ->when($order->branch_id, function ($query) use ($order) {
+                $query->where('branch_id', $order->branch_id); // Only same branch
+            })
+            ->get();
+
+        foreach ($waiters as $user) {
+            $user->notify(
+                new OrderStatusNotification($order, 'prepared')
+            );
+        }
+
+        return back()->with('success', 'Order marked as Prepared successfully');
     }
+
     public function markDelivered($restaurant, $order)
     {
         $order = Order::findOrFail($order);
@@ -602,6 +609,7 @@ class OrderController extends Controller
 
         return back()->with('success', 'Order Delivered');
     }
+
     public function markCompleted($restaurant, $order)
     {
         $order = Order::findOrFail($order);
@@ -613,7 +621,6 @@ class OrderController extends Controller
 
         return back()->with('success', 'Order Mark As Completed');
     }
-
 
     public function statusOrders(Restaurant $restaurant, $status)
     {
@@ -630,7 +637,6 @@ class OrderController extends Controller
             'restaurant' => $restaurant,
         ]);
     }
-
 
     public function makePayment(Request $request)
     {
@@ -659,6 +665,7 @@ class OrderController extends Controller
             ->where('branch_id', $branchId)
             ->select('id', 'table_number')
             ->get();
+
         return response()->json($tables);
     }
 }

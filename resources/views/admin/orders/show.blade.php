@@ -121,39 +121,114 @@
                     @endif
 
                     <!-- Status Actions -->
-                    @if ($order->status == 'pending' && auth()->user()->role == 'chef')
-                        <form method="POST"
-                            action="{{ route('restaurant.orders.prepare', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
-                            class="m-0">
-                            @csrf
-                            <button type="submit" class="btn btn-success">
-                                Mark as Prepared
-                            </button>
-                        </form>
-                    @endif
-                    @if ($order->status == 'prepared' && in_array(auth()->user()->role, ['waiter', 'waiter-head']))
-                        <form method="POST"
-                            action="{{ route('restaurant.orders.delivered', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
-                            class="m-0">
-                            @csrf
-                            <button type="submit" class="btn btn-primary">
-                                Mark as Delivered
-                            </button>
-                        </form>
-                    @endif
-                    @if ($order->status == 'delivered' && auth()->user()->role == ['waiter', 'waiter-head', 'owner'])
-                        <form method="POST"
-                            action="{{ route('restaurant.orders.completed', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
-                            class="m-0">
-                            @csrf
-                            <button type="submit" class="btn btn-info">
-                                Mark as Completed
-                            </button>
-                        </form>
-                    @endif
+                    <td class="text-center">
+                        @if ($order->status == 'pending' && auth()->user()->role == 'chef')
+                            <form method="POST"
+                                action="{{ route('restaurant.orders.prepare', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
+                                onsubmit="return confirm('Mark this order as Prepared?')">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Mark Prepared
+                                </button>
+                            </form>
+                        @endif
+
+                        @if ($order->status == 'prepared' && in_array(auth()->user()->role, ['waiter', 'waiter_head']))
+                            <form method="POST"
+                                action="{{ route('restaurant.orders.delivered', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
+                                onsubmit="return confirm('Mark this order as Delivered?')">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-truck"></i> Mark Delivered
+                                </button>
+                            </form>
+                        @endif
+                    </td>
                 </div>
 
             </div>
         </div>
     </div>
 @endsection
+{{-- notification scritp --}}
+<audio id="notificationSound" preload="auto">
+    <source src="{{ asset('sounds/order-notification.mp3') }}" type="audio/mpeg">
+</audio>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const notificationSound = document.getElementById('notificationSound');
+        let isProcessing = false;
+
+        document.addEventListener('click', function unlockAudio() {
+            notificationSound.play().then(() => {
+                notificationSound.pause();
+                notificationSound.currentTime = 0;
+            }).catch(() => {});
+            document.removeEventListener('click', unlockAudio);
+        }, {
+            once: true
+        });
+
+        setInterval(fetchNotifications, 4000);
+
+        async function fetchNotifications() {
+            if (isProcessing) return;
+
+            try {
+                const response = await fetch("{{ route('chef.notifications') }}");
+                const data = await response.json();
+
+                if (!data || !data.length) return;
+
+                isProcessing = true;
+                const notif = data[0];
+                const d = notif.data;
+
+                notificationSound.currentTime = 0;
+                notificationSound.play().catch(() => {});
+
+                Swal.fire({
+                    icon: 'success',
+                    title: d.status === 'prepared' ? '✅ Order Ready!' : '🛎 New Order',
+                    html: `<strong>Token #${d.token_no}</strong><br>${d.message}`,
+                    confirmButtonText: 'View Order',
+                    timer: 20000,
+                    allowOutsideClick: false
+                }).then(async (result) => {
+                    await markReadAndDelete(notif.id);
+
+                    if (result.isConfirmed) {
+                        let url = '/' + d.restaurant_slug;
+                        if (d.branch_slug) url += '/' + d.branch_slug;
+                        url += '/orders/' + d.order_id;
+                        window.location.href = url;
+                    }
+                }).finally(() => isProcessing = false);
+
+            } catch (e) {
+                console.error(e);
+                isProcessing = false;
+            }
+        }
+
+        async function markReadAndDelete(id) {
+            const token = '{{ csrf_token() }}';
+            await fetch(`/notifications/read/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                }
+            });
+            await fetch(`/notifications/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                }
+            });
+        }
+    });
+</script>

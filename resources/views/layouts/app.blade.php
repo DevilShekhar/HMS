@@ -204,6 +204,7 @@
 
                     </li>
 
+
                 </ul>
             </nav>
             <!-- NAVBAR END -->
@@ -838,6 +839,113 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- NOTIFICATION SCRIPT WITH LOOP SOUND UNTIL OK --}}
+    <audio id="notificationSound" preload="auto" loop>
+        <source src="{{ asset('sounds/order-notification.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const notificationSound = document.getElementById('notificationSound');
+            let isProcessing = false;
+
+            // Unlock audio on first interaction
+            document.addEventListener('click', function unlockAudio() {
+                notificationSound.play().then(() => {
+                    notificationSound.pause();
+                    notificationSound.currentTime = 0;
+                }).catch(() => {});
+                document.removeEventListener('click', unlockAudio);
+            }, {
+                once: true
+            });
+
+            setInterval(fetchNotifications, 4000);
+
+            async function fetchNotifications() {
+                if (isProcessing) return;
+
+                try {
+                    const response = await fetch("{{ route('chef.notifications') }}");
+                    const data = await response.json();
+
+                    console.log("Notifications:", data);
+
+                    if (!data || !data.length) return;
+
+                    isProcessing = true;
+
+                    const notification = data[0];
+                    const nData = notification.data;
+
+                    // Start looping sound
+                    notificationSound.currentTime = 0;
+                    notificationSound.loop = true;
+                    notificationSound.play().catch(() => {});
+
+                    let title = nData.status === 'prepared' ? '✅ Order Prepared!' : '🛎 New Order Assigned';
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: title,
+                        html: `
+                    <strong>Token #${nData.token_no}</strong><br>
+                    Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
+                    ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
+                    ${nData.message}
+                `,
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        timer: 30000 // 30 seconds max
+                    }).then(async (result) => {
+                        // Stop sound when popup is closed
+                        notificationSound.pause();
+                        notificationSound.currentTime = 0;
+                        notificationSound.loop = false;
+
+                        await markReadAndDelete(notification.id);
+
+                        if (result.isConfirmed) {
+                            let url = '/' + nData.restaurant_slug;
+                            if (nData.branch_slug) url += '/' + nData.branch_slug;
+                            url += '/orders/' + nData.order_id;
+                            window.location.href = url;
+                        }
+                    }).finally(() => {
+                        isProcessing = false;
+                    });
+
+                } catch (e) {
+                    console.error("Notification error:", e);
+                    isProcessing = false;
+                }
+            }
+
+            async function markReadAndDelete(id) {
+                const token = '{{ csrf_token() }}';
+                try {
+                    await fetch(`/notifications/read/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        }
+                    });
+                    await fetch(`/notifications/delete/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        }
+                    });
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>

@@ -5,37 +5,33 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class OrderStatusNotification extends Notification
+class OrderPreparedNotification extends Notification
 {
     use Queueable;
 
     public $order;
 
-    public $status;
-
-    public function __construct($order, $status)
+    public function __construct($order)
     {
         $this->order = $order;
-        $this->status = $status;
     }
 
-    public function via($notifiable): array
+    public function via($notifiable)
     {
         return ['database'];
     }
 
-    public function toArray($notifiable): array
+    public function toArray($notifiable)
     {
         return [
-            'type' => 'order-status-notification',
+            'type' => 'order-prepared',
             'order_id' => $this->order->id,
             'token_no' => $this->order->token_no,
             'customer_name' => $this->order->customer_name,
-            'table_no' => $this->order->table_no,           // ← Added
             'restaurant_slug' => $this->order->restaurant->slug,
             'branch_slug' => $this->order->branch?->slug,
-            'message' => "Order is {$this->status}",
-            'status' => $this->status,
+            'message' => 'Order is Prepared',
+            'status' => 'prepared',
         ];
     }
 }
