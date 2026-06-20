@@ -19,8 +19,8 @@ use App\Http\Controllers\TableCategoryController;
 use App\Http\Controllers\RestaurantTableController;
 use App\Models\Restaurant;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/login', function () {
+    return view('auth.login');
 });
 
 Auth::routes();
