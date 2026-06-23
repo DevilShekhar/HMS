@@ -15,8 +15,10 @@ class InventoryController extends Controller
     {
         $restaurant = app('restaurant');
         $items = InventoryItem::with(['branch', 'creator', 'updater'])->where('restaurant_id', $restaurant->id)->latest()->paginate(20);
+
         return view('admin.inventory.index', compact('items'));
     }
+
     public function create($restaurant, $branch = null)
     {
         $restaurant = app('restaurant');
@@ -29,16 +31,15 @@ class InventoryController extends Controller
                 ->firstOrFail();
 
             return view('admin.inventory.create', [
-                'branch' => $branchModel
+                'branch' => $branchModel,
             ]);
         }
-
 
         $branches = Branch::query()->where('restaurant_id', $restaurant->id)
             ->get();
 
         return view('admin.inventory.create', [
-            'branches' => $branches
+            'branches' => $branches,
         ]);
     }
 
@@ -58,7 +59,7 @@ class InventoryController extends Controller
             'name' => [
                 'required',
                 Rule::unique('inventory_items')
-                    ->where(fn($q) => $q->where(
+                    ->where(fn ($q) => $q->where(
                         'branch_id',
                         $branchId
                     )),
@@ -68,16 +69,16 @@ class InventoryController extends Controller
             'minimum_stock' => 'required|numeric|min:0',
         ]);
         InventoryItem::create([
-            'restaurant_id'   => app('restaurant')->id,
-            'branch_id'       => $branchId,
-            'name'            => $request->name,
-            'unit'            => $request->unit,
-            'total_stock'     => $request->total_stock,
+            'restaurant_id' => app('restaurant')->id,
+            'branch_id' => $branchId,
+            'name' => $request->name,
+            'unit' => $request->unit,
+            'total_stock' => $request->total_stock,
             'remaining_stock' => $request->total_stock,
-            'minimum_stock'   => $request->minimum_stock,
-            'is_active'       => 1,
-            'created_by'      => Auth::id(),
-            'updated_by'      => Auth::id(),
+            'minimum_stock' => $request->minimum_stock,
+            'is_active' => 1,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
         ]);
         $user = Auth::user();
 
@@ -88,18 +89,16 @@ class InventoryController extends Controller
                 ->with('success', 'Inventory Item created successfully.');
         }
 
-
         // Any branch user
         if ($user->branch_id) {
 
             return redirect()
                 ->route('branch.inventory.index', [
                     'restaurant' => $user->restaurant?->slug,
-                    'branch'     => $user->branch?->slug,
+                    'branch' => $user->branch?->slug,
                 ])
                 ->with('success', 'Inventory Item created successfully.');
         }
-
 
         // Restaurant level user
         if ($user->restaurant_id) {
@@ -111,6 +110,7 @@ class InventoryController extends Controller
                 ->with('success', 'Inventory Item created successfully.');
         }
     }
+
     public function edit($restaurant, $branch = null, $inventory = null)
     {
 
@@ -123,12 +123,7 @@ class InventoryController extends Controller
 
         if ($branch) {
 
-            $userBranch = Branch::query()->where(
-                'branch_manager_id',
-                Auth::id()
-            )->firstOrFail();
-
-            if ($inventory->branch_id != $userBranch->id) {
+            if ($inventory->branch_id != Auth::user()->branch_id) {
                 abort(403);
             }
         }
@@ -138,14 +133,9 @@ class InventoryController extends Controller
             app('restaurant')->id
         )->get();
 
-        return view(
-            'admin.inventory.edit',
-            compact(
-                'inventory',
-                'branches'
-            )
-        );
+        return view('admin.inventory.edit', compact('inventory', 'branches'));
     }
+
     public function update(Request $request, $restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
@@ -154,7 +144,7 @@ class InventoryController extends Controller
             'name' => [
                 'required',
                 Rule::unique('inventory_items')
-                    ->where(fn($q) => $q->where(
+                    ->where(fn ($q) => $q->where(
                         'branch_id',
                         $branchId
                     ))
@@ -166,34 +156,31 @@ class InventoryController extends Controller
             'minimum_stock' => 'required|numeric|min:0',
         ]);
         $inventory->update([
-            'branch_id'       => $branchId,
-            'name'            => $request->name,
-            'unit'            => $request->unit,
-            'total_stock'     => $request->total_stock,
+            'branch_id' => $branchId,
+            'name' => $request->name,
+            'unit' => $request->unit,
+            'total_stock' => $request->total_stock,
             'remaining_stock' => $request->remaining_stock,
-            'minimum_stock'   => $request->minimum_stock,
-            'updated_by'      => Auth::id(),
+            'minimum_stock' => $request->minimum_stock,
+            'updated_by' => Auth::id(),
         ]);
         if (Auth::user()->role === 'super_admin') {
 
             return redirect()
                 ->route('inventory.index')
-                ->with('success', 'Table Category created successfully.');
+                ->with('success', 'Table Category Updated successfully.');
         }
-
 
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.inventory.index', [
                     'restaurant' => Auth::user()->restaurant?->slug,
                     'branch' => Auth::user()->branch?->slug,
                 ])
-                ->with('success', 'Table Category created successfully.');
+                ->with('success', 'Table Category Updated successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {
@@ -201,15 +188,16 @@ class InventoryController extends Controller
                 ->route('restaurant.inventory.index', [
                     'restaurant' => Auth::user()->restaurant?->slug,
                 ])
-                ->with('success', 'Table Category created successfully.');
+                ->with('success', 'Table Category Updated successfully.');
         }
     }
+
     public function destroy($restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
 
         $inventory->update([
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         return back()->with(
@@ -217,29 +205,32 @@ class InventoryController extends Controller
             'Inventory Deactivated Successfully'
         );
     }
+
     public function stockInForm($restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
+
         return view(
             'admin.inventory.stock_in',
             compact('inventory')
         );
     }
+
     public function stockInStore(Request $request, $restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
         $request->validate([
             'quantity' => 'required|numeric|min:0.01',
-            'remarks' => 'nullable|string|max:500'
+            'remarks' => 'nullable|string|max:500',
         ]);
         InventoryTransaction::create([
-            'restaurant_id'     => $inventory->restaurant_id,
-            'branch_id'         => $inventory->branch_id,
+            'restaurant_id' => $inventory->restaurant_id,
+            'branch_id' => $inventory->branch_id,
             'inventory_item_id' => $inventory->id,
-            'type'              => 'in',
-            'quantity'          => $request->quantity,
-            'remarks'           => $request->remarks,
-            'created_by'        => Auth::id(),
+            'type' => 'in',
+            'quantity' => $request->quantity,
+            'remarks' => $request->remarks,
+            'created_by' => Auth::id(),
         ]);
         $inventory->increment('total_stock', $request->quantity);
         $inventory->increment(
@@ -247,8 +238,9 @@ class InventoryController extends Controller
             $request->quantity
         );
         $inventory->update([
-            'updated_by' => Auth::id()
+            'updated_by' => Auth::id(),
         ]);
+
         return redirect()
             ->route(
                 'restaurant.inventory.index',
@@ -263,43 +255,45 @@ class InventoryController extends Controller
     public function stockOutForm($restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
+
         return view(
             'admin.inventory.stock_out',
             compact('inventory')
         );
     }
+
     public function stockOutStore(Request $request, $restaurant, $inventory)
     {
         $inventory = InventoryItem::findOrFail($inventory);
         $request->validate([
             'quantity' => 'required|numeric|min:0.01',
-            'remarks' => 'nullable|string|max:500'
+            'remarks' => 'nullable|string|max:500',
         ]);
         if (
             $request->quantity >
             $inventory->remaining_stock
         ) {
             return back()->withErrors([
-                'quantity' =>
-                'Insufficient stock available.'
+                'quantity' => 'Insufficient stock available.',
             ]);
         }
         InventoryTransaction::create([
-            'restaurant_id'     => $inventory->restaurant_id,
-            'branch_id'         => $inventory->branch_id,
+            'restaurant_id' => $inventory->restaurant_id,
+            'branch_id' => $inventory->branch_id,
             'inventory_item_id' => $inventory->id,
-            'type'              => 'out',
-            'quantity'          => $request->quantity,
-            'remarks'           => $request->remarks,
-            'created_by'        => Auth::id(),
+            'type' => 'out',
+            'quantity' => $request->quantity,
+            'remarks' => $request->remarks,
+            'created_by' => Auth::id(),
         ]);
         $inventory->decrement(
             'remaining_stock',
             $request->quantity
         );
         $inventory->update([
-            'updated_by' => Auth::id()
+            'updated_by' => Auth::id(),
         ]);
+
         return redirect()
             ->route(
                 'restaurant.inventory.index',
@@ -321,6 +315,7 @@ class InventoryController extends Controller
             )
             ->latest()
             ->paginate(20);
+
         return view(
             'admin.inventory.transactions',
             compact(

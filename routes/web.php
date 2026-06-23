@@ -1,33 +1,44 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\DesignerDashboardController;
-use App\Http\Controllers\RoomPackController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\TableCategoryController;
+use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RestaurantTableController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\RoomPackController;
+use App\Http\Controllers\TableCategoryController;
+use App\Http\Controllers\UserController;
+use App\Models\Branch;
 use App\Models\Restaurant;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
     return view('auth.login');
 });
 
 Auth::routes();
+Route::get('{restaurant}/{branch}/register', [RegisterController::class, 'showBranchRegister'])
+    ->name('branch.register');
+
+Route::post('{restaurant}/{branch}/register', [RegisterController::class, 'branchRegister'])
+    ->name('branch.register.submit');
+Route::get('{restaurant}/{branch}/customer-login',[RegisterController::class, 'showCustomerLogin'])->name('customer.login');
+
+Route::post('{restaurant}/{branch}/customer-login',[RegisterController::class, 'customerLogin'])->name('customer.login.submit');
+// Route::post('{restaurant}/{branch}/logout',[LoginController::class,'logout'])->name('restaurant.logout');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -37,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
 
         if ($user->role === 'branch_manager') {
 
-            $branch = \App\Models\Branch::query()->find($user->branch_id);
+            $branch = Branch::query()->find($user->branch_id);
 
             if (!$branch) {
                 abort(403, 'Branch not assigned');
@@ -51,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
 
         $restaurant = Restaurant::query()->find($user->restaurant_id);
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(403, 'Restaurant not assigned');
         }
 
@@ -67,7 +78,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::resource('categories', CategoryController::class);
     });
-
 
     Route::resource('roles', RoleController::class);
 
@@ -143,21 +153,29 @@ Route::prefix('{restaurant}')
 
             if (Auth::check()) {
                 return redirect()->route('restaurant.login', [
-                    'restaurant' => $restaurant->slug
+                    'restaurant' => $restaurant->slug,
                 ]);
             }
 
             return redirect()->route('restaurant.dashboard', [
-                'restaurant' => $restaurant->slug
+                'restaurant' => $restaurant->slug,
             ]);
         });
+        Route::resource('recipe', RecipeController::class)->names([
+            'index' => 'restaurant.recipe.index',
+            'create' => 'restaurant.recipe.create',
+            'store' => 'restaurant.recipe.store',
+            'show' => 'restaurant.recipe.show',
+            'edit' => 'restaurant.recipe.edit',
+            'update' => 'restaurant.recipe.update',
+            'destroy' => 'restaurant.recipe.destroy',
+        ]);
         Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTablesByCategory'])->name('restaurant.orders.tables');
         Route::get('/login', [LoginController::class, 'showRestaurantLogin'])
             ->name('restaurant.login');
 
         Route::post('/login', [LoginController::class, 'restaurantLogin'])
             ->name('restaurant.login.submit');
-
 
         Route::get('/{branch}/login', [LoginController::class, 'showBranchLogin'])
             ->name('branch.login');
@@ -169,7 +187,6 @@ Route::prefix('{restaurant}')
             Route::get('/dashboard', function () {
                 return view('admin.dashboard');
             })->name('restaurant.dashboard');
-
 
             Route::prefix('{branch}')->group(function () {
 
@@ -184,21 +201,21 @@ Route::prefix('{restaurant}')
                     ->name('branch.users.create');
 
                 Route::resource('categories', CategoryController::class)->names([
-                    'index'   => 'branch.categories.index',
-                    'create'  => 'branch.categories.create',
-                    'store'   => 'branch.categories.store',
-                    'show'    => 'branch.categories.show',
-                    'edit'    => 'branch.categories.edit',
-                    'update'  => 'branch.categories.update',
+                    'index' => 'branch.categories.index',
+                    'create' => 'branch.categories.create',
+                    'store' => 'branch.categories.store',
+                    'show' => 'branch.categories.show',
+                    'edit' => 'branch.categories.edit',
+                    'update' => 'branch.categories.update',
                     'destroy' => 'branch.categories.destroy',
                 ]);
                 Route::resource('menu-items', MenuItemController::class)->names([
-                    'index'   => 'branch.menu-items.index',
-                    'create'  => 'branch.menu-items.create',
-                    'store'   => 'branch.menu-items.store',
-                    'show'    => 'branch.menu-items.show',
-                    'edit'    => 'branch.menu-items.edit',
-                    'update'  => 'branch.menu-items.update',
+                    'index' => 'branch.menu-items.index',
+                    'create' => 'branch.menu-items.create',
+                    'store' => 'branch.menu-items.store',
+                    'show' => 'branch.menu-items.show',
+                    'edit' => 'branch.menu-items.edit',
+                    'update' => 'branch.menu-items.update',
                     'destroy' => 'branch.menu-items.destroy',
                 ]);
                 Route::resource('inventory', InventoryController::class)->names([
@@ -211,82 +228,91 @@ Route::prefix('{restaurant}')
                     'destroy' => 'branch.inventory.destroy',
                 ]);
                 Route::resource('table-categories', TableCategoryController::class)->names([
-                    'index'   => 'branch.table-categories.index',
-                    'create'  => 'branch.table-categories.create',
-                    'store'   => 'branch.table-categories.store',
-                    'show'    => 'branch.table-categories.show',
-                    'edit'    => 'branch.table-categories.edit',
-                    'update'  => 'branch.table-categories.update',
+                    'index' => 'branch.table-categories.index',
+                    'create' => 'branch.table-categories.create',
+                    'store' => 'branch.table-categories.store',
+                    'show' => 'branch.table-categories.show',
+                    'edit' => 'branch.table-categories.edit',
+                    'update' => 'branch.table-categories.update',
                     'destroy' => 'branch.table-categories.destroy',
                 ]);
                 Route::resource('tables', RestaurantTableController::class)->names([
-                    'index'   => 'branch.tables.index',
-                    'create'  => 'branch.tables.create',
-                    'store'   => 'branch.tables.store',
-                    'show'    => 'branch.tables.show',
-                    'edit'    => 'branch.tables.edit',
-                    'update'  => 'branch.tables.update',
+                    'index' => 'branch.tables.index',
+                    'create' => 'branch.tables.create',
+                    'store' => 'branch.tables.store',
+                    'show' => 'branch.tables.show',
+                    'edit' => 'branch.tables.edit',
+                    'update' => 'branch.tables.update',
                     'destroy' => 'branch.tables.destroy',
                 ]);
                 Route::resource('orders', OrderController::class)->names([
-                    'index'   => 'branch.orders.index',
-                    'create'  => 'branch.orders.create',
-                    'store'   => 'branch.orders.store',
-                    'show'    => 'branch.orders.show',
-                    'edit'    => 'branch.orders.edit',
-                    'update'  => 'branch.orders.update',
+                    'index' => 'branch.orders.index',
+                    'create' => 'branch.orders.create',
+                    'store' => 'branch.orders.store',
+                    'show' => 'branch.orders.show',
+                    'edit' => 'branch.orders.edit',
+                    'update' => 'branch.orders.update',
                     'destroy' => 'branch.orders.destroy',
                 ]);
                 Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTables'])->name('branch.orders.tables');
                 Route::resource('users', UserController::class)->names([
-                    'index'   => 'branch.users.index',
-                    'create'  => 'branch.users.create',
-                    'store'   => 'branch.users.store',
-                    'show'    => 'branch.users.show',
-                    'edit'    => 'branch.users.edit',
-                    'update'  => 'branch.users.update',
+                    'index' => 'branch.users.index',
+                    'create' => 'branch.users.create',
+                    'store' => 'branch.users.store',
+                    'show' => 'branch.users.show',
+                    'edit' => 'branch.users.edit',
+                    'update' => 'branch.users.update',
                     'destroy' => 'branch.users.destroy',
+                ]);
+                Route::resource('recipe', RecipeController::class)->names([
+                    'index' => 'branch.recipe.index',
+                    'create' => 'branch.recipe.create',
+                    'store' => 'branch.recipe.store',
+                    'show' => 'branch.recipe.show',
+                    'edit' => 'branch.recipe.edit',
+                    'update' => 'branch.recipe.update',
+                    'destroy' => 'branch.recipe.destroy',
                 ]);
             });
             Route::resource('users', UserController::class)->names([
-                'index'   => 'restaurant.users.index',
-                'create'  => 'restaurant.users.create',
-                'store'   => 'restaurant.users.store',
-                'show'    => 'restaurant.users.show',
-                'edit'    => 'restaurant.users.edit',
-                'update'  => 'restaurant.users.update',
+                'index' => 'restaurant.users.index',
+                'create' => 'restaurant.users.create',
+                'store' => 'restaurant.users.store',
+                'show' => 'restaurant.users.show',
+                'edit' => 'restaurant.users.edit',
+                'update' => 'restaurant.users.update',
                 'destroy' => 'restaurant.users.destroy',
             ]);
 
             Route::resource('branches', BranchController::class)->names([
-                'index'   => 'restaurant.branches.index',
-                'create'  => 'restaurant.branches.create',
-                'store'   => 'restaurant.branches.store',
-                'show'    => 'restaurant.branches.show',
-                'edit'    => 'restaurant.branches.edit',
-                'update'  => 'restaurant.branches.update',
+                'index' => 'restaurant.branches.index',
+                'create' => 'restaurant.branches.create',
+                'store' => 'restaurant.branches.store',
+                'show' => 'restaurant.branches.show',
+                'edit' => 'restaurant.branches.edit',
+                'update' => 'restaurant.branches.update',
                 'destroy' => 'restaurant.branches.destroy',
             ]);
 
             Route::post('branches/{branch}/assign-manager', [BranchController::class, 'assignManager'])->name('restaurant.branches.assign-manager');
             Route::post('/branches/upload-qrcode', [BranchController::class, 'uploadQrCode'])->name('branches.upload-qrcode');
             Route::resource('categories', CategoryController::class)->names([
-                'index'   => 'restaurant.categories.index',
-                'create'  => 'restaurant.categories.create',
-                'store'   => 'restaurant.categories.store',
-                'show'    => 'restaurant.categories.show',
-                'edit'    => 'restaurant.categories.edit',
-                'update'  => 'restaurant.categories.update',
+                'index' => 'restaurant.categories.index',
+                'create' => 'restaurant.categories.create',
+                'store' => 'restaurant.categories.store',
+                'show' => 'restaurant.categories.show',
+                'edit' => 'restaurant.categories.edit',
+                'update' => 'restaurant.categories.update',
                 'destroy' => 'restaurant.categories.destroy',
             ]);
 
             Route::resource('menu-items', MenuItemController::class)->names([
-                'index'   => 'restaurant.menu-items.index',
-                'create'  => 'restaurant.menu-items.create',
-                'store'   => 'restaurant.menu-items.store',
-                'show'    => 'restaurant.menu-items.show',
-                'edit'    => 'restaurant.menu-items.edit',
-                'update'  => 'restaurant.menu-items.update',
+                'index' => 'restaurant.menu-items.index',
+                'create' => 'restaurant.menu-items.create',
+                'store' => 'restaurant.menu-items.store',
+                'show' => 'restaurant.menu-items.show',
+                'edit' => 'restaurant.menu-items.edit',
+                'update' => 'restaurant.menu-items.update',
                 'destroy' => 'restaurant.menu-items.destroy',
             ]);
 
@@ -294,12 +320,12 @@ Route::prefix('{restaurant}')
                 ->name('restaurant.categories.by-branch');
 
             Route::resource('orders', OrderController::class)->names([
-                'index'   => 'restaurant.orders.index',
-                'create'  => 'restaurant.orders.create',
-                'store'   => 'restaurant.orders.store',
-                'show'    => 'restaurant.orders.show',
-                'edit'    => 'restaurant.orders.edit',
-                'update'  => 'restaurant.orders.update',
+                'index' => 'restaurant.orders.index',
+                'create' => 'restaurant.orders.create',
+                'store' => 'restaurant.orders.store',
+                'show' => 'restaurant.orders.show',
+                'edit' => 'restaurant.orders.edit',
+                'update' => 'restaurant.orders.update',
                 'destroy' => 'restaurant.orders.destroy',
             ]);
 
@@ -313,21 +339,21 @@ Route::prefix('{restaurant}')
                 'destroy' => 'restaurant.inventory.destroy',
             ]);
             Route::resource('table-categories', TableCategoryController::class)->names([
-                'index'   => 'restaurant.table-categories.index',
-                'create'  => 'restaurant.table-categories.create',
-                'store'   => 'restaurant.table-categories.store',
-                'show'    => 'restaurant.table-categories.show',
-                'edit'    => 'restaurant.table-categories.edit',
-                'update'  => 'restaurant.table-categories.update',
+                'index' => 'restaurant.table-categories.index',
+                'create' => 'restaurant.table-categories.create',
+                'store' => 'restaurant.table-categories.store',
+                'show' => 'restaurant.table-categories.show',
+                'edit' => 'restaurant.table-categories.edit',
+                'update' => 'restaurant.table-categories.update',
                 'destroy' => 'restaurant.table-categories.destroy',
             ]);
             Route::resource('tables', RestaurantTableController::class)->names([
-                'index'   => 'restaurant.tables.index',
-                'create'  => 'restaurant.tables.create',
-                'store'   => 'restaurant.tables.store',
-                'show'    => 'restaurant.tables.show',
-                'edit'    => 'restaurant.tables.edit',
-                'update'  => 'restaurant.tables.update',
+                'index' => 'restaurant.tables.index',
+                'create' => 'restaurant.tables.create',
+                'store' => 'restaurant.tables.store',
+                'show' => 'restaurant.tables.show',
+                'edit' => 'restaurant.tables.edit',
+                'update' => 'restaurant.tables.update',
                 'destroy' => 'restaurant.tables.destroy',
             ]);
             Route::get('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInForm'])

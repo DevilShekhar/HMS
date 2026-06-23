@@ -518,57 +518,113 @@
                         @endphp
 
                         @if (auth()->user()->role !== 'super_admin')
+                            @can('view-inventory')
+                                <li class="dropdown">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i data-feather="archive"></i>
+                                        <span>Inventory Management</span>
+                                    </a>
 
-                            <li class="dropdown">
-                                <a href="#" class="nav-link has-dropdown">
-                                    <i data-feather="archive"></i>
-                                    <span>Inventory Management</span>
-                                </a>
+                                    <ul class="dropdown-menu">
 
-                                <ul class="dropdown-menu">
+                                        @if (currentRestaurantSlug() && currentBranchSlug())
+                                            <li>
+                                                <a
+                                                    href="{{ route('branch.inventory.index', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'branch' => currentBranchSlug(),
+                                                    ]) }}">
+                                                    Inventory List
+                                                </a>
+                                            </li>
 
-                                    @if (currentRestaurantSlug() && currentBranchSlug())
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.inventory.index', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                    'branch' => currentBranchSlug(),
-                                                ]) }}">
-                                                Inventory List
-                                            </a>
-                                        </li>
+                                            <li>
+                                                <a
+                                                    href="{{ route('branch.inventory.create', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'branch' => currentBranchSlug(),
+                                                    ]) }}">
+                                                    Add Inventory Item
+                                                </a>
+                                            </li>
+                                        @elseif(currentRestaurantSlug())
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.inventory.index', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                    ]) }}">
+                                                    Inventory List
+                                                </a>
+                                            </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.inventory.create', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                    'branch' => currentBranchSlug(),
-                                                ]) }}">
-                                                Add Inventory Item
-                                            </a>
-                                        </li>
-                                    @elseif(currentRestaurantSlug())
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.inventory.index', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                ]) }}">
-                                                Inventory List
-                                            </a>
-                                        </li>
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.inventory.create', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                    ]) }}">
+                                                    Add Inventory Item
+                                                </a>
+                                            </li>
+                                        @endif
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.inventory.create', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                ]) }}">
-                                                Add Inventory Item
-                                            </a>
-                                        </li>
-                                    @endif
+                                    </ul>
+                                </li>
+                            @endcan
 
-                                </ul>
-                            </li>
+                        @endif
+                        @if (auth()->user()->role !== 'super_admin')
+                            @can('view-recipe')
+                                <li class="dropdown">
+                                    <a href="#" class="nav-link has-dropdown">
+                                        <i data-feather="archive"></i>
+                                        <span>Management Recipe</span>
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+
+                                        @if (currentRestaurantSlug() && currentBranchSlug())
+                                            <li>
+                                                <a
+                                                    href="{{ route('branch.recipe.index', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'branch' => currentBranchSlug(),
+                                                    ]) }}">
+                                                    Recipe List
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a
+                                                    href="{{ route('branch.recipe.create', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'branch' => currentBranchSlug(),
+                                                    ]) }}">
+                                                    Add Recipe
+                                                </a>
+                                            </li>
+                                        @elseif(currentRestaurantSlug())
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.recipe.index', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                    ]) }}">
+                                                    Recipe List
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.recipe.create', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                    ]) }}">
+                                                    Add Recipe
+                                                </a>
+                                            </li>
+                                        @endif
+
+                                    </ul>
+                                </li>
+                            @endcan
 
                         @endif
                         @can('view-table')
@@ -892,11 +948,11 @@
                         icon: 'success',
                         title: title,
                         html: `
-                    <strong>Token #${nData.token_no}</strong><br>
-                    Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
-                    ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
-                    ${nData.message}
-                `,
+                            <strong>Token #${nData.token_no}</strong><br>
+                            Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
+                            ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
+                            ${nData.message}
+                        `,
                         confirmButtonText: 'OK',
                         allowOutsideClick: false,
                         allowEscapeKey: false,

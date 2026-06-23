@@ -13,6 +13,7 @@ use App\Models\TableCategory;
 use App\Models\User;
 use App\Notifications\NewOrderAssignedNotification;
 use App\Notifications\OrderStatusNotification;
+use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -280,21 +281,6 @@ class OrderController extends Controller
             ->route('orders.index')
             ->with('success', 'Order created successfully.');
     }
-
-    // private function generateToken($type)
-    // {
-    //     $lastToken = Order::orderBy('id', 'desc')->value('token_no');
-
-    //     $number = $lastToken
-    //         ? (int) str_replace(['TOK-', 'VIP-'], '', $lastToken)
-    //         : 0;
-
-    //     $number++;
-
-    //     $prefix = $type == 'vip' ? 'VIP-' : 'TOK-';
-
-    //     return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
-    // }
 
     private function generateToken(
         $type,
@@ -568,6 +554,7 @@ class OrderController extends Controller
 
     public function markPreparing($restaurant, $order)
     {
+        // dd('markPreparing called');
         $order = Order::findOrFail($order);
 
         // Security check
@@ -578,8 +565,26 @@ class OrderController extends Controller
             ], 403);
         }
 
-        $order->status = 'prepared';
-        $order->save();
+        $order->load(['items', 'items.menuItem']);
+        // dd($order->toArray());
+
+        try {
+            app(InventoryService::class)
+                ->deductRecipeStock($order);
+
+            $order->status = 'prepared';
+            $order->save();
+
+        } catch (\Exception $e) {
+
+            // return back()->with(
+            //     'error',
+            //     $e->getMessage()
+            // );
+            dd($e->getMessage());
+
+        }
+        // dd($order);
 
         // Notify Waiters and Waiter Heads
         $waiters = User::query()->where('restaurant_id', $order->restaurant_id)
@@ -590,9 +595,13 @@ class OrderController extends Controller
             ->get();
 
         foreach ($waiters as $user) {
-            $user->notify(
-                new OrderStatusNotification($order, 'prepared')
-            );
+            $creator = User::find($order->created_by);
+
+            if ($creator) {
+                $creator->notify(
+                    new OrderStatusNotification($order, 'prepared')
+                );
+            }
         }
 
         return back()->with('success', 'Order marked as Prepared successfully');

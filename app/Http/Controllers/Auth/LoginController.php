@@ -215,14 +215,30 @@ class LoginController extends Controller
     |--------------------------------------------------------------------------
     */
 
+
     public function logout(Request $request)
-    {
-        Auth::logout();
+{
+    $user = Auth::user();
 
-        $request->session()->invalidate();
+    Auth::logout();
 
-        $request->session()->regenerateToken();
+    $request->session()->invalidate();
 
-        return redirect('/');
+    $request->session()->regenerateToken();
+
+
+    // Customer logout redirect
+    if ($user && $user->role === 'customer') {
+
+        return redirect()->route('branch.register', [
+            'restaurant' => optional($user->restaurant)->slug,
+            'branch' => optional($user->branch)->slug,
+        ]);
+
     }
+
+
+    // Other users
+    return redirect('/');
+}
 }

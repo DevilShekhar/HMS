@@ -12,12 +12,28 @@
                     <!-- Customer & Table Details -->
                     <div class="row">
                         <div class="col-md-3">
+
                             <label>Customer Name</label>
-                            <input type="text" name="customer_name" class="form-control" required>
+
+                            @if (auth()->user()->role == 'customer')
+                                <input type="text" name="customer_name" class="form-control"
+                                    value="{{ auth()->user()->name }}" readonly>
+                            @else
+                                <input type="text" name="customer_name" class="form-control" required>
+                            @endif
+
                         </div>
                         <div class="col-md-3">
+
                             <label>Mobile Number</label>
-                            <input type="text" name="mobile_number" class="form-control">
+
+                            @if (auth()->user()->role == 'customer')
+                                <input type="text" name="mobile_number" class="form-control "
+                                    value="{{ auth()->user()->phone }}" readonly>
+                            @else
+                                <input type="text" name="mobile_number" class="form-control" required>
+                            @endif
+
                         </div>
                         @if (auth()->user()->role == 'waiter_head')
                             <div class="col-md-3">
@@ -485,7 +501,7 @@
                             let options = '<option value="">Select Table</option>';
                             data.forEach(table => {
 
-                                let disabled = table.occupied ? 'disabled' : '';
+                                let disabled = table.occupied ? '' : '';
 
                                 let text = table.table_number;
 

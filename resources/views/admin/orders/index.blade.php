@@ -240,7 +240,7 @@
                     </div>
                 </div>
             </div>
-        </section>.
+        </section>
         <div class="modal fade" id="paymentModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
