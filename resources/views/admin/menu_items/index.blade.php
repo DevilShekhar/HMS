@@ -107,6 +107,11 @@
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-info add-recipe-btn"
+                                                data-toggle="modal" data-target="#recipeModal"
+                                                data-menu-id="{{ $item->id }}" data-menu-name="{{ $item->name }}">
+                                                <i class="fas fa-book"></i>
+                                            </button>
 
                                             @php
                                                 $restaurantSlug = request()->route('restaurant');
@@ -225,4 +230,135 @@
 
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            $('.add-recipe-btn').click(function() {
+
+                let menuId = $(this).data('menu-id');
+                let menuName = $(this).data('menu-name');
+
+                $('#recipe_menu_item_id').val(menuId);
+                $('#recipe_menu_item_name').val(menuName);
+
+            });
+
+        });
+    </script>
+
+    <div class="modal fade" id="recipeModal" tabindex="-1">
+
+        <div class="modal-dialog modal-lg">
+
+            <div class="modal-content">
+
+                <form action="{{ route('restaurant.recipe.store', ['restaurant' => $restaurantSlug]) }}" method="POST">
+
+                    @csrf
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+                            Add Recipe
+                        </h5>
+
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" name="menu_item_id" id="recipe_menu_item_id">
+
+                        <div class="form-group">
+
+                            <label>Menu Item</label>
+
+                            <input type="text" id="recipe_menu_item_name" class="form-control" readonly>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Branch</label>
+
+                            <select name="branch_id" class="form-control">
+
+                                @foreach ($branches as $branch)
+                                    <option value="{{ $branch->id }}">
+                                        {{ $branch->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Ingredient</label>
+
+                            <select name="inventory_id" class="form-control">
+
+                                @foreach ($inventoryItems as $inventory)
+                                    <option value="{{ $inventory->id }}">
+                                        {{ $inventory->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Quantity Required</label>
+
+                            <input type="number" step="0.001" name="quantity_required" class="form-control">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Recipe Unit</label>
+
+                            <select name="recipe_unit" class="form-control">
+
+                                <option value="Gram">Gram</option>
+                                <option value="Kg">Kg</option>
+                                <option value="ML">ML</option>
+                                <option value="Litre">Litre</option>
+                                <option value="Piece">Piece</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Remarks</label>
+
+                            <textarea name="remarks" class="form-control"></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-primary">
+                            Save Recipe
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 @endsection

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MenuItem;
 use App\Models\Branch;
 use App\Models\Category;
+use App\Models\InventoryItem;
+use App\Models\MenuItem;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,17 +15,21 @@ class MenuItemController extends Controller
     /**
      * Display a listing of the resource.
      */
+   
     public function index()
     {
         $restaurant = Restaurant::query()->where('slug', request()->route('restaurant'))->firstOrFail();
 
         if (Auth::user()->role == 'owner') {
+
             $menuItems = MenuItem::with(['branch', 'category'])
                 ->where('restaurant_id', $restaurant->id)
                 ->latest()
                 ->get();
+
         } else {
-            $branch = Auth::user()->managedBranch;
+
+            $branch = Branch::query()->where('slug', request()->route('branch'))->firstOrFail();
 
             $menuItems = MenuItem::with(['branch', 'category'])
                 ->where('restaurant_id', $restaurant->id)
@@ -34,10 +39,12 @@ class MenuItemController extends Controller
                 ->get();
         }
 
-        return view(
-            'admin.menu_items.index',
-            compact('menuItems')
-        );
+        // For Recipe Modal
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
+
+        $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)->get();
+
+        return view('admin.menu_items.index', compact('menuItems', 'branches', 'inventoryItems'));
     }
 
     /**
@@ -87,6 +94,7 @@ class MenuItemController extends Controller
             )
         );
     }
+
     public function categoriesByBranch($restaurant, $branch)
     {
         $categories = Category::query()->where('branch_id', $branch)
@@ -96,6 +104,7 @@ class MenuItemController extends Controller
 
         return response()->json($categories);
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -123,9 +132,9 @@ class MenuItemController extends Controller
                 Auth::id()
             )->first();
 
-            if (!$branch) {
+            if (! $branch) {
                 return back()->withErrors([
-                    'branch' => 'Branch not assigned.'
+                    'branch' => 'Branch not assigned.',
                 ]);
             }
 
@@ -138,9 +147,9 @@ class MenuItemController extends Controller
 
             $file = $request->file('image');
 
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
 
-            if (!file_exists(public_path('uploads/menu-items'))) {
+            if (! file_exists(public_path('uploads/menu-items'))) {
                 mkdir(public_path('uploads/menu-items'), 0777, true);
             }
 
@@ -149,7 +158,7 @@ class MenuItemController extends Controller
                 $filename
             );
 
-            $image = 'uploads/menu-items/' . $filename;
+            $image = 'uploads/menu-items/'.$filename;
         }
 
         MenuItem::create([
@@ -191,10 +200,11 @@ class MenuItemController extends Controller
                     'Menu Item Added Successfully'
                 );
         }
+
         // Owner
         return redirect()
             ->route('restaurant.menu-items.index', [
-                'restaurant' => $restaurant->slug
+                'restaurant' => $restaurant->slug,
             ])
             ->with(
                 'success',
@@ -220,7 +230,6 @@ class MenuItemController extends Controller
             $restaurant
         )->firstOrFail();
 
-
         if (Auth::user()->hasRole('owner')) {
 
             $branches = Branch::query()->where(
@@ -236,21 +245,17 @@ class MenuItemController extends Controller
                 ->get();
         } elseif (Auth::user()->hasRole('branch_manager')) {
 
-
             $branchModel = Branch::query()->where(
                 'branch_manager_id',
                 Auth::id()
             )
                 ->firstOrFail();
 
-
             if ($menuItem->branch_id != $branchModel->id) {
                 abort(403);
             }
 
-
             $branches = collect([$branchModel]);
-
 
             $categories = Category::query()->where(
                 'restaurant_id',
@@ -260,6 +265,7 @@ class MenuItemController extends Controller
                 ->where('is_active', 1)
                 ->get();
         }
+
         return view(
             'admin.menu_items.edit',
             compact(
@@ -269,6 +275,7 @@ class MenuItemController extends Controller
             )
         );
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -323,9 +330,9 @@ class MenuItemController extends Controller
 
             $file = $request->file('image');
 
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
 
-            if (!file_exists(public_path('uploads/menu-items'))) {
+            if (! file_exists(public_path('uploads/menu-items'))) {
                 mkdir(public_path('uploads/menu-items'), 0777, true);
             }
 
@@ -334,7 +341,7 @@ class MenuItemController extends Controller
                 $filename
             );
 
-            $data['image'] = 'uploads/menu-items/' . $filename;
+            $data['image'] = 'uploads/menu-items/'.$filename;
         }
 
         $menuItem->update($data);
@@ -361,18 +368,18 @@ class MenuItemController extends Controller
                 );
         }
 
-
         // Owner
 
         return redirect()
             ->route('restaurant.menu-items.index', [
-                'restaurant' => $restaurant
+                'restaurant' => $restaurant,
             ])
             ->with(
                 'success',
                 'Menu Item Updated Successfully'
             );
     }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -387,7 +394,7 @@ class MenuItemController extends Controller
         $menuItem = MenuItem::findOrFail($menu_item);
 
         $menuItem->update([
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         if ($branch) {
@@ -401,7 +408,7 @@ class MenuItemController extends Controller
 
         return redirect()
             ->route('restaurant.menu-items.index', [
-                'restaurant' => $restaurant
+                'restaurant' => $restaurant,
             ])
             ->with('success', 'Menu Item Deactivated Successfully');
     }

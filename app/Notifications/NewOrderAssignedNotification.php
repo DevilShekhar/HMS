@@ -22,17 +22,17 @@ class NewOrderAssignedNotification extends Notification
     }
 
     public function toArray($notifiable): array
-{
-    return [
-        'type'            => 'order-notification',
-        'order_id'        => $this->order->id,
-        'token_no'        => $this->order->token_no,
-        'customer_name'   => $this->order->customer_name,
-        'table_no'        => $this->order->table_no,           // ← Added
-        'restaurant_slug' => $this->order->restaurant->slug,
-        'branch_slug'     => $this->order->branch?->slug,
-        'message'         => 'New Order Assigned',
-        'status'          => 'pending',
-    ];
-}
+    {
+        return [
+            'type' => 'order-notification',
+            'order_id' => $this->order->id,
+            'token_no' => $this->order->token_no,
+            'customer_name' => $this->order->customer_name,
+            'table_no' => $this->order->table_no,
+            'restaurant_slug' => $this->order->restaurant->slug,
+            'branch_slug' => $this->order->branch?->slug,
+            'message' => 'New Order Assigned',
+            'status' => 'pending',
+        ];
+    }
 }

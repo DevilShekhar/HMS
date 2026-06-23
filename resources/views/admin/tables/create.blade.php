@@ -58,26 +58,25 @@
                     <div class="row">
                         @if (auth()->user()->role == 'owner')
                             <div class="col-md-6 mb-4">
-                                <label class="form-label"> Branch</label>
+                                <label class="form-label">Branch</label>
                                 <select name="branch_id" id="branch_id" class="form-control premium-input">
-                                    <option value=""> Select Branch</option>
+                                    <option value="">Select Branch</option>
                                     @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}">
                                             {{ $branch->name }}
                                         </option>
                                     @endforeach
                                 </select>
+
                                 @error('branch_id')
-                                    <small class="text-danger">
-                                        {{ $message }}
-                                    </small>
+                                    <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-                        @endif
-                        @if (isset($branch))
+                        @elseif (isset($branch))
                             <input type="hidden" name="branch_id" value="{{ $branch->id }}">
+
                             <div class="col-md-6 mb-4">
-                                <label class="form-label"> Branch </label>
+                                <label class="form-label">Branch</label>
                                 <input type="text" class="form-control premium-input" value="{{ $branch->name }}"
                                     readonly>
                             </div>

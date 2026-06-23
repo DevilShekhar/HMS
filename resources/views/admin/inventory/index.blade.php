@@ -62,6 +62,7 @@
                                 <th>Remaining Stock</th>
                                 <th>Minimum Stock</th>
                                 <th>Status</th>
+                                <th>Is Active</th>
                                 <th>Created By</th>
                                 <th>Updated By</th>
                                 <th width="150">Action</th>
@@ -106,6 +107,17 @@
                                         @else
                                             <span class="badge bg-success">
                                                 In Stock
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($item->is_active)
+                                            <span class="badge bg-success">
+                                                Active
+                                            </span>
+                                        @else
+                                            <span class="badge bg-danger">
+                                                Inactive
                                             </span>
                                         @endif
                                     </td>
@@ -208,7 +220,7 @@
                                                 <button type="submit" class="btn btn-danger btn-sm">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
-                                                
+
                                             </form>
                                         @endif
 

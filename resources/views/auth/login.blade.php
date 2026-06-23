@@ -35,25 +35,28 @@
                             </div>
 
                             <div class="card-body">
-
-                                @if (session('error'))
-                                    <div class="alert alert-danger">
-                                        {{ session('error') }}
-                                    </div>
-                                @endif
-
                                 <form method="POST"
-                                    action="
-                                            {{ request()->route('branch')
-                                                ? route('branch.login.submit', [
-                                                    'restaurant' => request()->route('restaurant'),
-                                                    'branch' => request()->route('branch'),
-                                                ])
-                                                : (request()->route('restaurant')
-                                                    ? route('restaurant.login.submit', [
-                                                        'restaurant' => request()->route('restaurant'),
-                                                    ])
-                                                    : route('login')) }}">
+                                    @if (request()->routeIs('customer.login')) action="{{ route('customer.login.submit', [
+                                        'restaurant' => request()->route('restaurant'),
+                                        'branch' => request()->route('branch'),
+                                    ]) }}"
+
+                                            @elseif(request()->route('branch'))
+
+                                            action="{{ route('branch.login.submit', [
+                                                'restaurant' => request()->route('restaurant'),
+                                                'branch' => request()->route('branch'),
+                                            ]) }}"
+
+                                            @elseif(request()->route('restaurant'))
+
+                                            action="{{ route('restaurant.login.submit', [
+                                                'restaurant' => request()->route('restaurant'),
+                                            ]) }}"
+
+                                            @else
+
+                                            action="{{ route('login') }}" @endif>
                                     @csrf
                                     <div class="form-group">
                                         <label>Email</label>
@@ -85,6 +88,19 @@
                                             Login
                                         </button>
                                     </div>
+                                    @if (request()->routeIs('customer.login'))
+                                        <div class="text-center mt-3">
+                                            New customer?
+
+                                            <a
+                                                href="{{ route('branch.register', [
+                                                    'restaurant' => request()->route('restaurant'),
+                                                    'branch' => request()->route('branch'),
+                                                ]) }}">
+                                                Register here
+                                            </a>
+                                        </div>
+                                    @endif
 
                                 </form>
 
