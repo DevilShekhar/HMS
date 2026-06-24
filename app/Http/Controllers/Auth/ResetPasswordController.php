@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Support\Facades\Auth;
 
 class ResetPasswordController extends Controller
 {
@@ -25,5 +26,20 @@ class ResetPasswordController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/dashboard';
+
+    protected function redirectTo()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'customer') {
+
+            $restaurant = $user->restaurant?->slug;
+            $branch = $user->branch?->slug;
+
+            return "/{$restaurant}/{$branch}/dashboard";
+        }
+
+        return '/dashboard';
+    }
 }

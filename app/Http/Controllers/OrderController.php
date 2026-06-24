@@ -22,7 +22,6 @@ class OrderController extends Controller
 {
     public function index()
     {
-
         $restaurant = app('restaurant');
         $query = Order::with([
             'branch',
@@ -32,25 +31,31 @@ class OrderController extends Controller
             'restaurant_id',
             $restaurant->id
         );
-        if (Auth::user()->role == 'owner') {
-            // show all orders
-        } elseif (Auth::user()->role == 'branch_manager') {
-            $query->where(
-                'branch_id',
-                Auth::user()->branch_id
-            );
-        } elseif (Auth::user()->role == 'waiter_head') {
+        $user = Auth::user();
 
-        } elseif (Auth::user()->role == 'chef') {
-            $query->where(
-                'chef_id',
-                Auth::id()
-            );
+        if ($user->role == 'owner') {
+
+            // show all orders
+
+        } elseif ($user->role == 'branch_manager') {
+
+            $query->where('branch_id', $user->branch_id);
+
+        } elseif ($user->role == 'waiter_head') {
+
+            // show branch orders
+
+        } elseif ($user->role == 'chef') {
+
+            $query->where('chef_id', $user->id);
+
+        } elseif ($user->role == 'customer') {
+
+            $query->where('customer_id', $user->id);
+
         } else {
-            $query->where(
-                'branch_id',
-                Auth::user()->branch_id
-            );
+
+            $query->where('branch_id', $user->branch_id);
         }
 
         $orders = $query
@@ -205,7 +210,13 @@ class OrderController extends Controller
                 'restaurant_id' => $restaurant->id,
                 'branch_id' => $branchId,
                 'chef_id' => $chef?->id,
-                'created_by' => Auth::id(),
+                'created_by' => Auth::user()->role === 'customer'
+                    ? null
+                    : Auth::id(),
+
+                'customer_id' => Auth::user()->role === 'customer'
+                    ? Auth::id()
+                    : null,
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
                 'token_no' => $token,
@@ -216,12 +227,31 @@ class OrderController extends Controller
                 'tax' => 0,
                 'total' => 0,
             ]);
-            if ($chef) {
-                $chef->notify(
-                    new NewOrderAssignedNotification($order)
-                );
+            if (Auth::user()->role === 'customer') {
+
+                $waiterHead = User::query()
+                    ->where('restaurant_id', $restaurant->id)
+                    ->where('role', 'waiter_head')
+                    ->when($branchId, function ($q) use ($branchId) {
+                        $q->where('branch_id', $branchId);
+                    })
+                    ->first();
+
+                if ($waiterHead) {
+                    $waiterHead->notify(
+                        new NewOrderAssignedNotification($order)
+                    );
+                }
+
+            } else {
+
+                if ($chef) {
+                    $chef->notify(
+                        new NewOrderAssignedNotification($order)
+                    );
+                }
+
             }
-            // dd($chef);
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -554,7 +584,6 @@ class OrderController extends Controller
 
     public function markPreparing($restaurant, $order)
     {
-        // dd('markPreparing called');
         $order = Order::findOrFail($order);
 
         // Security check
@@ -566,9 +595,9 @@ class OrderController extends Controller
         }
 
         $order->load(['items', 'items.menuItem']);
-        // dd($order->toArray());
 
         try {
+
             app(InventoryService::class)
                 ->deductRecipeStock($order);
 
@@ -577,34 +606,25 @@ class OrderController extends Controller
 
         } catch (\Exception $e) {
 
-            // return back()->with(
-            //     'error',
-            //     $e->getMessage()
-            // );
-            dd($e->getMessage());
-
-        }
-        // dd($order);
-
-        // Notify Waiters and Waiter Heads
-        $waiters = User::query()->where('restaurant_id', $order->restaurant_id)
-            ->whereIn('role', ['waiter', 'waiter_head'])
-            ->when($order->branch_id, function ($query) use ($order) {
-                $query->where('branch_id', $order->branch_id); // Only same branch
-            })
-            ->get();
-
-        foreach ($waiters as $user) {
-            $creator = User::find($order->created_by);
-
-            if ($creator) {
-                $creator->notify(
-                    new OrderStatusNotification($order, 'prepared')
-                );
-            }
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
         }
 
-        return back()->with('success', 'Order marked as Prepared successfully');
+        // Notify only order creator
+        $creator = User::query()->find($order->created_by);
+
+        if ($creator) {
+            $creator->notify(
+                new OrderStatusNotification($order, 'prepared')
+            );
+        }
+
+        return back()->with(
+            'success',
+            'Order marked as Prepared successfully'
+        );
     }
 
     public function markDelivered($restaurant, $order)
@@ -649,7 +669,6 @@ class OrderController extends Controller
 
     public function makePayment(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'order_id' => 'required|exists:orders,id',
             'payment_method' => 'required|in:cash,upi,card',
@@ -676,5 +695,43 @@ class OrderController extends Controller
             ->get();
 
         return response()->json($tables);
+    }
+
+    public function customerHistory(Request $request)
+    {
+        $restaurantId = Auth::user()->restaurant_id;
+        $branchId = Auth::user()->branch_id;
+
+        $customer = User::query()->where('phone', $request->phone)
+            ->where('role', 'customer')
+            ->where('restaurant_id', $restaurantId)
+            ->where('branch_id', $branchId)
+            ->first();
+
+        if (! $customer) {
+            return response()->json([
+                'found' => false,
+            ]);
+        }
+
+        $orders = Order::query()->where('customer_id', $customer->id)
+            ->where('restaurant_id', $restaurantId)
+            ->where('branch_id', $branchId)
+            ->latest()
+            ->get();
+
+        $lastOrder = Order::query()->where('customer_id', $customer->id)
+            ->where('restaurant_id', $restaurantId)
+            ->where('branch_id', $branchId)
+            ->latest()
+            ->first();
+
+        return response()->json([
+            'found' => true,
+            'customer_name' => $customer->name,
+            'total_visits' => $orders->count(),
+            'last_visit' => optional($lastOrder)->created_at?->format('d M Y'),
+            'orders' => $orders,
+        ]);
     }
 }

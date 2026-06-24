@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BranchController;
@@ -30,11 +31,14 @@ Route::get('{restaurant}/{branch}/register', [RegisterController::class, 'showBr
 
 Route::post('{restaurant}/{branch}/register', [RegisterController::class, 'branchRegister'])
     ->name('branch.register.submit');
-Route::get('{restaurant}/{branch}/customer-login',[RegisterController::class, 'showCustomerLogin'])->name('customer.login');
+Route::get('{restaurant}/{branch}/customer-login', [RegisterController::class, 'showCustomerLogin'])->name('customer.login');
 
-Route::post('{restaurant}/{branch}/customer-login',[RegisterController::class, 'customerLogin'])->name('customer.login.submit');
-// Route::post('{restaurant}/{branch}/logout',[LoginController::class,'logout'])->name('restaurant.logout');
+Route::post('{restaurant}/{branch}/customer-login', [RegisterController::class, 'customerLogin'])->name('customer.login.submit');
+Route::get('/{restaurant}/{branch}/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('branch.customer.forgot-password');
 
+Route::post('/{restaurant}/{branch}/forgot-password','Auth\ForgotPasswordController@sendResetLinkEmail')->name('branch.customer.password.email');
+
+Route::get('/customer-history', [OrderController::class, 'customerHistory'])->name('customer.history');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
@@ -50,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
 
             $branch = Branch::query()->find($user->branch_id);
 
-            if (!$branch) {
+            if (! $branch) {
                 abort(403, 'Branch not assigned');
             }
 
@@ -400,16 +404,34 @@ Route::prefix('{restaurant}')
                     request()->session()->regenerateToken();
                 }
 
+                // Super Admin
                 if ($user && $user->role === 'super_admin') {
                     return redirect()->route('login');
                 }
 
+                // Customer -> Register Page
+                if ($user && $user->role === 'customer') {
+
+                    if ($branchSlug) {
+                        return redirect()->route('branch.register', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]);
+                    }
+
+                    return redirect()->route('restaurant.register', [
+                        'restaurant' => $restaurantSlug,
+                    ]);
+                }
+
+                // Staff / Owner / Chef / Waiter
                 if ($user && $user->branch_id && $restaurantSlug && $branchSlug) {
                     return redirect()->route('branch.login', [
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
                     ]);
                 }
+
                 if ($restaurantSlug) {
                     return redirect()->route('restaurant.login', [
                         'restaurant' => $restaurantSlug,
@@ -417,6 +439,8 @@ Route::prefix('{restaurant}')
                 }
 
                 return redirect()->route('login');
+
             })->name('restaurant.logout');
         });
+
     });

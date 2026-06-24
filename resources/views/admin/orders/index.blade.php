@@ -68,7 +68,9 @@
                                     <th>Status</th>
                                     <th>Payment Method</th>
                                     <th>Total</th>
-                                    <th>Assign</th>
+                                    @if (auth()->user()->role != 'customer')
+                                        <th>Assign</th>
+                                    @endif
                                     <th width="180">
                                         Action
                                     </th>
@@ -100,7 +102,7 @@
                                             {{ $order->table?->category?->name ?? '-' }}
 
                                         </td>
-                                        <td>
+                                        <td class="text-white">
                                             @if ($order->order_type == 'vip')
                                                 <span class="badge bg-warning text-dark">
                                                     VIP
@@ -146,7 +148,9 @@
                                             @endif
                                         </td>
                                         <td> ₹{{ number_format($order->total, 2) }} </td>
-                                        <td>{{ $order->chef?->name ?? 'Not Assigned' }}</td>
+                                        @if (auth()->user()->role != 'customer')
+                                            <td>{{ $order->chef?->name ?? 'Not Assigned' }}</td>
+                                        @endif
                                         <td>
                                             <div class="d-flex gap-2">
 

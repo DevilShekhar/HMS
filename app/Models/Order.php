@@ -27,6 +27,10 @@ class Order extends Model
         'branch_id', 'payment_method',
     ];
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
