@@ -11,29 +11,24 @@
                 <div class="card-body">
                     <!-- Customer & Table Details -->
                     <div class="row">
+
                         <div class="col-md-3">
-
-                            <label>Customer Name</label>
-
                             @if (auth()->user()->role == 'customer')
-                                <input type="text" name="customer_name" class="form-control"
-                                    value="{{ auth()->user()->name }}" readonly>
+                                <input type="hidden" name="customer_name" value="{{ auth()->user()->name }}">
                             @else
+                                <label>Customer Name</label>
+
                                 <input type="text" name="customer_name" class="form-control" required>
                             @endif
-
                         </div>
                         <div class="col-md-3">
-
-                            <label>Mobile Number</label>
-
                             @if (auth()->user()->role == 'customer')
-                                <input type="text" name="mobile_number" class="form-control "
+                                <input type="hidden" name="mobile_number" class="form-control "
                                     value="{{ auth()->user()->phone }}" readonly>
                             @else
-                                <input type="text" name="mobile_number" class="form-control" required>
+                                <label>Mobile Number</label>
+                                <input type="text" name="mobile_number" class="form-control" required id="mobile_number">
                             @endif
-
                         </div>
                         @if (auth()->user()->role == 'waiter_head')
                             <div class="col-md-3">
@@ -154,6 +149,10 @@
                         </div>
                     </div>
 
+
+
+
+
                     <!-- Hidden fields for menu items -->
                     <div id="hiddenItemsContainer"></div>
                 </div>
@@ -162,7 +161,45 @@
                         Order</button>
                     <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}" class="btn btn-secondary">Back</a>
                 </div>
+
             </form>
+
+        </div>
+        <div id="customerHistory" class="card mt-3" style="display:none;">
+            <div class="card-header py-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-user-check text-success"></i>
+                    Returning Customer
+                </h6>
+            </div>
+
+            <div class="card-body py-2">
+                <div class="row text-center mb-2">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Visits</small>
+                        <strong id="visitCount">0</strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Last Visit</small>
+                        <strong id="lastVisit">-</strong>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Order Type</th>
+                                <th width="80">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyRows">
+                            <!-- JS Data -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -525,6 +562,48 @@
                         });
                 });
             }
+        });
+        $('#mobile_number').on('blur', function() {
+
+            let phone = $(this).val();
+
+            if (!phone) {
+                return;
+            }
+
+            $.get("{{ route('customer.history') }}", {
+                phone: phone
+            }, function(response) {
+
+                if (!response.found) {
+                    $('#customerHistory').hide();
+                    return;
+                }
+
+                $('#customerHistory').show();
+
+                $('#visitCount').text(response.total_visits);
+                $('#lastVisit').text(response.last_visit);
+
+                let html = '';
+
+                response.orders.forEach(order => {
+
+                    html += `
+                        <tr>
+                           <td>${new Date(order.created_at).toLocaleDateString('en-GB')}</td>
+                            <td>
+                                <span class="badge badge-${order.order_type === 'vip' ? 'warning' : 'primary'}">
+                                    ${order.order_type}
+                                </span>
+                            </td>
+                            <td>₹${order.total}</td>
+                        </tr>
+                        `;
+                });
+
+                $('#historyRows').html(html);
+            });
         });
     </script>
 @endpush

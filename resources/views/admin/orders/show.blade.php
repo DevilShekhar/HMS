@@ -21,7 +21,58 @@
             </div>
 
             <div class="card-body">
+                <div class="mb-4">
+                    <h5>Order Status</h5>
 
+                    @php
+                        $statuses = [
+                            'pending' => 1,
+                            'prepared' => 2,
+                            'delivered' => 3,
+                            'completed' => 4,
+                        ];
+
+                        $currentStep = $statuses[$order->status] ?? 1;
+                    @endphp
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+
+                        <div class="text-center flex-fill">
+                            <div class="badge {{ $currentStep >= 1 ? 'bg-warning' : 'bg-secondary' }}">
+                                1
+                            </div>
+                            <div class="mt-2">Order Placed</div>
+                        </div>
+
+                        <div class="flex-fill border-top"></div>
+
+                        <div class="text-center flex-fill">
+                            <div class="badge {{ $currentStep >= 2 ? 'bg-info' : 'bg-secondary' }}">
+                                2
+                            </div>
+                            <div class="mt-2">Prepared</div>
+                        </div>
+
+                        <div class="flex-fill border-top"></div>
+
+                        <div class="text-center flex-fill">
+                            <div class="badge {{ $currentStep >= 3 ? 'bg-primary' : 'bg-secondary' }}">
+                                3
+                            </div>
+                            <div class="mt-2">Delivered</div>
+                        </div>
+
+                        <div class="flex-fill border-top"></div>
+
+                        <div class="text-center flex-fill">
+                            <div class="badge {{ $currentStep >= 4 ? 'bg-success' : 'bg-secondary' }}">
+                                4
+                            </div>
+                            <div class="mt-2">Completed</div>
+                        </div>
+
+                    </div>
+                </div>
                 <!-- Order Info -->
                 <div class="row mb-2">
                     <div class="col-md-2">
@@ -29,9 +80,19 @@
                         {{ $order->id }}
                     </div>
                     <div class="col-md-2">
-                        <strong>Token No:</strong><br>
-                        <span class="fw-bold">{{ $order->token_no }}</span>
+                        @if ($order->order_type == 'vip')
+                            <strong>VIP Order</strong><br>
+                            <span class="badge badge-warning">
+                                {{ $order->token_no }}
+                            </span>
+                        @else
+                            <strong>Token No</strong><br>
+                            <span class="badge badge-primary">
+                                {{ $order->token_no }}
+                            </span>
+                        @endif
                     </div>
+
                     <div class="col-md-2">
                         <strong>Table No:</strong><br>
                         {{ $order->table_no ?? ($order->table?->name ?? 'Take Away') }}
@@ -105,17 +166,17 @@
 
                     <!-- Back Button -->
                     @if (auth()->user()->role === 'super_admin')
-                        <a href="{{ route('orders.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('orders.index') }}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Orders
                         </a>
                     @elseif($branchSlug)
                         <a href="{{ route('branch.orders.index', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
-                            class="btn btn-secondary">
+                            class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Orders
                         </a>
                     @elseif($restaurantSlug)
                         <a href="{{ route('restaurant.orders.index', ['restaurant' => $restaurantSlug]) }}"
-                            class="btn btn-secondary">
+                            class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Orders
                         </a>
                     @endif
@@ -147,6 +208,8 @@
                 </div>
 
             </div>
+
+
         </div>
     </div>
 @endsection

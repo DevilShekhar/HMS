@@ -166,7 +166,7 @@
                                 </a>
                                 <div class="dropdown-divider"></div>
 
-                                @if (auth()->user()->role == 'super_admin' ?? 'N/A')
+                                @if (auth()->check() && auth()->user()->role == 'super_admin')
                                     <form action="{{ route('logout') }}" method="POST">
                                         @csrf
 
@@ -178,22 +178,21 @@
                                         </button>
                                     </form>
                                 @else
-                                    <form
-                                        action="{{ route('restaurant.logout', [
-                                            'restaurant' => optional(auth()->user()->restaurant)->slug,
-                                        ]) }}"
-                                        method="POST">
+                                    @auth
+                                        <form
+                                            action="{{ route('restaurant.logout', [
+                                                'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                            ]) }}"
+                                            method="POST">
 
-                                        @csrf
+                                            @csrf
 
-                                        <button type="submit" class="dropdown-item has-icon text-danger">
-
-                                            <i class="fas fa-sign-out-alt"></i>
-                                            Logout
-
-                                        </button>
-
-                                    </form>
+                                            <button type="submit" class="dropdown-item has-icon text-danger">
+                                                <i class="fas fa-sign-out-alt"></i>
+                                                Logout
+                                            </button>
+                                        </form>
+                                    @endauth
                                 @endif
 
                             </div>
@@ -226,40 +225,42 @@
                     </div>
 
                     <ul class="sidebar-menu">
+                        @can('view-dashboard')
 
-                        {{-- Dashboard --}}
-                        <li
-                            class="{{ request()->routeIs('dashboard') ||
-                            request()->routeIs('restaurant.dashboard') ||
-                            request()->routeIs('branch.dashboard')
-                                ? 'active'
-                                : '' }}">
+                            {{-- Dashboard --}}
+                            <li
+                                class="{{ request()->routeIs('dashboard') ||
+                                request()->routeIs('restaurant.dashboard') ||
+                                request()->routeIs('branch.dashboard')
+                                    ? 'active'
+                                    : '' }}">
 
-                            @if (auth()->user()->role == 'super_admin')
-                                <a href="{{ route('dashboard') }}" class="nav-link">
-                                    <i data-feather="monitor"></i>
-                                    <span>Dashboard</span>
-                                </a>
-                            @elseif(!empty($restaurantSlug) && !empty($BranchSlug))
-                                <a href="{{ route('branch.dashboard', [
-                                    'restaurant' => $restaurantSlug,
-                                    'branch' => $BranchSlug,
-                                ]) }}"
-                                    class="nav-link">
-                                    <i data-feather="monitor"></i>
-                                    <span>Dashboard</span>
-                                </a>
-                            @elseif(!empty($restaurantSlug))
-                                <a href="{{ route('restaurant.dashboard', [
-                                    'restaurant' => $restaurantSlug,
-                                ]) }}"
-                                    class="nav-link">
-                                    <i data-feather="monitor"></i>
-                                    <span>Dashboard</span>
-                                </a>
-                            @endif
+                                @if (auth()->user()->role == 'super_admin')
+                                    <a href="{{ route('dashboard') }}" class="nav-link">
+                                        <i data-feather="monitor"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                @elseif(!empty($restaurantSlug) && !empty($BranchSlug))
+                                    <a href="{{ route('branch.dashboard', [
+                                        'restaurant' => $restaurantSlug,
+                                        'branch' => $BranchSlug,
+                                    ]) }}"
+                                        class="nav-link">
+                                        <i data-feather="monitor"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                @elseif(!empty($restaurantSlug))
+                                    <a href="{{ route('restaurant.dashboard', [
+                                        'restaurant' => $restaurantSlug,
+                                    ]) }}"
+                                        class="nav-link">
+                                        <i data-feather="monitor"></i>
+                                        <span>Dashboard</span>
+                                    </a>
+                                @endif
 
-                        </li>
+                            </li>
+                        @endcan
 
                         {{-- User Management existing code --}}
 
@@ -268,7 +269,7 @@
                             $BranchSlug = $BranchSlug ?? request()->route('branch');
                         @endphp
 
-                        @if (in_array(auth()->user()->role, ['super_admin', 'owner', 'branch_manager']))
+                        @if (in_array(optional(auth()->user())->role, ['super_admin', 'owner', 'branch_manager']))
 
                             <li class="dropdown">
                                 <a href="#" class="nav-link has-dropdown">
@@ -380,7 +381,7 @@
                             $branchSlug = request()->route('branch');
                         @endphp
 
-                        @if (in_array(auth()->user()->role, ['super_admin', 'owner', 'branch_manager']))
+                        @if (in_array(optional(auth()->user())->role, ['super_admin', 'owner', 'branch_manager']))
 
                             @can('view-category')
                                 <li class="dropdown">
@@ -455,8 +456,8 @@
 
                         {{-- Menu Management --}}
                         @php
-                            $restaurantSlug = optional(auth()->user()->restaurant)->slug;
-                            $branchSlug = optional(auth()->user()->branch)->slug;
+                            $restaurantSlug = optional(optional(auth()->user())->restaurant)->slug;
+                            $branchSlug = optional(optional(auth()->user())->branch)->slug;
                         @endphp
 
                         @can('view-menu')
@@ -517,7 +518,7 @@
                             $branchSlug = request()->route('branch');
                         @endphp
 
-                        @if (auth()->user()->role !== 'super_admin')
+                        @if (optional(auth()->user())->role !== 'super_admin')
                             @can('view-inventory')
                                 <li class="dropdown">
                                     <a href="#" class="nav-link has-dropdown">
@@ -572,7 +573,7 @@
                             @endcan
 
                         @endif
-                        @if (auth()->user()->role !== 'super_admin')
+                        @if (optional(auth()->user())->role !== 'super_admin')
                             @can('view-recipe')
                                 <li class="dropdown">
                                     <a href="#" class="nav-link has-dropdown">
@@ -742,7 +743,7 @@
 
                                     <ul class="dropdown-menu">
 
-                                        @can('view-order')
+                                        @can('order-list')
                                             @if (auth()->user()->branch_id)
                                                 <li>
                                                     <a
@@ -789,40 +790,62 @@
                                                 </li>
                                             @endif
                                         @endcan
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.orders.statusorder', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                    'status' => 'preparing',
-                                                ]) }}">
-                                                Preparing Orders
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.orders.statusorder', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                    'status' => 'completed',
-                                                ]) }}">
-                                                Completed Orders
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.orders.statusorder', [
-                                                    'restaurant' => currentRestaurantSlug(),
-                                                    'status' => 'delivered',
-                                                ]) }}">
-                                                Delivered Orders
-                                            </a>
-                                        </li>
+                                        @can('prepare-order')
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.orders.statusorder', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'status' => 'preparing',
+                                                    ]) }}">
+                                                    Preparing Orders
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('complete-order-order')
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.orders.statusorder', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'status' => 'completed',
+                                                    ]) }}">
+                                                    Completed Orders
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('deliver-order')
+                                            <li>
+                                                <a
+                                                    href="{{ route('restaurant.orders.statusorder', [
+                                                        'restaurant' => currentRestaurantSlug(),
+                                                        'status' => 'delivered',
+                                                    ]) }}">
+                                                    Delivered Orders
+                                                </a>
+                                            </li>
+                                        @endcan
 
                                     </ul>
                                 </li>
                             @endif
+
                         @endcan
+
+                        @if (auth()->check() && auth()->user()->role === 'customer')
+                            <li>
+                                <a
+                                    href="{{ route('restaurant.orders.index', [
+                                        'restaurant' => auth()->user()->restaurant->slug,
+                                        'branch' => auth()->user()->branch->slug,
+                                    ]) }}">
+
+                                    <i data-feather="shopping-bag"></i>
+                                    <span>My Orders</span>
+                                </a>
+                            </li>
+                        @endif
+
                         {{-- Restaurant Info --}}
-                        @if (auth()->user()->role != 'super_admin')
+                        @if (optional(auth()->user())->role != 'super_admin')
                             <li class="menu-header">
                                 Session
                             </li>
@@ -830,7 +853,7 @@
                         {{-- Logout --}}
                         <li>
 
-                            @if (auth()->user()->role == 'super_admin')
+                            @if (optional(auth()->user())->role == 'super_admin')
                                 <a href="#"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                                     class="nav-link">

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
+use App\Models\Restaurant;
+use App\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Restaurant;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -62,11 +62,19 @@ class LoginController extends Controller
         if (session()->has('restaurant_slug')) {
 
             return redirect(
-                '/' . session('restaurant_slug') . '/dashboard'
+                '/'.session('restaurant_slug').'/dashboard'
             );
         }
+        if ($user->role === 'customer') {
 
-        return redirect('/');
+            $restaurant = $user->restaurant?->slug;
+            $branch = $user->branch?->slug;
+
+            return redirect("/{$restaurant}/{$branch}/dashboard");
+        }
+
+        return redirect('/dashboard');
+
     }
 
     /*
@@ -78,7 +86,7 @@ class LoginController extends Controller
     public function showRestaurantLogin($restaurant)
     {
         session([
-            'restaurant_slug' => $restaurant
+            'restaurant_slug' => $restaurant,
         ]);
 
         return view('auth.login');
@@ -119,11 +127,11 @@ class LoginController extends Controller
             ->where('branch_id', $branchModel->id)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'email' => 'You are not assigned to this branch.'
+                    'email' => 'You are not assigned to this branch.',
                 ]);
         }
 
@@ -145,7 +153,7 @@ class LoginController extends Controller
         return back()
             ->withInput()
             ->withErrors([
-                'email' => 'Invalid credentials.'
+                'email' => 'Invalid credentials.',
             ]);
     }
 
@@ -159,7 +167,7 @@ class LoginController extends Controller
     {
         $restaurantModel = Restaurant::query()->where('slug', $restaurant)->first();
 
-        if (!$restaurantModel) {
+        if (! $restaurantModel) {
             abort(404);
         }
 
@@ -167,14 +175,14 @@ class LoginController extends Controller
             ->where('restaurant_id', $restaurantModel->id)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors([
-                'email' => 'You are not allowed to login to this restaurant.'
+                'email' => 'You are not allowed to login to this restaurant.',
             ]);
         }
         if ($user->branch_id) {
             return back()->withErrors([
-                'email' => 'Please login using your branch login URL.'
+                'email' => 'Please login using your branch login URL.',
             ]);
         }
 
@@ -182,7 +190,7 @@ class LoginController extends Controller
             'email' => $request->email,
             'password' => $request->password,
             'restaurant_id' => $restaurantModel->id,
-            'status' => 'Active'
+            'status' => 'Active',
         ])) {
 
             $request->session()->regenerate();
@@ -205,7 +213,7 @@ class LoginController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Invalid credentials.'
+            'email' => 'Invalid credentials.',
         ]);
     }
 
@@ -215,30 +223,28 @@ class LoginController extends Controller
     |--------------------------------------------------------------------------
     */
 
-
     public function logout(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    Auth::logout();
+        Auth::logout();
 
-    $request->session()->invalidate();
+        $request->session()->invalidate();
 
-    $request->session()->regenerateToken();
+        $request->session()->regenerateToken();
 
+        // Customer logout redirect
+        if ($user && $user->role === 'customer') {
 
-    // Customer logout redirect
-    if ($user && $user->role === 'customer') {
+            return redirect()->route('branch.register', [
+                'restaurant' => optional($user->restaurant)->slug,
+                'branch' => optional($user->branch)->slug,
+            ]);
 
-        return redirect()->route('branch.register', [
-            'restaurant' => optional($user->restaurant)->slug,
-            'branch' => optional($user->branch)->slug,
-        ]);
+        }
 
+        // Other users
+        return redirect('/');
     }
 
-
-    // Other users
-    return redirect('/');
-}
 }

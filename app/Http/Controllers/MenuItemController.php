@@ -15,7 +15,6 @@ class MenuItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-   
     public function index()
     {
         $restaurant = Restaurant::query()->where('slug', request()->route('restaurant'))->firstOrFail();
@@ -110,6 +109,7 @@ class MenuItemController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|max:255',
