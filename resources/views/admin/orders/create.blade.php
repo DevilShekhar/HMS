@@ -30,6 +30,15 @@
                                 <input type="text" name="mobile_number" class="form-control" required id="mobile_number">
                             @endif
                         </div>
+                        <div class="col-md-3">
+                            @if (auth()->user()->role == 'customer')
+                                <input type="hidden" name="email" class="form-control "
+                                    value="{{ auth()->user()->email }}" readonly>
+                            @else
+                                <label>Email</label>
+                                <input type="text" name="email" class="form-control" required>
+                            @endif
+                        </div>
                         @if (auth()->user()->role == 'waiter_head')
                             <div class="col-md-3">
                                 <label>Order Type</label>
@@ -53,6 +62,16 @@
                             <select name="table_no" id="table_no" class="form-control">
                                 <option value="">Select Table</option>
                             </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Date of Birth</label>
+                            <input type="date" name="birth_date" class="form-control" value="{{ old('birth_date') }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Anniversary Date</label>
+                            <input type="date" name="anniversary_date" class="form-control"
+                                value="{{ old('anniversary_date') }}">
                         </div>
                     </div>
 
@@ -159,7 +178,8 @@
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success" id="submitOrderBtn" style="display:none;">Save
                         Order</button>
-                    <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}" class="btn btn-secondary">Back</a>
+                    <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}"
+                        class="btn btn-secondary">Back</a>
                 </div>
 
             </form>

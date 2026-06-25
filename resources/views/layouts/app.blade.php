@@ -345,6 +345,80 @@
 
                         @endif
 
+                        @php
+                            $restaurantSlug = optional(optional(auth()->user())->restaurant)->slug;
+                            $branchSlug = optional(optional(auth()->user())->branch)->slug;
+                        @endphp
+
+                        @can('view-customer-offers')
+                            <li class="dropdown">
+                                <a href="#" class="nav-link has-dropdown">
+                                    <i data-feather="coffee"></i>
+                                    <span>Greeting & Offers</span>
+                                </a>
+
+                                <ul class="dropdown-menu">
+
+                                    @if ($branchSlug)
+                                        <li>
+                                            <a
+                                                href="{{ route('branch.customer-offers.index', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'branch' => $branchSlug,
+                                                ]) }}">
+                                                Customer Offers List
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a
+                                                href="{{ route('branch.customer-offers.create', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'branch' => $branchSlug,
+                                                ]) }}">
+                                                Add Customer Offers
+                                            </a>
+                                        </li>
+                                    @else
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.customer-offers.index', [
+                                                    'restaurant' => $restaurantSlug,
+                                                ]) }}">
+                                                Customer Offers List
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a
+                                                href="{{ route('restaurant.customer-offers.create', [
+                                                    'restaurant' => $restaurantSlug,
+                                                ]) }}">
+                                                Add Customer Offers
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                </ul>
+                            </li>
+                        @endcan
+                        @can('view-customer-offers')
+                        <li>
+                            <a
+                                href="{{ $branchSlug
+                                    ? route('branch.registered-customers.index', [
+                                        'restaurant' => $restaurantSlug,
+                                        'branch' => $branchSlug,
+                                    ])
+                                    : route('restaurant.registered-customers.index', [
+                                        'restaurant' => $restaurantSlug,
+                                    ]) }}">
+
+                                <i data-feather="mail"></i>
+                                <span>Send Offer</span>
+                            </a>
+                        </li>
+                        @endcan
 
                         {{-- Restaurants --}}
                         @can('view-restaurant')
@@ -843,6 +917,20 @@
                                 </a>
                             </li>
                         @endif
+                        @if (auth()->check() &&
+                                auth()->user()->role === 'customer' &&
+                                auth()->user()->orders()->where('restaurant_id', auth()->user()->restaurant_id)->where('branch_id', auth()->user()->branch_id)->exists())
+                            <li>
+                                <a
+                                    href="{{ route('customer.orders', [
+                                        'restaurant' => auth()->user()->restaurant->slug,
+                                        'branch' => auth()->user()->branch->slug,
+                                    ]) }}">
+                                    <i data-feather="shopping-bag"></i>
+                                    <span>My History</span>
+                                </a>
+                            </li>
+                        @endif
 
                         {{-- Restaurant Info --}}
                         @if (optional(auth()->user())->role != 'super_admin')
@@ -1023,6 +1111,58 @@
                     console.error(e);
                 }
             }
+        });
+        $(document).ready(function() {
+
+            $('#description').summernote({
+                height: 250,
+                placeholder: 'Enter offer description here...'
+            });
+
+        });
+    </script>
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+
+                form.addEventListener('submit', function(e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Deactivate Branch?',
+                        text: 'This action can be reverted later.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
         });
     </script>
 

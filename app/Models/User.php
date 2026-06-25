@@ -18,6 +18,7 @@ class User extends Authenticatable
         'gender',
         'profile_photo',
         'birth_date',
+        'anniversary_date',
         'address',
         'password',
         'role',

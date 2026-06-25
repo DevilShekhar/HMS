@@ -57,18 +57,33 @@ class OrderController extends Controller
 
             $query->where('branch_id', $user->branch_id);
         }
+        $filter = request('filter');
 
-        $orders = $query
-            ->latest()
-            ->get();
+        if ($filter == 'today') {
 
-        return view(
-            'admin.orders.index',
-            compact(
-                'orders',
-                'restaurant'
-            )
-        );
+            $query->whereDate('created_at', today());
+
+        } elseif ($filter == 'customer') {
+
+            $query->whereNotNull('customer_id');
+
+        } elseif ($filter == 'waiter') {
+
+            $query->whereHas('creator', function ($q) {
+                $q->where('role', 'waiter');
+            });
+
+        } elseif ($filter == 'waiter_head') {
+
+            $query->whereHas('creator', function ($q) {
+                $q->where('role', 'waiter_head');
+            });
+
+        }
+
+        $orders = $query->latest()->get();
+
+        return view('admin.orders.index', compact('orders', 'restaurant'));
     }
 
     public function create()
@@ -165,7 +180,10 @@ class OrderController extends Controller
         $request->validate([
             'customer_name' => 'required',
             'mobile_number' => 'required',
+            'birth_date' => 'nullable',
+            'anniversary_date' => 'nullable',
             'menu_item_id' => 'required|array',
+            'email' => 'nullable',
         ]);
 
         $restaurant = app('restaurant');
@@ -190,12 +208,7 @@ class OrderController extends Controller
             $branchId = null;
         }
 
-        DB::transaction(function () use (
-            $request,
-            $restaurant,
-            $orderType,
-            $branchId
-        ) {
+        DB::transaction(function () use ($request, $restaurant, $orderType, $branchId) {
 
             $chef = User::query()->where('role', 'chef')
                 ->where('restaurant_id', $restaurant->id)
@@ -221,6 +234,9 @@ class OrderController extends Controller
                 'mobile_number' => $request->mobile_number,
                 'token_no' => $token,
                 'table_no' => $request->table_no,
+                'birth_date' => $request->birth_date,
+                'anniversary_date' => $request->anniversary_date,
+                'email' => $request->email,
                 'order_type' => $orderType,
                 'status' => 'pending',
                 'subtotal' => 0,
@@ -507,12 +523,6 @@ class OrderController extends Controller
         }
     }
 
-    public function destroy(
-        $restaurant,
-        $order
-    ) {
-        //
-    }
 
     public function updateStatus(
         Request $request,
@@ -733,5 +743,24 @@ class OrderController extends Controller
             'last_visit' => optional($lastOrder)->created_at?->format('d M Y'),
             'orders' => $orders,
         ]);
+    }
+
+    public function myOrders()
+    {
+        $customer = Auth::user();
+
+        $orders = Order::with([
+            'items.menuItem',
+        ])
+            ->where('customer_id', $customer->id)
+            ->where('restaurant_id', $customer->restaurant_id)
+            ->where('branch_id', $customer->branch_id)
+            ->latest()
+            ->get();
+
+        return view(
+            'customer.orders.index',
+            compact('orders')
+        );
     }
 }

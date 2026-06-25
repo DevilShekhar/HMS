@@ -24,13 +24,17 @@ class Order extends Model
         'tax',
         'total',
         'restaurant_id',
-        'branch_id', 'payment_method',
+        'branch_id',
+        'payment_method',
+        'birth_date',
+        'anniversary_date','email'
     ];
 
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
+
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);

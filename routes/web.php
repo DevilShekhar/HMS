@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerOfferController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
@@ -36,9 +37,24 @@ Route::get('{restaurant}/{branch}/customer-login', [RegisterController::class, '
 Route::post('{restaurant}/{branch}/customer-login', [RegisterController::class, 'customerLogin'])->name('customer.login.submit');
 Route::get('/{restaurant}/{branch}/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('branch.customer.forgot-password');
 
-Route::post('/{restaurant}/{branch}/forgot-password','Auth\ForgotPasswordController@sendResetLinkEmail')->name('branch.customer.password.email');
-
+Route::post('/{restaurant}/{branch}/forgot-password',
+    [ForgotPasswordController::class, 'sendResetLinkEmail']
+)->name('branch.customer.password.email');
 Route::get('/customer-history', [OrderController::class, 'customerHistory'])->name('customer.history');
+Route::get('{restaurant}/{branch}/my-orders', [OrderController::class, 'myOrders'])->name('customer.orders');
+Route::resource('customer-offers', CustomerOfferController::class);
+Route::post('/customer-offers/send', [CustomerOfferController::class, 'sendOffer'])->name('customer-offers.send');
+
+Route::get(
+    '/{restaurant}/registered-customers',
+    [CustomerOfferController::class, 'registeredCustomers']
+)->name('restaurant.registered-customers.index');
+
+Route::get(
+    '/{restaurant}/{branch}/registered-customers',
+    [CustomerOfferController::class, 'registeredCustomers']
+)->name('branch.registered-customers.index');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
@@ -139,6 +155,7 @@ Route::get('{restaurant}/orders/status/{status}', [OrderController::class, 'stat
 Route::post('{restaurant}/orders/payment', [OrderController::class, 'makePayment'])->name('restaurant.orders.payment');
 
 Route::post('{restaurant}/{branch}/orders/payment', [OrderController::class, 'makePayment'])->name('branch.orders.payment');
+
 Route::get('/notifications', function () {
 
     return Auth::user()
@@ -204,6 +221,19 @@ Route::prefix('{restaurant}')
                 Route::get('users/create', [UserController::class, 'create'])
                     ->name('branch.users.create');
 
+                Route::resource('customer-offers', CustomerOfferController::class)
+                    ->parameters([
+                        'customer-offers' => 'customerOffer',
+                    ])
+                    ->names([
+                        'index' => 'branch.customer-offers.index',
+                        'create' => 'branch.customer-offers.create',
+                        'store' => 'branch.customer-offers.store',
+                        'show' => 'branch.customer-offers.show',
+                        'edit' => 'branch.customer-offers.edit',
+                        'update' => 'branch.customer-offers.update',
+                        'destroy' => 'branch.customer-offers.destroy',
+                    ]);
                 Route::resource('categories', CategoryController::class)->names([
                     'index' => 'branch.categories.index',
                     'create' => 'branch.categories.create',
@@ -360,6 +390,19 @@ Route::prefix('{restaurant}')
                 'update' => 'restaurant.tables.update',
                 'destroy' => 'restaurant.tables.destroy',
             ]);
+            Route::resource('customer-offers', CustomerOfferController::class)
+                ->parameters([
+                    'customer-offers' => 'customerOffer',
+                ])
+                ->names([
+                    'index' => 'restaurant.customer-offers.index',
+                    'create' => 'restaurant.customer-offers.create',
+                    'store' => 'restaurant.customer-offers.store',
+                    'show' => 'restaurant.customer-offers.show',
+                    'edit' => 'restaurant.customer-offers.edit',
+                    'update' => 'restaurant.customer-offers.update',
+                    'destroy' => 'restaurant.customer-offers.destroy',
+                ]);
             Route::get('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInForm'])
                 ->name('restaurant.inventory.stock-in');
 
