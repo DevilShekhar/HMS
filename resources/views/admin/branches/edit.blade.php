@@ -74,7 +74,7 @@
                                 @error('owner_id')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
-                            </div>                          
+                            </div>
                             <div class="col-md-6 mb-4">
                                 <label>Branch Name</label>
                                 <input type="text" name="name"value="{{ old('name',$branch->name) }}" class="form-control premium-input">

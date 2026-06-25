@@ -57,6 +57,8 @@ class RegisterController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'max:15', 'unique:users,phone'],
             'password' => ['required', 'confirmed', 'min:6'],
+            'birth_date' => ['required'],
+            'anniversary' => ['nullable'],
         ]);
     }
 
@@ -71,6 +73,8 @@ class RegisterController extends Controller
             'phone' => $data['phone'],
             'password' => Hash::make(Str::random(12)),
             'role' => 'customer',
+            'birth_date' => $data['birth_date'],
+            'anniversary_date' => $data['anniversary_date'] ?? null,
             'status' => 'active',
         ]);
     }
@@ -121,19 +125,19 @@ class RegisterController extends Controller
             );
         }
 
-        // New customer create
-
         $user = User::create([
-
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'birth_date' => $request->birth_date,
+            'anniversary_date' => $request->anniversary_date,
             'role' => 'customer',
             'status' => 'active',
             'restaurant_id' => $restaurantModel->id,
             'branch_id' => $branchModel->id,
         ]);
+        // dd($user);
 
         Auth::login($user);
 

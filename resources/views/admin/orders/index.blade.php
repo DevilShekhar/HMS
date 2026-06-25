@@ -54,11 +54,40 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    @if (in_array(optional(auth()->user())->role, ['super_admin', 'owner', 'branch_manager']))
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+
+                            <a href="{{ request()->url() }}"
+                                class="btn btn-sm {{ !request('filter') ? 'btn-primary' : 'btn-outline-primary' }}">
+                                All Orders
+                            </a>
+
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'today']) }}"
+                                class="btn btn-sm {{ request('filter') == 'today' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                Today's Orders
+                            </a>
+
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'customer']) }}"
+                                class="btn btn-sm {{ request('filter') == 'customer' ? 'btn-success' : 'btn-outline-success' }}">
+                                Customer Orders
+                            </a>
+
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter']) }}"
+                                class="btn btn-sm {{ request('filter') == 'waiter' ? 'btn-info' : 'btn-outline-info' }}">
+                                Waiter Orders
+                            </a>
+
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter_head']) }}"
+                                class="btn btn-sm {{ request('filter') == 'waiter_head' ? 'btn-warning' : 'btn-outline-warning' }}">
+                                Waiter Head Orders
+                            </a>
+                        </div>
+                    @endif
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>SrNo.</th>
                                     <th>Token No</th>
                                     <th>Customer</th>
                                     <th>Mobile</th>

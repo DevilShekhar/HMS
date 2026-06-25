@@ -76,6 +76,27 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <label for="birth_date" class="col-md-4 col-form-label text-md-end">
+                                    Date of Birth
+                                </label>
+
+                                <div class="col-md-6">
+                                    <input id="birth_date" type="date" class="form-control" name="birth_date"
+                                        value="{{ old('birth_date') }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label for="anniversary_date" class="col-md-4 col-form-label text-md-end">
+                                    Anniversary Date
+                                </label>
+
+                                <div class="col-md-6">
+                                    <input id="anniversary_date" type="date" class="form-control"
+                                        name="anniversary_date" value="{{ old('anniversary_date') }}">
+                                </div>
+                            </div>
                             <!-- Password -->
                             <div class="row mb-3">
 
