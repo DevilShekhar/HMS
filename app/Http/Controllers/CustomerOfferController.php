@@ -103,6 +103,7 @@ class CustomerOfferController extends Controller
                 ->with('success', 'Customer Offers successfully.');
         }
     }
+
     public function edit($restaurant, $branch = null, ?CustomerOffer $customerOffer = null)
     {
         // if branch is missing Laravel sends CustomerOffer as second argument
@@ -258,6 +259,7 @@ class CustomerOfferController extends Controller
             compact('customers')
         );
     }
+
     public function sendOffer(Request $request)
     {
         $request->validate([
@@ -306,17 +308,10 @@ class CustomerOfferController extends Controller
             );
         }
 
-        Mail::to($customer->email)
-            ->send(
-                new CustomerOfferMail(
-                    $customer,
-                    $offer
-                )
-            );
+        Mail::to($customer->email)->send(new CustomerOfferMail($customer, $offer));
 
-        return back()->with(
-            'success',
-            'Offer sent successfully.'
-        );
+        return redirect()
+            ->back()
+            ->with('success', 'Offer sent successfully!');
     }
 }

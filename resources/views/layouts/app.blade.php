@@ -345,6 +345,15 @@
 
                         @endif
 
+                        @can('view-subscription')
+                            <li class="">
+                                <a href="{{ route('subscription-plans.index') }}" class="nav-link">
+                                    <i data-feather="award"></i>
+                                    <span>Subscription Management</span>
+                                </a>
+                            </li>
+                        @endcan
+
                         @php
                             $restaurantSlug = optional(optional(auth()->user())->restaurant)->slug;
                             $branchSlug = optional(optional(auth()->user())->branch)->slug;
@@ -403,20 +412,63 @@
                             </li>
                         @endcan
                         @can('view-customer-offers')
-                        <li>
-                            <a
-                                href="{{ $branchSlug
-                                    ? route('branch.registered-customers.index', [
-                                        'restaurant' => $restaurantSlug,
-                                        'branch' => $branchSlug,
-                                    ])
-                                    : route('restaurant.registered-customers.index', [
-                                        'restaurant' => $restaurantSlug,
-                                    ]) }}">
+                            <li>
+                                <a
+                                    href="{{ $branchSlug
+                                        ? route('branch.registered-customers.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ])
+                                        : route('restaurant.registered-customers.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
 
-                                <i data-feather="mail"></i>
-                                <span>Send Offer</span>
+                                    <i data-feather="mail"></i>
+                                    <span>Send Offer</span>
+                                </a>
+                            </li>
+                        @endcan
+
+                        @can('view-reports')
+                        <li class="dropdown">
+
+                            <a href="#" class="nav-link has-dropdown">
+                                <i data-feather="bar-chart-2"></i>
+                                <span>Report</span>
                             </a>
+
+                            <ul class="dropdown-menu">
+
+                                <li>
+                                    <a
+                                        href="{{ $branchSlug
+                                            ? route('branch.reports.revenue', [
+                                                'restaurant' => $restaurantSlug,
+                                                'branch' => $branchSlug,
+                                            ])
+                                            : route('restaurant.reports.revenue', [
+                                                'restaurant' => $restaurantSlug,
+                                            ]) }}">
+                                        Revenue
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a
+                                        href="{{ $branchSlug
+                                            ? route('branch.reports.top-selling', [
+                                                'restaurant' => $restaurantSlug,
+                                                'branch' => $branchSlug,
+                                            ])
+                                            : route('restaurant.reports.top-selling', [
+                                                'restaurant' => $restaurantSlug,
+                                            ]) }}">
+                                        Top Selling Items
+                                    </a>
+                                </li>
+
+                            </ul>
+
                         </li>
                         @endcan
 

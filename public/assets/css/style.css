@@ -4373,7 +4373,7 @@ h6 .badge {
 }
 
 .d-flex{
-    gap: 1.5px;
+    gap: 0.5rem;
 }
 .btn.btn-icon .ion,
 .btn.btn-icon .fas,
@@ -13414,4 +13414,424 @@ h1 {
 .remove-item-btn:hover {
     color: #dc3545;
     background: #f8d7da;
+}
+
+.plan-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.popular-plan {
+    border: 2px solid #4361ee;
+    background: linear-gradient(135deg, rgba(67, 97, 238, 0.05), rgba(67, 97, 238, 0.02));
+}
+
+.popular-badge {
+    position: absolute;
+    top: 20px;
+    right: -30px;
+    background: linear-gradient(135deg, #4361ee, #7209b7);
+    color: white;
+    padding: 5px 40px;
+    font-size: 12px;
+    font-weight: bold;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.branch-badge {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #495057;
+    margin-top: 8px;
+}
+
+.price-wrapper {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.currency {
+    font-size: 24px;
+    font-weight: 600;
+    color: #4361ee;
+}
+
+.price {
+    font-size: 48px;
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1;
+}
+
+.period {
+    font-size: 16px;
+    color: #6c757d;
+    margin-left: 4px;
+}
+
+.savings-badge {
+    background: #d4edda;
+    color: #155724;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.features-list {
+    margin: 0;
+    padding: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.feature-item i {
+    font-size: 16px;
+    width: 20px;
+}
+
+.duration-selector {
+    margin-top: 20px;
+}
+
+.form-select {
+    border-radius: 12px;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-edit {
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-delete {
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 500;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+}
+
+@media (max-width: 768px) {
+    .price {
+        font-size: 36px;
+    }
+}
+
+.plan-card{
+    border:2px solid #e5e7eb;
+    border-radius:14px;
+    padding:20px;
+    cursor:pointer;
+    transition:.3s;
+    height:100%;
+}
+
+.plan-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.plan-card:has(.plan-radio:checked){
+    border:2px solid #22c55e;
+    background:#ecfdf5;
+}
+
+.price-box{
+    text-align:center;
+}
+
+.price-box h3{
+    margin:0;
+    font-weight:700;
+}
+
+.gradient-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.gradient-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12),
+                0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Unique Gradients */
+.restaurant-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.branches-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.expiry-card {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.today-card {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.yesterday-card {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.weekly-card {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
+
+.monthly-card {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+}
+
+.yearly-card {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+
+
+
+/* Base Style */
+.gradient-card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.gradient-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12),
+                0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Smaller Card Body */
+.gradient-card .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 130px;     /* Reduced from 160px */
+    padding: 1.2rem !important;   /* Reduced padding */
+}
+
+/* Light Gradients for Order Status */
+.pending-card {
+    background: linear-gradient(135deg, #f39c12 0%, #fbc658 100%);
+}
+
+.preparing-card {
+    background: linear-gradient(135deg, #3498db 0%, #74b9ff 100%);
+}
+
+.completed-card {
+    background: linear-gradient(135deg, #27ae60 0%, #6ed99e 100%);
+}
+
+/* Text Clarity & Smaller Size */
+.gradient-card h6,
+.gradient-card h2,
+.gradient-card i {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.gradient-card h2 {
+    font-size: 2.2rem;     /* Smaller than before */
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.gradient-card i {
+    font-size: 2.4rem;     /* Smaller icon */
+    margin-bottom: 12px;
+}
+
+/* Base Card Layout */
+.status-card {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Icon Container Shape */
+.status-card__icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Text Element Grouping */
+.status-card__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-card__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* Base Card Layout */
+.status-card {
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+
+  /* Smooth transition for hover effects */
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* Icon Container Shape */
+.status-card__icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  /* Smooth transition for icon background color change on hover */
+  transition: background-color 0.25s ease;
+}
+
+/* Text Element Grouping */
+.status-card__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-card__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-card__value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+}
+
+/* --- Dynamic Hover States & Gradients --- */
+
+/* 1. Pending Status Theme */
+.status-card--pending {
+  background: linear-gradient(135deg, #fffcf0 0%, #fff3cd 100%);
+}
+.status-card--pending .status-card__icon-wrapper {
+  background-color: #ffeaa7;
+  color: #856404;
+}
+.status-card--pending .status-card__label { color: #856404; }
+.status-card--pending .status-card__value { color: #533f03; }
+
+/* Pending Hover Effect */
+.status-card--pending:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(133, 100, 4, 0.12);
+  border-color: rgba(133, 100, 4, 0.2);
+}
+.status-card--pending:hover .status-card__icon-wrapper {
+  background-color: #fddb73; /* Slightly darker yellow on hover */
+}
+
+
+/* 2. Preparing Status Theme */
+.status-card--preparing {
+  background: linear-gradient(135deg, #f4f9fc 0%, #d1ecf1 100%);
+}
+.status-card--preparing .status-card__icon-wrapper {
+  background-color: #bee5eb;
+  color: #0c5460;
+}
+.status-card--preparing .status-card__label { color: #0c5460; }
+.status-card--preparing .status-card__value { color: #042d34; }
+
+/* Preparing Hover Effect */
+.status-card--preparing:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(12, 84, 96, 0.12);
+  border-color: rgba(12, 84, 96, 0.2);
+}
+.status-card--preparing:hover .status-card__icon-wrapper {
+  background-color: #a3d7e0; /* Slightly darker cyan on hover */
+}
+
+
+/* 3. Completed Status Theme */
+.status-card--completed {
+  background: linear-gradient(135deg, #f3fdf6 0%, #d4edda 100%);
+}
+.status-card--completed .status-card__icon-wrapper {
+  background-color: #c3e6cb;
+  color: #155724;
+}
+.status-card--completed .status-card__label { color: #155724; }
+.status-card--completed .status-card__value { color: #0b3014; }
+
+/* Completed Hover Effect */
+.status-card--completed:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(21, 87, 36, 0.12);
+  border-color: rgba(21, 87, 36, 0.2);
+}
+.status-card--completed:hover .status-card__icon-wrapper {
+  background-color: #aae0b5; /* Slightly darker green on hover */
 }

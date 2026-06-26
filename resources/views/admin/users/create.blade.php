@@ -139,7 +139,7 @@
                             @if (auth()->user()->role == 'super_admin' || auth()->user()->role == 'owner')
                                 <div class="col-md-6 mb-4">
                                     <label>Branch <span class="text-danger">*</span></label>
-                                    <select name="branch_id" id="branch_id" class="form-control premium-input" required>
+                                    <select name="branch_id" id="branch_id" class="form-control premium-input">
                                         <option value="">Select Branch</option>
                                         @foreach ($branches as $branch)
                                             <option value="{{ $branch->id }}"

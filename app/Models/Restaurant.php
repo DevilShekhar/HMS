@@ -9,19 +9,25 @@ class Restaurant extends Model
     protected $fillable = [
         'name',
         'slug',
-        'status'
+        'status',
     ];
 
     public function users()
     {
         return $this->hasMany(User::class);
     }
+
     public function menuItems()
     {
         return $this->hasMany(MenuItem::class);
     }
+
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+    public function subscription()
+    {
+        return $this->hasOne(SubscriptionPlan::class);
     }
 }

@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
-use App\Models\User;
 use App\Models\Restaurant;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     /**
      * User List
      */
+
     public function index(Request $request)
     {
         $authUser = Auth::user();
@@ -23,21 +23,29 @@ class UserController extends Controller
 
         if ($authUser->role === 'super_admin') {
 
-            $query->latest();
+            $query->where('role', 'owner');
         } elseif ($authUser->role === 'owner') {
 
             $query->where('restaurant_id', $authUser->restaurant_id)
-                ->where('role', '!=', 'super_admin');
+                ->whereIn('role', [
+                    'branch_manager',
+                    'user',
+                ]);
+
         } elseif ($authUser->role === 'branch_manager') {
 
             $query->where('restaurant_id', $authUser->restaurant_id)
                 ->where('branch_id', $authUser->branch_id)
-                ->where('role', '!=', 'super_admin');
+                ->whereNotIn('role', [
+                    'super_admin',
+                    'owner',
+                    'branch_manager',
+                    'customer',
+                ]);
         } else {
 
             $query->whereRaw('1 = 0', [], 'and');
         }
-
 
         $users = $query->latest()->paginate(20);
 
@@ -65,7 +73,7 @@ class UserController extends Controller
                     'waiter_head',
                     'waiter',
                     'cashier',
-                    'chef'
+                    'chef',
                 ];
                 break;
             case 'branch_manager':
@@ -73,7 +81,7 @@ class UserController extends Controller
                     'waiter_head',
                     'waiter',
                     'cashier',
-                    'chef'
+                    'chef',
                 ];
                 break;
         }
@@ -88,26 +96,28 @@ class UserController extends Controller
                 Auth::user()->restaurant_id
             )->get();
         }
+
         return view(
             'admin.users.create',
             compact('roles', 'restaurants', 'restaurant', 'branches')
         );
     }
+
     /**
      * Store User
      */
     public function store(Request $request, $restaurant = null)
     {
         $validated = $request->validate([
-            'name'          => 'required|max:255',
-            'email'         => 'required|email|unique:users,email',
-            'phone'         => 'required',
-            'gender'        => 'required',
-            'birth_date'    => 'required|date',
-            'address'       => 'required',
-            'role'          => 'required',
-            'password'      => 'required|min:6|confirmed',
-            'branch_id'     => Auth::user()->role === 'owner'
+            'name' => 'required|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required',
+            'gender' => 'required',
+            'birth_date' => 'required|date',
+            'address' => 'required',
+            'role' => 'required',
+            'password' => 'required|min:6|confirmed',
+            'branch_id' => Auth::user()->role === 'owner'
                 ? 'required|exists:branches,id'
                 : 'nullable',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
@@ -117,35 +127,35 @@ class UserController extends Controller
 
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
             // Create folder if not exists
-            if (!file_exists(public_path('uploads/profiles'))) {
+            if (! file_exists(public_path('uploads/profiles'))) {
                 mkdir(public_path('uploads/profiles'), 0777, true);
             }
             $file->move(
                 public_path('uploads/profiles'),
                 $filename
             );
-            $profilePhoto = 'uploads/profiles/' . $filename;
+            $profilePhoto = 'uploads/profiles/'.$filename;
         }
 
-        $user =  User::create([
-            'name'          => $validated['name'],
-            'email'         => $validated['email'],
-            'phone'         => $validated['phone'],
-            'gender'        => $validated['gender'],
-            'birth_date'    => $validated['birth_date'],
-            'address'       => $validated['address'],
-            'role'          => $validated['role'],
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'gender' => $validated['gender'],
+            'birth_date' => $validated['birth_date'],
+            'address' => $validated['address'],
+            'role' => $validated['role'],
             'profile_photo' => $profilePhoto,
             'restaurant_id' => Auth::user()->restaurant_id,
 
             'branch_id' => Auth::user()->role === 'owner'
                 ? $validated['branch_id']
                 : Auth::user()->branch_id,
-            'status'        => 'active',
-            'password'      => Hash::make($validated['password']),
-            'created_by'    => Auth::id(),
+            'status' => 'active',
+            'password' => Hash::make($validated['password']),
+            'created_by' => Auth::id(),
         ]);
         $user->assignRole($validated['role']);
 
@@ -157,10 +167,8 @@ class UserController extends Controller
                 ->with('success', 'User created successfully.');
         }
 
-
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.users.index', [
@@ -169,7 +177,6 @@ class UserController extends Controller
                 ])
                 ->with('success', 'User created successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {
@@ -201,7 +208,7 @@ class UserController extends Controller
                     'waiter_head',
                     'waiter',
                     'cashier',
-                    'chef'
+                    'chef',
                 ];
                 break;
             case 'branch_manager':
@@ -209,10 +216,11 @@ class UserController extends Controller
                     'waiter_head',
                     'waiter',
                     'cashier',
-                    'chef'
+                    'chef',
                 ];
                 break;
         }
+
         return view(
             'admin.users.edit',
             compact(
@@ -233,7 +241,7 @@ class UserController extends Controller
         $user = User::findOrFail($userId);
         $validated = $request->validate([
             'name' => 'required|max:255',
-            'email' => 'required|email|unique:users,email,' . $userId,
+            'email' => 'required|email|unique:users,email,'.$userId,
             'phone' => 'required',
             'gender' => 'required',
             'birth_date' => 'required|date',
@@ -255,9 +263,9 @@ class UserController extends Controller
                 unlink(public_path($user->profile_photo));
             }
             $file = $request->file('profile_photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time().'_'.$file->getClientOriginalName();
             // Make sure folder exists
-            if (!file_exists(public_path('uploads/profiles'))) {
+            if (! file_exists(public_path('uploads/profiles'))) {
                 mkdir(public_path('uploads/profiles'), 0777, true);
             }
             $file->move(
@@ -265,7 +273,7 @@ class UserController extends Controller
                 $filename
             );
             $validated['profile_photo'] =
-                'uploads/profiles/' . $filename;
+                'uploads/profiles/'.$filename;
         }
         // Update password only if entered
         if ($request->filled('password')) {
@@ -290,10 +298,8 @@ class UserController extends Controller
                 ->with('success', 'User created successfully.');
         }
 
-
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.users.index', [
@@ -302,7 +308,6 @@ class UserController extends Controller
                 ])
                 ->with('success', 'User created successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {
@@ -333,10 +338,8 @@ class UserController extends Controller
                 ->with('success', 'User created successfully.');
         }
 
-
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.users.index', [
@@ -345,7 +348,6 @@ class UserController extends Controller
                 ])
                 ->with('success', 'User created successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {

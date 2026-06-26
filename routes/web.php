@@ -6,15 +6,18 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerOfferController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RestaurantTableController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RoomPackController;
+use App\Http\Controllers\SubscriptionPlanController;
 use App\Http\Controllers\TableCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Branch;
@@ -90,6 +93,9 @@ Route::middleware(['auth'])->group(function () {
             'restaurant' => $restaurant->slug,
         ]);
     })->name('dashboard');
+    Route::get('/dashboard',
+        [DashboardController::class, 'dashboard']
+    )->name('dashboard');
 
     Route::resource('restaurants', RestaurantController::class);
     Route::resource('room_packs', RoomPackController::class);
@@ -98,6 +104,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::resource('categories', CategoryController::class);
     });
+
+    Route::resource('subscription-plans', SubscriptionPlanController::class);
 
     Route::resource('roles', RoleController::class);
 
@@ -205,15 +213,21 @@ Route::prefix('{restaurant}')
             ->name('branch.login.submit');
 
         Route::middleware(['auth'])->group(function () {
-            Route::get('/dashboard', function () {
-                return view('admin.dashboard');
-            })->name('restaurant.dashboard');
+
+
+            Route::get('/dashboard',
+                [DashboardController::class, 'dashboard']
+            )->name('restaurant.dashboard');
 
             Route::prefix('{branch}')->group(function () {
 
-                Route::get('/dashboard', function () {
-                    return view('admin.dashboard');
-                })->name('branch.dashboard');
+             
+
+                Route::get('/dashboard', [DashboardController::class, 'dashboard'])
+                    ->name('branch.dashboard');
+
+                Route::get('/revenue-stats', [OrderController::class, 'revenueStats'])
+                    ->name('branch.revenue.stats');
 
                 Route::get('users', [UserController::class, 'index'])
                     ->name('branch.users.index');
@@ -307,6 +321,12 @@ Route::prefix('{restaurant}')
                     'update' => 'branch.recipe.update',
                     'destroy' => 'branch.recipe.destroy',
                 ]);
+
+                Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('branch.reports.revenue');
+
+                Route::get('/reports/top-selling', [ReportController::class, 'topSelling'])->name('branch.reports.top-selling');
+                Route::get('/reports/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('branch.reports.revenue.pdf');
+                Route::get('/reports/top-selling-item/pdf', [ReportController::class, 'topSellingPdf'])->name('branch.reports.top-selling-item.pdf');
             });
             Route::resource('users', UserController::class)->names([
                 'index' => 'restaurant.users.index',
@@ -317,6 +337,11 @@ Route::prefix('{restaurant}')
                 'update' => 'restaurant.users.update',
                 'destroy' => 'restaurant.users.destroy',
             ]);
+            Route::get('/reports/revenue', [ReportController::class, 'revenue'])->name('restaurant.reports.revenue');
+
+            Route::get('/reports/top-selling', [ReportController::class, 'topSelling'])->name('restaurant.reports.top-selling');
+            Route::get('/reports/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('restaurant.reports.revenue.pdf');
+            Route::get('/reports/top-selling-item/pdf', [ReportController::class, 'topSellingPdf'])->name('restaurant.reports.top-selling-item.pdf');
 
             Route::resource('branches', BranchController::class)->names([
                 'index' => 'restaurant.branches.index',

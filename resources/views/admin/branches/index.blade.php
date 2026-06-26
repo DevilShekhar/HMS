@@ -46,6 +46,7 @@
                                     <th>Phone</th>
                                     <th>City</th>
                                     <th>QR Code</th>
+                                    <th>Expiry Date</th>
                                     <th>Status</th>
                                     <th width="220">Action</th>
                                 </tr>
@@ -85,6 +86,29 @@
                                                     alt="QR Code">
                                             @else
                                                 <span class="badge bg-secondary">No QR</span>
+                                            @endif
+                                        </td>
+                                        @php
+                                            $endDate = optional($branch->activeSubscription)->end_date;
+                                        @endphp
+
+                                        <td class="text-white">
+                                            @if ($endDate)
+                                                @if (\Carbon\Carbon::parse($endDate)->diffInDays(now(), false) >= -10 && \Carbon\Carbon::parse($endDate)->isFuture())
+                                                    <span class="badge bg-danger">
+                                                        {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                                                    </span>
+                                                @elseif(\Carbon\Carbon::parse($endDate)->isPast())
+                                                    <span class="badge bg-secondary">
+                                                        Expired
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success">
+                                                        {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
+                                                    </span>
+                                                @endif
+                                            @else
+                                                -
                                             @endif
                                         </td>
                                         <td>
@@ -145,7 +169,7 @@
                                                     </button>
                                                 @endif
                                             </div>
-                                            
+
                                         </td>
                                     </tr>
                                 @empty
