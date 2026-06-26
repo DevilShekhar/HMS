@@ -6,6 +6,15 @@
             <div class="card-header">
                 <h4>Create Order</h4>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <form method="POST" action="{{ route('restaurant.orders.store', $restaurant->slug) }}" id="orderForm">
                 @csrf
                 <div class="card-body">
@@ -18,7 +27,8 @@
                             @else
                                 <label>Customer Name</label>
 
-                                <input type="text" name="customer_name" class="form-control" required>
+                                <input type="text" name="customer_name" class="form-control" value="{{ old('customer_name') }}"
+                                    required>
                             @endif
                         </div>
                         <div class="col-md-3">
@@ -27,16 +37,20 @@
                                     value="{{ auth()->user()->phone }}" readonly>
                             @else
                                 <label>Mobile Number</label>
-                                <input type="text" name="mobile_number" class="form-control" required id="mobile_number">
+                                <input type="text" name="mobile_number" class="form-control" required id="mobile_number"
+                                    value="{{ old('mobile_number') }}">
+                                    @error('mobile_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             @endif
                         </div>
                         <div class="col-md-3">
                             @if (auth()->user()->role == 'customer')
-                                <input type="hidden" name="email" class="form-control "
-                                    value="{{ auth()->user()->email }}" readonly>
+                                <input type="hidden" name="email" class="form-control " value="{{ auth()->user()->email }}"
+                                    readonly>
                             @else
                                 <label>Email</label>
-                                <input type="text" name="email" class="form-control" required>
+                                <input type="text" name="email" class="form-control" value="{{ old('email') }}" required>
                             @endif
                         </div>
                         @if (auth()->user()->role == 'waiter_head')
@@ -49,19 +63,35 @@
                             </div>
                         @endif
                         <div class="col-md-3">
-                            <label>Table Area</label>
-                            <select id="table_category" class="form-control">
+                            <label>Table Area <span class="text-danger">*</span></label>
+
+                            <select id="table_category" class="form-control @error('table_category') is-invalid @enderror"
+                                name="table_category" required>
                                 <option value="">Select Table Area</option>
+
                                 @foreach ($tableCategories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}" {{ old('table_category') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
                                 @endforeach
                             </select>
+
+                            @error('table_category')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="col-md-3">
-                            <label>Table Number</label>
-                            <select name="table_no" id="table_no" class="form-control">
+                            <label>Table Number <span class="text-danger">*</span></label>
+
+                            <select name="table_no" id="table_no"
+                                class="form-control @error('table_no') is-invalid @enderror" required>
                                 <option value="">Select Table</option>
                             </select>
+
+                            @error('table_no')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-4">
                             <label>Date of Birth</label>
@@ -178,8 +208,7 @@
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success" id="submitOrderBtn" style="display:none;">Save
                         Order</button>
-                    <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}"
-                        class="btn btn-secondary">Back</a>
+                    <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}" class="btn btn-secondary">Back</a>
                 </div>
 
             </form>
@@ -233,10 +262,10 @@
         const sgstPercent = 0;
 
         // Category filter dropdown
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const categoryFilter = document.getElementById('categoryFilter');
             if (categoryFilter) {
-                categoryFilter.addEventListener('change', function() {
+                categoryFilter.addEventListener('change', function () {
                     filterByCategory(this.value);
                 });
             }
@@ -311,22 +340,22 @@
                 const item = order[id];
                 const lineTotal = item.price * item.qty;
                 html += `
-                    <div class="order-item">
-                        <div>
-                            <div class="order-item-name">${escapeHtml(item.name)}</div>
-                            <div class="order-item-price">₹${item.price.toFixed(2)} each</div>
-                        </div>
-                        <div class="order-item-controls">
-                            <div class="qty-control">
-                                <button type="button" class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
-                                <span class="qty-value">${item.qty}</span>
-                                <button type="button" class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
+                            <div class="order-item">
+                                <div>
+                                    <div class="order-item-name">${escapeHtml(item.name)}</div>
+                                    <div class="order-item-price">₹${item.price.toFixed(2)} each</div>
+                                </div>
+                                <div class="order-item-controls">
+                                    <div class="qty-control">
+                                        <button type="button" class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
+                                        <span class="qty-value">${item.qty}</span>
+                                        <button type="button" class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
+                                    </div>
+                                    <div class="order-item-total">₹${lineTotal.toFixed(2)}</div>
+                                    <button type="button" class="remove-item-btn" onclick="removeItem(${id})">✕</button>
+                                </div>
                             </div>
-                            <div class="order-item-total">₹${lineTotal.toFixed(2)}</div>
-                            <button type="button" class="remove-item-btn" onclick="removeItem(${id})">✕</button>
-                        </div>
-                    </div>
-                `;
+                        `;
             }
             container.innerHTML = html;
             updateTotals();
@@ -340,9 +369,9 @@
             for (let id in order) {
                 const item = order[id];
                 html += `
-                    <input type="hidden" name="menu_item_id[]" value="${id}">
-                    <input type="hidden" name="quantity[]" value="${item.qty}">
-                `;
+                            <input type="hidden" name="menu_item_id[]" value="${id}">
+                            <input type="hidden" name="quantity[]" value="${item.qty}">
+                        `;
             }
             container.innerHTML = html;
         }
@@ -384,7 +413,7 @@
         }
 
         function escapeHtml(str) {
-            return String(str).replace(/[&<>]/g, function(m) {
+            return String(str).replace(/[&<>]/g, function (m) {
                 if (m === '&') return '&amp;';
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;';
@@ -393,7 +422,7 @@
         }
 
         // Menu card click
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const card = e.target.closest('.menu-card');
             if (card) {
                 addItemToOrder(card.dataset.id, card.dataset.name, parseFloat(card.dataset.price));
@@ -405,7 +434,7 @@
         const searchResults = document.getElementById('searchResults');
 
         if (searchInput) {
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 const query = this.value.toLowerCase().trim();
 
                 if (query.length === 0) {
@@ -435,13 +464,13 @@
                 let html = '';
                 filtered.forEach(item => {
                     html += `
-                        <div class="search-result-item" data-id="${item.id}" data-name="${escapeHtml(item.name)}" data-price="${item.price}">
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong>${escapeHtml(item.name)}</strong>
-                                <span style="color:#007bff; font-weight:600;">₹${parseFloat(item.price).toFixed(2)}</span>
-                            </div>
-                        </div>
-                    `;
+                                <div class="search-result-item" data-id="${item.id}" data-name="${escapeHtml(item.name)}" data-price="${item.price}">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <strong>${escapeHtml(item.name)}</strong>
+                                        <span style="color:#007bff; font-weight:600;">₹${parseFloat(item.price).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            `;
                 });
                 searchResults.innerHTML = html;
                 searchResults.style.display = 'block';
@@ -450,7 +479,7 @@
                 document.querySelectorAll('.menu-card').forEach(card => card.style.display = 'none');
 
                 document.querySelectorAll('.search-result-item').forEach(result => {
-                    result.addEventListener('click', function() {
+                    result.addEventListener('click', function () {
                         addItemToOrder(this.dataset.id, this.dataset.name, parseFloat(this.dataset
                             .price));
                         searchInput.value = '';
@@ -468,16 +497,16 @@
             });
         }
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (searchInput && !searchInput.contains(e.target) && searchResults && !searchResults.contains(e
-                    .target)) {
+                .target)) {
                 searchResults.classList.remove('show');
                 searchResults.style.display = 'none';
             }
         });
 
         // Place Order
-        document.getElementById('placeOrderBtn')?.addEventListener('click', function() {
+        document.getElementById('placeOrderBtn')?.addEventListener('click', function () {
             if (Object.keys(order).length === 0) {
                 Swal.fire({
                     icon: 'warning',
@@ -506,14 +535,14 @@
             Swal.fire({
                 title: 'Confirm Order?',
                 html: `
-                    <div style="text-align:left;">
-                        <p><strong>Subtotal:</strong> ₹${subtotal.toFixed(2)}</p>
-                        ${taxHtml}
-                        <hr>
-                        <p><strong>Grand Total:</strong> ₹${grandTotal.toFixed(2)}</p>
-                        <p><strong>Payment:</strong> ${selectedPayment.toUpperCase()}</p>
-                    </div>
-                `,
+                            <div style="text-align:left;">
+                                <p><strong>Subtotal:</strong> ₹${subtotal.toFixed(2)}</p>
+                                ${taxHtml}
+                                <hr>
+                                <p><strong>Grand Total:</strong> ₹${grandTotal.toFixed(2)}</p>
+                                <p><strong>Payment:</strong> ${selectedPayment.toUpperCase()}</p>
+                            </div>
+                        `,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#007bff',
@@ -527,17 +556,17 @@
         });
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateHiddenFields();
         });
 
         // Table category and table number selection
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const tableCategory = document.getElementById('table_category');
             const tableNo = document.getElementById('table_no');
 
             if (tableCategory) {
-                tableCategory.addEventListener('change', function() {
+                tableCategory.addEventListener('change', function () {
                     let categoryId = this.value;
                     if (!categoryId) {
                         tableNo.innerHTML = '<option value="">Select Table</option>';
@@ -567,12 +596,12 @@
                                 }
 
                                 options += `
-                                        <option
-                                            value="${table.table_number}"
-                                            ${disabled}>
-                                            ${text}
-                                        </option>
-                                    `;
+                                                <option
+                                                    value="${table.table_number}"
+                                                    ${disabled}>
+                                                    ${text}
+                                                </option>
+                                            `;
                             });
 
                             tableNo.innerHTML = options;
@@ -583,7 +612,7 @@
                 });
             }
         });
-        $('#mobile_number').on('blur', function() {
+        $('#mobile_number').on('blur', function () {
 
             let phone = $(this).val();
 
@@ -593,7 +622,7 @@
 
             $.get("{{ route('customer.history') }}", {
                 phone: phone
-            }, function(response) {
+            }, function (response) {
 
                 if (!response.found) {
                     $('#customerHistory').hide();
@@ -610,16 +639,16 @@
                 response.orders.forEach(order => {
 
                     html += `
-                        <tr>
-                           <td>${new Date(order.created_at).toLocaleDateString('en-GB')}</td>
-                            <td>
-                                <span class="badge badge-${order.order_type === 'vip' ? 'warning' : 'primary'}">
-                                    ${order.order_type}
-                                </span>
-                            </td>
-                            <td>₹${order.total}</td>
-                        </tr>
-                        `;
+                                <tr>
+                                   <td>${new Date(order.created_at).toLocaleDateString('en-GB')}</td>
+                                    <td>
+                                        <span class="badge badge-${order.order_type === 'vip' ? 'warning' : 'primary'}">
+                                            ${order.order_type}
+                                        </span>
+                                    </td>
+                                    <td>₹${order.total}</td>
+                                </tr>
+                                `;
                 });
 
                 $('#historyRows').html(html);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\Restaurant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,39 @@ class LoginController extends Controller
         return back()->withErrors([
             'email' => 'Please login using your restaurant URL. Example: /jalpari/login',
         ]);
+    }
+
+    private function hasValidSubscription($user)
+    {
+        if ($user->role == 'owner') {
+
+            $restaurant = $user->restaurant;
+
+            $subscription = $restaurant?->activeSubscription;
+
+            return $subscription &&
+                Carbon::parse($subscription->end_date)->isFuture();
+        }
+
+        if (
+            in_array($user->role, [
+                'branch_manager',
+                'chef',
+                'waiter',
+                'cashier',
+                'waiter_head',
+            ])
+        ) {
+
+            $branch = $user->branch;
+
+            $subscription = $branch?->activeSubscription;
+
+            return $subscription &&
+                Carbon::parse($subscription->end_date)->isFuture();
+        }
+
+        return true;
     }
 
     /*
@@ -143,6 +177,20 @@ class LoginController extends Controller
         ])) {
 
             $request->session()->regenerate();
+            $subscription = $branchModel->activeSubscription;
+
+            if (
+                ! $subscription ||
+                $subscription->status !== 'active' ||
+                Carbon::parse($subscription->end_date)->isPast()
+            ) {
+
+                Auth::logout();
+
+                return back()->withErrors([
+                    'email' => 'Branch subscription has expired. Please contact administrator.',
+                ]);
+            }
 
             return redirect()->route('branch.dashboard', [
                 'restaurant' => $restaurantModel->slug,
@@ -166,7 +214,6 @@ class LoginController extends Controller
     public function restaurantLogin(Request $request, $restaurant)
     {
         $restaurantModel = Restaurant::query()->where('slug', $restaurant)->first();
-
         if (! $restaurantModel) {
             abort(404);
         }
@@ -246,5 +293,4 @@ class LoginController extends Controller
         // Other users
         return redirect('/');
     }
-
 }

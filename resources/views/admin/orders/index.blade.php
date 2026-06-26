@@ -20,16 +20,14 @@
                             <a href="{{ route('branch.orders.create', [
                                 'restaurant' => $restaurantSlug,
                                 'branch' => $branchSlug,
-                            ]) }}"
-                                class="btn btn-primary">
+                            ]) }}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i>
                                 Create Order
                             </a>
                         @else
                             <a href="{{ route('restaurant.orders.create', [
                                 'restaurant' => $restaurantSlug,
-                            ]) }}"
-                                class="btn btn-primary">
+                            ]) }}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i>
                                 Create Order
                             </a>
@@ -44,6 +42,7 @@
                     {{ session('success') }}
                 </div>
             @endif
+            
             <div class="card premium-block">
                 <div class="card-header premium-card-header">
                     <div>
@@ -55,36 +54,36 @@
                 </div>
                 <div class="card-body">
                     @if (in_array(optional(auth()->user())->role, ['super_admin', 'owner', 'branch_manager']))
-                        <div class="d-flex flex-wrap gap-2 mb-3">
+                        <div class="d-flex flex-wrap mb-3">
 
                             <a href="{{ request()->url() }}"
                                 class="btn btn-sm {{ !request('filter') ? 'btn-primary' : 'btn-outline-primary' }}">
-                                All Orders
+                                All Orders ({{ $counts['all'] }})
                             </a>
 
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'today']) }}"
                                 class="btn btn-sm {{ request('filter') == 'today' ? 'btn-primary' : 'btn-outline-primary' }}">
-                                Today's Orders
+                                Today's Orders ({{ $counts['today'] }})
                             </a>
 
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'customer']) }}"
                                 class="btn btn-sm {{ request('filter') == 'customer' ? 'btn-success' : 'btn-outline-success' }}">
-                                Customer Orders
+                                Customer Orders({{ $counts['customer'] }})
                             </a>
 
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter']) }}"
                                 class="btn btn-sm {{ request('filter') == 'waiter' ? 'btn-info' : 'btn-outline-info' }}">
-                                Waiter Orders
+                                Waiter Orders({{ $counts['waiter'] }})
                             </a>
 
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter_head']) }}"
                                 class="btn btn-sm {{ request('filter') == 'waiter_head' ? 'btn-warning' : 'btn-outline-warning' }}">
-                                Waiter Head Orders
+                                Waiter Head Orders({{ $counts['waiter_head'] }})
                             </a>
                         </div>
                     @endif
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle" id="permissionsTable">
                             <thead>
                                 <tr>
                                     <th>SrNo.</th>
@@ -215,22 +214,20 @@
 
                                                         @if ($canEdit)
                                                             @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                                <a href="{{ route('branch.orders.edit', [
+                                                                            <a href="{{ route('branch.orders.edit', [
                                                                     'restaurant' => $restaurantSlug,
                                                                     'branch' => $branchSlug,
                                                                     'order' => $order->id,
-                                                                ]) }}"
-                                                                    class="btn btn-warning btn-sm">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
+                                                                ]) }}" class="btn btn-warning btn-sm">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>
                                                             @elseif(!empty($restaurantSlug))
-                                                                <a href="{{ route('restaurant.orders.edit', [
+                                                                            <a href="{{ route('restaurant.orders.edit', [
                                                                     'restaurant' => $restaurantSlug,
                                                                     'order' => $order->id,
-                                                                ]) }}"
-                                                                    class="btn btn-warning btn-sm">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
+                                                                ]) }}" class="btn btn-warning btn-sm">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>
                                                             @else
                                                                 <a href="{{ route('orders.edit', ['order' => $order->id]) }}"
                                                                     class="btn btn-warning btn-sm">
@@ -238,8 +235,7 @@
                                                                 </a>
                                                             @endif
                                                         @else
-                                                            <button class="btn btn-secondary btn-sm" disabled
-                                                                title="Editing time expired">
+                                                            <button class="btn btn-secondary btn-sm" disabled title="Editing time expired">
                                                                 <i class="fas fa-edit"></i> Expired
                                                             </button>
                                                         @endif
@@ -279,87 +275,85 @@
                 <div class="modal-content">
 
                     @if (auth()->user()->branch_id)
-                        <form method="POST"
-                            action="{{ route('branch.orders.payment', [
+                            <form method="POST" action="{{ route('branch.orders.payment', [
+                            'restaurant' => $restaurant->slug,
+                            'branch' => auth()->user()->branch->slug,
+                        ]) }}">
+                    @else
+                                    <form method="POST" action="{{ route('restaurant.orders.payment', [
                                 'restaurant' => $restaurant->slug,
-                                'branch' => auth()->user()->branch->slug,
                             ]) }}">
-                        @else
-                            <form method="POST"
-                                action="{{ route('restaurant.orders.payment', [
-                                    'restaurant' => $restaurant->slug,
-                                ]) }}">
-                    @endif
+                        @endif
 
-                    @csrf
+                            @csrf
 
 
-                    <input type="hidden" name="order_id" id="order_id">
+                            <input type="hidden" name="order_id" id="order_id">
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            Make Payment
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    Make Payment
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
 
-                    <div class="modal-body">
+                            <div class="modal-body">
 
-                        <label class="form-label">
-                            Payment Method
-                        </label>
+                                <label class="form-label">
+                                    Payment Method
+                                </label>
 
-                        <select name="payment_method" id="payment_method" class="form-control" required>
+                                <select name="payment_method" id="payment_method" class="form-control" required>
 
-                            <option value="">
-                                Select Payment Method
-                            </option>
+                                    <option value="">
+                                        Select Payment Method
+                                    </option>
 
-                            <option value="cash">
-                                Cash
-                            </option>
+                                    <option value="cash">
+                                        Cash
+                                    </option>
 
-                            <option value="upi">
-                                UPI
-                            </option>
+                                    <option value="upi">
+                                        UPI
+                                    </option>
 
-                            <option value="card">
-                                Card
-                            </option>
+                                    <option value="card">
+                                        Card
+                                    </option>
 
-                        </select>
+                                </select>
 
-                        <div id="upiSection" class="mt-3" style="display:none;">
+                                <div id="upiSection" class="mt-3" style="display:none;">
 
-                            <h6>
-                                Scan QR Code
-                            </h6>
+                                    <h6>
+                                        Scan QR Code
+                                    </h6>
 
-                            <img id="branchQr" src="" class="img-fluid border rounded">
+                                    <img id="branchQr" src="" class="img-fluid border rounded">
 
-                        </div>
+                                </div>
 
-                    </div>
+                            </div>
 
-                    <div class="modal-footer">
+                            <div class="modal-footer">
 
-                        <button type="submit" class="btn btn-primary">
-                            Confirm Payment
-                        </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Confirm Payment
+                                </button>
 
-                    </div>
+                            </div>
 
-                    </form>
+                        </form>
 
                 </div>
             </div>
         </div>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
 
                 document.querySelectorAll('.paymentBtn').forEach(btn => {
 
-                    btn.addEventListener('click', function() {
+                    btn.addEventListener('click', function () {
 
                         document.getElementById('order_id').value =
                             this.dataset.order;
@@ -371,7 +365,7 @@
                 });
 
                 document.getElementById('payment_method')
-                    .addEventListener('change', function() {
+                    .addEventListener('change', function () {
 
                         let upiSection =
                             document.getElementById('upiSection');
@@ -392,7 +386,7 @@
     @endsection
     @if (session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -405,11 +399,11 @@
     @endif
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             document.querySelectorAll('.delete-form').forEach(form => {
 
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
 
                     e.preventDefault();
 
@@ -434,6 +428,16 @@
 
         });
     </script>
+    @push('scripts')
+        <script>
+            $(function () {
+                $('#permissionsTable').DataTable({
+                    responsive: false,
+                    autoWidth: false
+                });
+            });
+        </script>
+    @endpush
 @else
     @php
         abort(403);

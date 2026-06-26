@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Branch;
-use App\Models\User;
+use App\Models\BranchSubscription;
 use App\Models\Restaurant;
+use App\Models\SubscriptionPlan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class BranchController extends Controller
 {
@@ -22,7 +23,7 @@ class BranchController extends Controller
         $query = Branch::with([
             'restaurant',
             'owner',
-            'manager'
+            'manager',
         ]);
 
         if ($user->role === 'owner') {
@@ -73,12 +74,13 @@ class BranchController extends Controller
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
+        $plans = SubscriptionPlan::query()->get();
 
         return view(
             'admin.branches.create',
             compact(
                 'restaurants',
-                'owners'
+                'owners', 'plans'
             )
         );
     }
@@ -88,30 +90,71 @@ class BranchController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
-            'restaurant_id'     => 'required|exists:restaurants,id',
-            'owner_id'          => 'required|exists:users,id',
-            'name'              => 'required|max:255',
-            'code'              => 'nullable|max:50',
-            'phone'             => 'nullable|max:20',
-            'email'             => 'nullable|email',
-            'address'           => 'nullable',
-            'city'              => 'nullable|max:100',
-            'state'             => 'nullable|max:100',
-            'country'           => 'nullable|max:100',
-            'postal_code'       => 'nullable|max:20',
-            'latitude'          => 'nullable',
-            'longitude'         => 'nullable',
-            'gst_number'        => 'nullable|max:100',
-            'fssai_license'     => 'nullable|max:100',
-            'opening_time'      => 'nullable',
-            'closing_time'      => 'nullable',
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'owner_id' => 'required|exists:users,id',
+            'name' => 'required|max:255',
+            'code' => 'nullable|max:50',
+            'phone' => 'nullable|max:20',
+            'email' => 'nullable|email',
+            'address' => 'nullable',
+            'city' => 'nullable|max:100',
+            'state' => 'nullable|max:100',
+            'country' => 'nullable|max:100',
+            'postal_code' => 'nullable|max:20',
+            'latitude' => 'nullable',
+            'longitude' => 'nullable',
+            'gst_number' => 'nullable|max:100',
+            'fssai_license' => 'nullable|max:100',
+            'opening_time' => 'nullable',
+            'closing_time' => 'nullable',
             'branch_manager_id' => 'nullable|exists:users,id',
+            'subscription_plan_id' => 'required|exists:subscription_plans,id',
+            'billing_cycle' => 'required|in:monthly,quarterly,half_yearly,yearly',
         ]);
 
         $validated['is_active'] = 1;
         $validated['slug'] = Str::slug($validated['name']);
-        Branch::create($validated);
+        $branch = Branch::create($validated);
+
+        $plan = SubscriptionPlan::findOrFail(
+            $request->subscription_plan_id
+        );
+
+        $amount = match ($request->billing_cycle) {
+
+            'monthly' => $plan->monthly_price,
+
+            'quarterly' => $plan->quarterly_price,
+
+            'half_yearly' => $plan->half_yearly_price,
+
+            'yearly' => $plan->yearly_price,
+        };
+
+        $startDate = now();
+
+        $endDate = match ($request->billing_cycle) {
+
+            'monthly' => now()->addMonth(),
+
+            'quarterly' => now()->addMonths(3),
+
+            'half_yearly' => now()->addMonths(6),
+
+            'yearly' => now()->addYear(),
+        };
+
+        BranchSubscription::create([
+            'branch_id' => $branch->id,
+            'subscription_plan_id' => $plan->id,
+            'billing_cycle' => $request->billing_cycle,
+            'amount' => $amount,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'status' => 'active',
+        ]);
 
         return redirect()
             ->route('branches.index')
@@ -127,11 +170,14 @@ class BranchController extends Controller
     public function show(Request $request)
     {
         $branchId = $request->route('branch');
+
         $branch = Branch::with([
             'restaurant',
             'owner',
-            'manager'
+            'manager',
+            'activeSubscription.plan',
         ])->findOrFail($branchId);
+
         return view('admin.branches.show', compact('branch'));
     }
 
@@ -155,6 +201,9 @@ class BranchController extends Controller
             ->where('status', 'active')
             ->orderBy('name')
             ->get();
+        $plans = SubscriptionPlan::query()->where('status', 1)->get();
+
+        $currentSubscription = $branch->activeSubscription;
 
         return view(
             'admin.branches.edit',
@@ -162,7 +211,7 @@ class BranchController extends Controller
                 'branch',
                 'restaurants',
                 'owners',
-                'managers'
+                'managers', 'plans', 'currentSubscription'
             )
         );
     }
@@ -175,29 +224,105 @@ class BranchController extends Controller
         $branch = Branch::findOrFail($id);
 
         $validated = $request->validate([
-            'restaurant_id'     => 'required|exists:restaurants,id',
-            'owner_id'          => 'required|exists:users,id',
+            'restaurant_id' => 'required|exists:restaurants,id',
+            'owner_id' => 'required|exists:users,id',
             'branch_manager_id' => 'nullable|exists:users,id',
-            'name'              => 'required|max:255',
-            'code'              => 'nullable|max:50',
-            'phone'             => 'nullable|max:20',
-            'email'             => 'nullable|email',
-            'address'           => 'nullable',
-            'city'              => 'nullable|max:100',
-            'state'             => 'nullable|max:100',
-            'country'           => 'nullable|max:100',
-            'postal_code'       => 'nullable|max:20',
-            'latitude'          => 'nullable',
-            'longitude'         => 'nullable',
-            'gst_number'        => 'nullable|max:100',
-            'fssai_license'     => 'nullable|max:100',
-            'opening_time'      => 'nullable',
-            'closing_time'      => 'nullable',
-            'is_active'         => 'nullable'
+            'name' => 'required|max:255',
+            'code' => 'nullable|max:50',
+            'phone' => 'nullable|max:20',
+            'email' => 'nullable|email',
+            'address' => 'nullable',
+            'city' => 'nullable|max:100',
+            'state' => 'nullable|max:100',
+            'country' => 'nullable|max:100',
+            'postal_code' => 'nullable|max:20',
+            'latitude' => 'nullable',
+            'longitude' => 'nullable',
+            'gst_number' => 'nullable|max:100',
+            'fssai_license' => 'nullable|max:100',
+            'opening_time' => 'nullable',
+            'closing_time' => 'nullable',
+            'is_active' => 'nullable',
+            'subscription_plan_id' => 'nullable|exists:subscription_plans,id',
+            'billing_cycle' => 'nullable|in:monthly,quarterly,half_yearly,yearly',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
         $branch->update($validated);
+
+        $currentSubscription = $branch->activeSubscription;
+
+        if (! $currentSubscription) {
+
+            // First subscription for this branch
+
+            $plan = SubscriptionPlan::findOrFail(
+                $request->subscription_plan_id
+            );
+
+            $amount = match ($request->billing_cycle) {
+                'monthly' => $plan->monthly_price,
+                'quarterly' => $plan->quarterly_price,
+                'half_yearly' => $plan->half_yearly_price,
+                'yearly' => $plan->yearly_price,
+            };
+
+            $endDate = match ($request->billing_cycle) {
+                'monthly' => now()->addMonth(),
+                'quarterly' => now()->addMonths(3),
+                'half_yearly' => now()->addMonths(6),
+                'yearly' => now()->addYear(),
+            };
+
+            BranchSubscription::create([
+                'branch_id' => $branch->id,
+                'subscription_plan_id' => $plan->id,
+                'billing_cycle' => $request->billing_cycle,
+                'amount' => $amount,
+                'start_date' => now(),
+                'end_date' => $endDate,
+                'status' => 'active',
+            ]);
+
+        } elseif (
+            $currentSubscription->subscription_plan_id != $request->subscription_plan_id ||
+            $currentSubscription->billing_cycle != $request->billing_cycle
+        ) {
+
+            // Plan changed
+
+            $currentSubscription->update([
+                'status' => 'cancelled',
+            ]);
+
+            $plan = SubscriptionPlan::findOrFail(
+                $request->subscription_plan_id
+            );
+
+            $amount = match ($request->billing_cycle) {
+                'monthly' => $plan->monthly_price,
+                'quarterly' => $plan->quarterly_price,
+                'half_yearly' => $plan->half_yearly_price,
+                'yearly' => $plan->yearly_price,
+            };
+
+            $endDate = match ($request->billing_cycle) {
+                'monthly' => now()->addMonth(),
+                'quarterly' => now()->addMonths(3),
+                'half_yearly' => now()->addMonths(6),
+                'yearly' => now()->addYear(),
+            };
+
+            BranchSubscription::create([
+                'branch_id' => $branch->id,
+                'subscription_plan_id' => $plan->id,
+                'billing_cycle' => $request->billing_cycle,
+                'amount' => $amount,
+                'start_date' => now(),
+                'end_date' => $endDate,
+                'status' => 'active',
+            ]);
+        }
 
         return redirect()
             ->route('branches.index')
@@ -215,7 +340,7 @@ class BranchController extends Controller
         $branch = Branch::findOrFail($id);
 
         $branch->update([
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         return redirect()
@@ -258,25 +383,28 @@ class BranchController extends Controller
 
         return response()->json($managers);
     }
+
     public function assignManager(Request $request)
     {
         $branch = Branch::findOrFail($request->route('branch'));
         $branch->branch_manager_id = $request->branch_manager_id;
         $branch->save();
+
         return redirect()
             ->route('restaurant.branches.index', [
-                'restaurant' => $request->route('restaurant')
+                'restaurant' => $request->route('restaurant'),
             ])
             ->with(
                 'success',
                 'Branch manager assigned successfully.'
             );
     }
+
     public function uploadQrCode(Request $request)
     {
         $request->validate([
             'branch_id' => 'required|exists:branches,id',
-            'qrcode'    => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'qrcode' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $branch = Branch::findOrFail($request->branch_id);
@@ -293,7 +421,7 @@ class BranchController extends Controller
             );
 
             $branch->update([
-                'qrcode' => 'uploads/qrcodes/'.$filename
+                'qrcode' => 'uploads/qrcodes/'.$filename,
             ]);
         }
 

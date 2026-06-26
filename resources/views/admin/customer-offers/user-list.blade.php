@@ -6,8 +6,6 @@
         <div class="card-header">
             <h4>Registered Customers</h4>
         </div>
-
-
         <div class="card-body">
 
             <div class="table-responsive">
@@ -16,7 +14,7 @@
 
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>SrNo</th>
                             <th>Name</th>
                             <th>Mobile</th>
                             <th>Email</th>
@@ -80,9 +78,6 @@
                                 </td>
 
                             </tr>
-
-
-
                             <!-- Send Offer Modal -->
 
                             <div class="modal fade" id="offerModal{{ $customer->id }}" tabindex="-1">

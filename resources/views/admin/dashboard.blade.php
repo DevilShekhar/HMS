@@ -2,76 +2,343 @@
 
 @section('content')
     <section class="section">
-        <div class="row ">
+        <div class="row mb-3">
 
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                <div class="card">
-                    <div class="card-statistic-4">
-                        <div class="align-items-center justify-content-between">
-                            <div class="row ">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                                    <div class="card-content">
-                                        <h5 class="font-15"> Customers</h5>
-                                        <h2 class="mb-3 font-18">1,287</h2>
-                                        <p class="mb-0"><span class="col-orange">09%</span> Decrease</p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                                    <div class="banner-img">
-                                        <img src="assets/img/banner/2.png" alt="">
-                                    </div>
-                                </div>
-                            </div>
+            {{-- SuperAdmin Cards --}}
+            @if (isset($revenue) && auth()->user()->role == 'super_admin')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card restaurant-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Total Restaurant</h6>
+                            <h3 class="text-white mb-0">{{ $totalRestaurants }}</h3>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                <div class="card">
-                    <div class="card-statistic-4">
-                        <div class="align-items-center justify-content-between">
-                            <div class="row ">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                                    <div class="card-content">
-                                        <h5 class="font-15">New Project</h5>
-                                        <h2 class="mb-3 font-18">128</h2>
-                                        <p class="mb-0"><span class="col-green">18%</span>
-                                            Increase</p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                                    <div class="banner-img">
-                                        <img src="assets/img/banner/3.png" alt="">
-                                    </div>
-                                </div>
-                            </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card branches-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Total Branches</h6>
+                            <h3 class="text-white mb-0">{{ $totalBranches }}</h3>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                <div class="card">
-                    <div class="card-statistic-4">
-                        <div class="align-items-center justify-content-between">
-                            <div class="row ">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                                    <div class="card-content">
-                                        <h5 class="font-15">Revenue</h5>
-                                        <h2 class="mb-3 font-18">$48,697</h2>
-                                        <p class="mb-0"><span class="col-green">42%</span> Increase</p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                                    <div class="banner-img">
-                                        <img src="assets/img/banner/4.png" alt="">
-                                    </div>
-                                </div>
-                            </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card expiry-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Near Expiring</h6>
+                            <h3 class="text-white mb-0">{{ $nearExpirySubscriptions }}</h3>
                         </div>
                     </div>
+                </div>
+            @endif
+
+            {{-- Revenue Cards --}}
+            @can('today-revenue')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card today-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Today Revenue</h6>
+                            <h3 class="text-white mb-1">₹{{ number_format($revenue['today']['amount']) }}</h3>
+                            <p class="text-white mb-0">{{ $revenue['today']['orders'] }} Orders</p>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('yesterday-revenue')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card yesterday-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Yesterday Revenue</h6>
+                            @if (isset($revenue))
+                                <h3 class="text-white mb-1">₹{{ number_format($revenue['yesterday']['amount']) }}</h3>
+                                <p class="text-white mb-0">{{ $revenue['yesterday']['orders'] }} Orders</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('weekly-revenue')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card weekly-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Weekly Revenue</h6>
+                            <h3 class="text-white mb-1">₹{{ number_format($revenue['weekly']['amount']) }}</h3>
+                            <p class="text-white mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('monthly-revenue')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card monthly-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Monthly Revenue</h6>
+                            @if (isset($revenue))
+                                <h3 class="text-white mb-1">₹{{ number_format($revenue['monthly']['amount']) }}</h3>
+                                <p class="text-white mb-0">{{ $revenue['monthly']['orders'] }} Orders</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+            @can('yearly-revenue')
+                <div class="col-md-3 mb-4">
+                    <div class="card gradient-card yearly-card shadow-sm border-0">
+                        <div class="card-body text-center p-4">
+                            <h6 class="text-white mb-2">Yearly Revenue</h6>
+                            @if (isset($revenue))
+                                <h3 class="text-white mb-1">₹{{ number_format($revenue['yearly']['amount']) }}</h3>
+                                <p class="text-white mb-0">{{ $revenue['yearly']['orders'] }} Orders</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endcan
+
+        </div>
+
+        @can('order-status')
+            <div class="row g-4 mt-3 mb-4">
+
+                {{-- Pending Orders --}}
+                <div class="col-12 col-md-4">
+                    <div class="status-card status-card--pending">
+                        <div class="status-card__icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z" />
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                            </svg>
+                        </div>
+                        <div class="status-card__content">
+                            <span class="status-card__label">Pending Orders</span>
+                            <h2 class="status-card__value">{{ $orderStatus['pending'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Preparing Orders --}}
+                <div class="col-12 col-md-4">
+                    <div class="status-card status-card--preparing">
+                        <div class="status-card__icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path
+                                    d="M8 11.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5" />
+                                <path
+                                    d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0zM1 1.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5z" />
+                            </svg>
+                        </div>
+                        <div class="status-card__content">
+                            <span class="status-card__label">Preparing Orders</span>
+                            <h2 class="status-card__value">{{ $orderStatus['preparing'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Completed Orders --}}
+                <div class="col-12 col-md-4">
+                    <div class="status-card status-card--completed">
+                        <div class="status-card__icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
+                                viewBox="0 0 16 16">
+                                <path
+                                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
+                            </svg>
+                        </div>
+                        <div class="status-card__content">
+                            <span class="status-card__label">Completed Orders</span>
+                            <h2 class="status-card__value">{{ $orderStatus['completed'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        @endcan
+
+        @php
+            $restaurantSlug = request()->route('restaurant');
+            $branchSlug = request()->route('branch');
+        @endphp
+        <div class="card shadow mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Prepared Orders</h5>
+                <div class="premium-head-actions">
+
+                        @if ($branchSlug)
+                                    <a href="{{ route('branch.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}" class="btn btn-primary">
+
+                                        View All
+                                    </a>
+                        @else
+                                    <a href="{{ route('restaurant.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}" class="btn btn-primary">
+
+                                        View All
+                                    </a>
+                        @endif
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Token</th>
+                                <th>Customer</th>
+                                <th>Table</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse($preparedOrders as $order)
+                                <tr>
+                                    <td>{{ $order->token_no }}</td>
+                                    <td>{{ $order->customer_name }}</td>
+                                    <td>{{ $order->table_no ?? '-' }}</td>
+                                    <td>₹{{ number_format($order->total, 2) }}</td>
+                                    <td>
+                                        <span class="badge bg-info">Prepared</span>
+                                    </td>
+                                    <td>
+                                            <div class="d-flex gap-2">
+
+                                                {{-- View Button - Always visible --}}
+                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                    <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @elseif(!empty($restaurantSlug))
+                                                    <a href="{{ route('restaurant.orders.show', ['restaurant' => $restaurantSlug, 'order' => $order->id]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('orders.show', ['order' => $order->id]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                @endif
+
+                                            </div>
+                                        </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center">No prepared orders found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+
+
+        @can('inventory-dashboard')
+            <div class="row mt-4">
+
+                <div class="col-lg-12">
+
+                    <div class="card shadow">
+
+                        <div class="card-header">
+
+                            <h5 class="mb-0">
+                                Inventory Stock Summary
+                            </h5>
+
+                        </div>
+
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="StockTable">
+                                    <thead>
+                                        <tr>
+                                            @if (auth()->user()->role == 'super_admin')
+                                                <th>Restaurant</th>
+                                            @endif
+                                            @if (auth()->user()->role != 'branch_manager')
+                                                <th>Branch</th>
+                                            @endif
+                                            <th>Item</th>
+                                            <th>Remaining</th>
+                                            <th>Minimum</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($inventoryStocks as $item)
+                                            <tr>
+
+                                                @if(auth()->user()->role == 'super_admin')
+                                                    <td>{{ optional($item->restaurant)->name }}</td>
+                                                @endif
+
+                                                @if(auth()->user()->role != 'branch_manager')
+                                                    <td>{{ optional($item->branch)->name }}</td>
+                                                @endif
+
+                                                <td>{{ $item->name }}</td>
+
+                                                <td>
+                                                    {{ $item->remaining_stock }}
+                                                    {{ $item->unit }}
+                                                </td>
+
+                                                <td>
+                                                    {{ $item->minimum_stock }}
+                                                    {{ $item->unit }}
+                                                </td>
+
+                                                <td>
+                                                    @if($item->remaining_stock <= $item->minimum_stock)
+                                                        <span class="badge badge-danger">
+                                                            Low Stock
+                                                        </span>
+                                                    @else
+                                                        <span class="badge badge-success">
+                                                            Available
+                                                        </span>
+                                                    @endif
+                                                </td>
+
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="{{ auth()->user()->role == 'super_admin' ? 6 : (auth()->user()->role == 'branch_manager' ? 4 : 5) }}"
+                                                    class="text-center">
+                                                    No Inventory Found
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endcan
+
+
+
+
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card ">
@@ -84,8 +351,7 @@
                                     <a href="#" class="dropdown-item has-icon"><i class="fas fa-eye"></i> View</a>
                                     <a href="#" class="dropdown-item has-icon"><i class="far fa-edit"></i> Edit</a>
                                     <div class="dropdown-divider"></div>
-                                    <a href="#" class="dropdown-item has-icon text-danger"><i
-                                            class="far fa-trash-alt"></i>
+                                    <a href="#" class="dropdown-item has-icon text-danger"><i class="far fa-trash-alt"></i>
                                         Delete</a>
                                 </div>
                             </div>
@@ -245,17 +511,15 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-8.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Wildan Ahdian"></li>
+                                                    src="assets/img/users/user-8.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Wildan Ahdian"></li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-9.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-9.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-10.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Sarah Smith"></li>
+                                                    src="assets/img/users/user-10.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Sarah Smith"></li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+4</span></li>
                                         </ul>
                                     </td>
@@ -284,12 +548,11 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-1.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Wildan Ahdian"></li>
+                                                    src="assets/img/users/user-1.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Wildan Ahdian"></li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-2.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-2.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+2</span></li>
                                         </ul>
@@ -319,17 +582,15 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-3.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Wildan Ahdian"></li>
+                                                    src="assets/img/users/user-3.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Wildan Ahdian"></li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-4.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-4.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-5.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Sarah Smith"></li>
+                                                    src="assets/img/users/user-5.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Sarah Smith"></li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+3</span></li>
                                         </ul>
                                     </td>
@@ -358,13 +619,12 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-7.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-7.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-8.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Sarah Smith"></li>
+                                                    src="assets/img/users/user-8.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Sarah Smith"></li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+4</span></li>
                                         </ul>
                                     </td>
@@ -393,17 +653,15 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-9.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Wildan Ahdian"></li>
+                                                    src="assets/img/users/user-9.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Wildan Ahdian"></li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-10.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-10.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-2.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Sarah Smith"></li>
+                                                    src="assets/img/users/user-2.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Sarah Smith"></li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+2</span></li>
                                         </ul>
                                     </td>
@@ -432,17 +690,15 @@
                                     <td class="text-truncate">
                                         <ul class="list-unstyled order-list m-b-0 m-b-0">
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-8.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Wildan Ahdian"></li>
+                                                    src="assets/img/users/user-8.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Wildan Ahdian"></li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-9.png" alt="user"
-                                                    data-toggle="tooltip" title="" data-original-title="John Deo">
+                                                    src="assets/img/users/user-9.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="John Deo">
                                             </li>
                                             <li class="team-member team-member-sm"><img class="rounded-circle"
-                                                    src="assets/img/users/user-10.png" alt="user"
-                                                    data-toggle="tooltip" title=""
-                                                    data-original-title="Sarah Smith"></li>
+                                                    src="assets/img/users/user-10.png" alt="user" data-toggle="tooltip"
+                                                    title="" data-original-title="Sarah Smith"></li>
                                             <li class="avatar avatar-sm"><span class="badge badge-primary">+4</span></li>
                                         </ul>
                                     </td>
@@ -616,5 +872,19 @@
             </div>
         </div>
     </section>
+    {{-- @push('scripts')
+        <script>
+            $(function () {
+                $('#StockTable').DataTable({
+                    responsive: false,
+                    autoWidth: false,
+                    pageLength: 5,
+                    lengthMenu: [
+                        [5, 10, 15, 25, 50, -1],
+                        [5, 10, 15, 25, 50, "All"]
+                    ]
+                });
+            });
+        </script>
+    @endpush --}}
 @endsection
-

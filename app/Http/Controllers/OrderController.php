@@ -23,27 +23,77 @@ class OrderController extends Controller
     public function index()
     {
         $restaurant = app('restaurant');
+        $user = Auth::user();
+
+        // Base query according to access
+        $baseQuery = Order::query()->where('restaurant_id', $restaurant->id);
+
+        if ($user->role == 'owner') {
+
+            // all orders
+
+        } elseif ($user->role == 'branch_manager') {
+
+            $baseQuery->where('branch_id', $user->branch_id);
+
+        } elseif ($user->role == 'waiter_head') {
+
+            $baseQuery->where('branch_id', $user->branch_id);
+
+        } elseif ($user->role == 'chef') {
+
+            $baseQuery->where('chef_id', $user->id);
+
+        } elseif ($user->role == 'customer') {
+
+            $baseQuery->where('customer_id', $user->id);
+
+        } else {
+
+            $baseQuery->where('branch_id', $user->branch_id);
+        }
+
+        // Counts
+        $counts = [
+            'all' => (clone $baseQuery)->count(),
+
+            'today' => (clone $baseQuery)
+                ->whereDate('created_at', today())
+                ->count(),
+
+            'customer' => (clone $baseQuery)
+                ->whereNotNull('customer_id')
+                ->count(),
+
+            'waiter' => (clone $baseQuery)
+                ->whereHas('creator', function ($q) {
+                    $q->where('role', 'waiter');
+                })
+                ->count(),
+
+            'waiter_head' => (clone $baseQuery)
+                ->whereHas('creator', function ($q) {
+                    $q->where('role', 'waiter_head');
+                })
+                ->count(),
+        ];
+
+        // Orders listing
         $query = Order::with([
             'branch',
             'items',
             'chef',
-        ])->where(
-            'restaurant_id',
-            $restaurant->id
-        );
-        $user = Auth::user();
+        ])
+            ->where('restaurant_id', $restaurant->id);
 
-        if ($user->role == 'owner') {
-
-            // show all orders
-
-        } elseif ($user->role == 'branch_manager') {
+        // Apply same permission logic
+        if ($user->role == 'branch_manager') {
 
             $query->where('branch_id', $user->branch_id);
 
         } elseif ($user->role == 'waiter_head') {
 
-            // show branch orders
+            $query->where('branch_id', $user->branch_id);
 
         } elseif ($user->role == 'chef') {
 
@@ -53,10 +103,12 @@ class OrderController extends Controller
 
             $query->where('customer_id', $user->id);
 
-        } else {
+        } elseif ($user->role != 'owner') {
 
             $query->where('branch_id', $user->branch_id);
         }
+
+        // Filter buttons
         $filter = request('filter');
 
         if ($filter == 'today') {
@@ -78,12 +130,15 @@ class OrderController extends Controller
             $query->whereHas('creator', function ($q) {
                 $q->where('role', 'waiter_head');
             });
-
         }
 
         $orders = $query->latest()->get();
 
-        return view('admin.orders.index', compact('orders', 'restaurant'));
+        return view('admin.orders.index', compact(
+            'orders',
+            'restaurant',
+            'counts'
+        ));
     }
 
     public function create()
@@ -184,6 +239,8 @@ class OrderController extends Controller
             'anniversary_date' => 'nullable',
             'menu_item_id' => 'required|array',
             'email' => 'nullable',
+            'table_category' => 'required',
+            'table_no' => 'required',
         ]);
 
         $restaurant = app('restaurant');
@@ -522,7 +579,6 @@ class OrderController extends Controller
                 ->with('success', 'Order updated successfully.');
         }
     }
-
 
     public function updateStatus(
         Request $request,
