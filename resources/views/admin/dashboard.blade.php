@@ -162,59 +162,42 @@
             </div>
         @endcan
 
-        @php
-            $restaurantSlug = request()->route('restaurant');
-            $branchSlug = request()->route('branch');
-        @endphp
-        <div class="card shadow mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Prepared Orders</h5>
-                <div class="premium-head-actions">
+        @can('prepared-index-dashboard')
+            @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+            @endphp
+            <div class="card shadow mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Prepared Orders</h5>
 
-                        @if ($branchSlug)
-                                    <a href="{{ route('branch.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                                'branch' => $branchSlug,
-                            ]) }}" class="btn btn-primary">
-
-                                        View All
-                                    </a>
-                        @else
-                                    <a href="{{ route('restaurant.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                            ]) }}" class="btn btn-primary">
-
-                                        View All
-                                    </a>
-                        @endif
                 </div>
-            </div>
 
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Token</th>
-                                <th>Customer</th>
-                                <th>Table</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @forelse($preparedOrders as $order)
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
                                 <tr>
-                                    <td>{{ $order->token_no }}</td>
-                                    <td>{{ $order->customer_name }}</td>
-                                    <td>{{ $order->table_no ?? '-' }}</td>
-                                    <td>₹{{ number_format($order->total, 2) }}</td>
-                                    <td>
-                                        <span class="badge bg-info">Prepared</span>
-                                    </td>
-                                    <td>
+                                    <th>Token</th>
+                                    <th>Customer</th>
+                                    <th>Table</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @forelse($preparedOrders as $order)
+                                    <tr>
+                                        <td>{{ $order->token_no }}</td>
+                                        <td>{{ $order->customer_name }}</td>
+                                        <td>{{ $order->table_no ?? '-' }}</td>
+                                        <td>₹{{ number_format($order->total, 2) }}</td>
+                                        <td>
+                                            <span class="badge bg-info">Prepared</span>
+                                        </td>
+                                        <td>
                                             <div class="d-flex gap-2">
 
                                                 {{-- View Button - Always visible --}}
@@ -229,25 +212,26 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 @else
-                                                    <a href="{{ route('orders.show', ['order' => $order->id]) }}"
+                                                    {{-- <a href="{{ route('orders.show', ['order' => $order->id]) }}"
                                                         class="btn btn-sm btn-info">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    </a> --}}
                                                 @endif
 
                                             </div>
                                         </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">No prepared orders found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">No prepared orders found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        @endcan
 
 
         @can('inventory-dashboard')
@@ -872,19 +856,4 @@
             </div>
         </div>
     </section>
-    {{-- @push('scripts')
-        <script>
-            $(function () {
-                $('#StockTable').DataTable({
-                    responsive: false,
-                    autoWidth: false,
-                    pageLength: 5,
-                    lengthMenu: [
-                        [5, 10, 15, 25, 50, -1],
-                        [5, 10, 15, 25, 50, "All"]
-                    ]
-                });
-            });
-        </script>
-    @endpush --}}
 @endsection
