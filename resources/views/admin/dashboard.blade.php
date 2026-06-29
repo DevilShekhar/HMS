@@ -162,15 +162,37 @@
             </div>
         @endcan
 
+        @php
+            $restaurantSlug = request()->route('restaurant');
+            $branchSlug = request()->route('branch');
+        @endphp
         @can('prepared-index-dashboard')
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
             <div class="card shadow mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Prepared Orders</h5>
+                    <h5 class="mb-0">Prepared and Pendings Orders</h5>
+                    <div class="premium-head-actions">
 
+
+                        @if (!empty($restaurantSlug) && !empty($branchSlug))
+
+                                    <a href="{{ route('branch.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}" class="btn btn-primary">
+                                        View All
+                                    </a>
+
+                        @elseif (!empty($restaurantSlug))
+
+                                    <a href="{{ route('restaurant.orders.index', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}" class="btn btn-primary">
+                                        View All
+                                    </a>
+
+                        @endif
+
+                    </div>
                 </div>
 
                 <div class="card-body p-0">
@@ -195,12 +217,11 @@
                                         <td>{{ $order->table_no ?? '-' }}</td>
                                         <td>₹{{ number_format($order->total, 2) }}</td>
                                         <td>
-                                            <span class="badge bg-info">Prepared</span>
+                                            {{ $order->status }}
                                         </td>
                                         <td>
                                             <div class="d-flex gap-2">
 
-                                                {{-- View Button - Always visible --}}
                                                 @if (!empty($restaurantSlug) && !empty($branchSlug))
                                                     <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
                                                         class="btn btn-sm btn-info">
@@ -212,10 +233,7 @@
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                 @else
-                                                    {{-- <a href="{{ route('orders.show', ['order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a> --}}
+
                                                 @endif
 
                                             </div>
@@ -233,22 +251,15 @@
             </div>
         @endcan
 
-
         @can('inventory-dashboard')
             <div class="row mt-4">
-
                 <div class="col-lg-12">
-
                     <div class="card shadow">
-
                         <div class="card-header">
-
                             <h5 class="mb-0">
                                 Inventory Stock Summary
                             </h5>
-
                         </div>
-
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover" id="StockTable">
@@ -269,7 +280,6 @@
                                     <tbody>
                                         @forelse($inventoryStocks as $item)
                                             <tr>
-
                                                 @if(auth()->user()->role == 'super_admin')
                                                     <td>{{ optional($item->restaurant)->name }}</td>
                                                 @endif
@@ -277,19 +287,15 @@
                                                 @if(auth()->user()->role != 'branch_manager')
                                                     <td>{{ optional($item->branch)->name }}</td>
                                                 @endif
-
                                                 <td>{{ $item->name }}</td>
-
                                                 <td>
                                                     {{ $item->remaining_stock }}
                                                     {{ $item->unit }}
                                                 </td>
-
                                                 <td>
                                                     {{ $item->minimum_stock }}
                                                     {{ $item->unit }}
                                                 </td>
-
                                                 <td>
                                                     @if($item->remaining_stock <= $item->minimum_stock)
                                                         <span class="badge badge-danger">
@@ -301,7 +307,6 @@
                                                         </span>
                                                     @endif
                                                 </td>
-
                                             </tr>
                                         @empty
                                             <tr>
@@ -319,9 +324,6 @@
                 </div>
             </div>
         @endcan
-
-
-
 
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
@@ -856,4 +858,19 @@
             </div>
         </div>
     </section>
+    {{-- @push('scripts')
+    <script>
+        $(function () {
+            $('#StockTable').DataTable({
+                responsive: false,
+                autoWidth: false,
+                pageLength: 5,
+                lengthMenu: [
+                    [5, 10, 15, 25, 50, -1],
+                    [5, 10, 15, 25, 50, "All"]
+                ]
+            });
+        });
+    </script>
+    @endpush --}}
 @endsection
