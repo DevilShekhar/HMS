@@ -27,7 +27,7 @@ class Branch extends Model
         'opening_time',
         'closing_time',
         'is_active',
-        'slug',
+        'slug','registration_qrcode'
     ];
 
     public function restaurant()

@@ -1,3 +1,4 @@
+@can('create-customer-offers')
 @extends('layouts.app')
 
 @section('content')
@@ -108,3 +109,8 @@
         </div>
     </div>
 @endsection
+@else
+    @php
+        abort(403);
+    @endphp
+@endcan

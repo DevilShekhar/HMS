@@ -169,11 +169,10 @@ class DashboardController extends Controller
                 ->count(),
         ];
         $preparedOrders = (clone $orders)
-            ->where('status', 'prepared')
+            ->whereIn('status', ['prepared', 'pending'])
             ->orderByDesc('id')
             ->take(10)
             ->get();
-            
 
         return view('admin.dashboard', compact(
             'revenue',

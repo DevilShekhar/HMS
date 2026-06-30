@@ -1,3 +1,4 @@
+@can('view-inventory')
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
@@ -287,3 +288,8 @@
 
     });
 </script>
+@else
+    @php
+        abort(403);
+    @endphp
+@endcan

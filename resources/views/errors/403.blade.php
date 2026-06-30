@@ -55,8 +55,39 @@
             You don’t have permission to access this page.
         </div>
 
-        <a href="{{ url('/') }}" class="btn">Go Home</a>
-    </div>
+        @auth
+            <div class="premium-head-actions">
+
+                @if(auth()->user()->role === 'super_admin')
+
+                    <a href="{{ route('dashboard') }}" class="btn premium-btn ghost-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Go Home
+                    </a>
+
+                @elseif(in_array(auth()->user()->role, ['branch_manager', 'chef', 'waiter', 'waiter_head']))
+
+                        <a href="{{ route('branch.dashboard', [
+                        'restaurant' => auth()->user()->restaurant->slug,
+                        'branch' => auth()->user()->branch->slug,
+                    ]) }}" class="btn premium-btn ghost-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Home
+                        </a>
+
+                @elseif(in_array(auth()->user()->role, ['owner', 'customer']))
+
+                        <a href="{{ route('restaurant.dashboard', [
+                        'restaurant' => auth()->user()->restaurant->slug,
+                    ]) }}" class="btn premium-btn ghost-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Go Home
+                        </a>
+
+                @endif
+
+            </div>
+        @endauth
 
 </body>
 

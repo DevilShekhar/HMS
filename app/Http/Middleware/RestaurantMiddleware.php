@@ -2,9 +2,8 @@
 
 namespace App\Http\Middleware;
 
-
-use Closure;
 use App\Models\Restaurant;
+use Closure;
 use Illuminate\Support\Facades\Auth;
 
 class RestaurantMiddleware
@@ -12,7 +11,7 @@ class RestaurantMiddleware
     public function handle($request, Closure $next)
     {
         if (Auth::check() && Auth::user()->role === 'super_admin') {
-            return $next($request);
+            abort(404);
         }
 
         $slug = $request->route('restaurant');
@@ -23,7 +22,7 @@ class RestaurantMiddleware
             $restaurant = Restaurant::query()->where('slug', $slug)->first();
         }
 
-        if (!$restaurant) {
+        if (! $restaurant) {
             abort(404);
         }
 

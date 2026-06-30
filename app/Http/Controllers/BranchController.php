@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BranchController extends Controller
 {
@@ -118,6 +119,31 @@ class BranchController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
         $branch = Branch::create($validated);
 
+        $registrationUrl = config('app.url').'/'.
+        $branch->restaurant->slug.'/'.
+        $branch->slug.'/register';
+
+        $qrFolder = public_path('uploads/registration-qrcodes');
+
+        if (! file_exists($qrFolder)) {
+            mkdir($qrFolder, 0755, true);
+        }
+
+        $fileName = 'branch_'.$branch->id.'_registration.svg';
+        $filePath = $qrFolder.'/'.$fileName;
+
+        QrCode::format('svg')
+            ->size(400)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($registrationUrl, $filePath);
+
+        // Force refresh in case of caching
+        clearstatcache();
+
+        $branch->update([
+            'registration_qrcode' => 'uploads/registration-qrcodes/'.$fileName,
+        ]);
         $plan = SubscriptionPlan::findOrFail(
             $request->subscription_plan_id
         );
@@ -250,6 +276,31 @@ class BranchController extends Controller
         $validated['slug'] = Str::slug($validated['name']);
         $branch->update($validated);
 
+        $registrationUrl = config('app.url').'/'.
+            $branch->restaurant->slug.'/'.
+            $branch->slug.'/register';
+
+        $qrFolder = public_path('uploads/registration-qrcodes');
+
+        if (! file_exists($qrFolder)) {
+            mkdir($qrFolder, 0755, true);
+        }
+
+        $fileName = 'branch_'.$branch->id.'_registration.svg';
+        $filePath = $qrFolder.'/'.$fileName;
+
+        QrCode::format('svg')
+            ->size(400)
+            ->margin(2)
+            ->errorCorrection('H')
+            ->generate($registrationUrl, $filePath);
+
+        // Force refresh in case of caching
+        clearstatcache();
+
+        $branch->update([
+            'registration_qrcode' => 'uploads/registration-qrcodes/'.$fileName,
+        ]);
         $currentSubscription = $branch->activeSubscription;
 
         if (! $currentSubscription) {
@@ -426,5 +477,38 @@ class BranchController extends Controller
         }
 
         return back()->with('success', 'QR uploaded successfully.');
+    }
+
+    public function regenerateQr($id)
+    {
+        $branch = Branch::with('restaurant')->findOrFail($id);
+
+        $url = route('branch.register', [
+            'restaurant' => $branch->restaurant->slug,
+            'branch' => $branch->slug,
+        ]);
+
+        $fileName = 'branch_'.$branch->id.'_registration.svg';
+
+        $path = public_path(
+            'uploads/registration-qrcodes/'.$fileName
+        );
+
+        if (! file_exists(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
+
+        QrCode::format('svg')
+            ->size(400)
+            ->generate(
+                $url,
+                $path
+            );
+
+        $branch->update([
+            'registration_qrcode' => 'uploads/registration-qrcodes/'.$fileName,
+        ]);
+
+        return 'QR regenerated: '.$url;
     }
 }

@@ -16,7 +16,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RestaurantTableController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\RoomPackController;
 use App\Http\Controllers\SubscriptionPlanController;
 use App\Http\Controllers\TableCategoryController;
 use App\Http\Controllers\UserController;
@@ -43,20 +42,11 @@ Route::get('/{restaurant}/{branch}/forgot-password', [ForgotPasswordController::
 Route::post('/{restaurant}/{branch}/forgot-password',
     [ForgotPasswordController::class, 'sendResetLinkEmail']
 )->name('branch.customer.password.email');
+
 Route::get('/customer-history', [OrderController::class, 'customerHistory'])->name('customer.history');
 Route::get('{restaurant}/{branch}/my-orders', [OrderController::class, 'myOrders'])->name('customer.orders');
 Route::resource('customer-offers', CustomerOfferController::class);
 Route::post('/customer-offers/send', [CustomerOfferController::class, 'sendOffer'])->name('customer-offers.send');
-
-Route::get(
-    '/{restaurant}/registered-customers',
-    [CustomerOfferController::class, 'registeredCustomers']
-)->name('restaurant.registered-customers.index');
-
-Route::get(
-    '/{restaurant}/{branch}/registered-customers',
-    [CustomerOfferController::class, 'registeredCustomers']
-)->name('branch.registered-customers.index');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
@@ -93,30 +83,32 @@ Route::middleware(['auth'])->group(function () {
             'restaurant' => $restaurant->slug,
         ]);
     })->name('dashboard');
-    Route::get('/dashboard',
-        [DashboardController::class, 'dashboard']
-    )->name('dashboard');
 
-    Route::resource('restaurants', RestaurantController::class);
-    Route::resource('room_packs', RoomPackController::class);
-    Route::resource('users', UserController::class);
-    Route::resource('branches', BranchController::class);
+    Route::middleware(['auth', 'role:super_admin'])->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+
+        Route::resource('restaurants', RestaurantController::class);
+
+        Route::resource('users', UserController::class);
+        Route::resource('branches', BranchController::class);
+
+        Route::resource('subscription-plans', SubscriptionPlanController::class);
+
+        Route::resource('roles', RoleController::class);
+
+        Route::resource('permissions', PermissionController::class)->names([
+            'index' => 'permissions.index',
+            'create' => 'permissions.create',
+            'store' => 'permissions.store',
+            'edit' => 'permissions.edit',
+            'update' => 'permissions.update',
+            'destroy' => 'permissions.destroy',
+        ]);
+    });
     Route::middleware(['auth'])->group(function () {
         Route::resource('categories', CategoryController::class);
     });
-
-    Route::resource('subscription-plans', SubscriptionPlanController::class);
-
-    Route::resource('roles', RoleController::class);
-
-    Route::resource('permissions', PermissionController::class)->names([
-        'index' => 'permissions.index',
-        'create' => 'permissions.create',
-        'store' => 'permissions.store',
-        'edit' => 'permissions.edit',
-        'update' => 'permissions.update',
-        'destroy' => 'permissions.destroy',
-    ]);
 
     Route::get('roles/{role}/permissions-data', [RoleController::class, 'getPermissionsData'])
         ->name('roles.permissions.data');
@@ -174,7 +166,7 @@ Route::get('/notifications', function () {
 
 Route::prefix('{restaurant}')
     ->where(['restaurant' => '[a-zA-Z0-9\-]+'])
-    ->middleware('restaurant')
+    ->middleware('restaurant', 'route.access')
     ->group(function () {
 
         Route::get('/', function () {
@@ -199,6 +191,12 @@ Route::prefix('{restaurant}')
             'update' => 'restaurant.recipe.update',
             'destroy' => 'restaurant.recipe.destroy',
         ]);
+
+        Route::get(
+            '/registered-customers',
+            [CustomerOfferController::class, 'registeredCustomers']
+        )->name('restaurant.registered-customers.index');
+
         Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTablesByCategory'])->name('restaurant.orders.tables');
         Route::get('/login', [LoginController::class, 'showRestaurantLogin'])
             ->name('restaurant.login');
@@ -214,14 +212,9 @@ Route::prefix('{restaurant}')
 
         Route::middleware(['auth'])->group(function () {
 
-
-            Route::get('/dashboard',
-                [DashboardController::class, 'dashboard']
-            )->name('restaurant.dashboard');
+            Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('restaurant.dashboard');
 
             Route::prefix('{branch}')->group(function () {
-
-             
 
                 Route::get('/dashboard', [DashboardController::class, 'dashboard'])
                     ->name('branch.dashboard');
@@ -248,6 +241,12 @@ Route::prefix('{restaurant}')
                         'update' => 'branch.customer-offers.update',
                         'destroy' => 'branch.customer-offers.destroy',
                     ]);
+
+                Route::get(
+                    '/registered-customers',
+                    [CustomerOfferController::class, 'registeredCustomers']
+                )->name('branch.registered-customers.index');
+
                 Route::resource('categories', CategoryController::class)->names([
                     'index' => 'branch.categories.index',
                     'create' => 'branch.categories.create',
@@ -512,3 +511,26 @@ Route::prefix('{restaurant}')
         });
 
     });
+Route::fallback(function () {
+
+    if (! Auth::check()) {
+        return response()->view('errors.404', [], 404);
+    }
+
+    $user = Auth::user();
+
+    if ($user->role === 'super_admin') {
+        return redirect()->route('dashboard');
+    }
+
+    if (in_array($user->role, ['branch_manager', 'chef', 'waiter', 'waiter_head'])) {
+        return redirect()->route('branch.dashboard', [
+            'restaurant' => $user->restaurant->slug,
+            'branch' => $user->branch->slug,
+        ]);
+    }
+
+    return redirect()->route('restaurant.dashboard', [
+        'restaurant' => $user->restaurant->slug,
+    ]);
+});
