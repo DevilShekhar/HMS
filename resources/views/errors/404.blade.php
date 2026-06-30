@@ -63,25 +63,37 @@
         <div class="msg">Oops! The page you are looking for was not found.</div>
 
         @php
+            $restaurantSlug = request()->route('restaurant');
+            $branchSlug = request()->route('branch');
+
             $homeUrl = route('login');
 
             if (auth()->check()) {
-                if (auth()->user()->role == 'super_admin') {
+
+                if (auth()->user()->role === 'super_admin') {
+
                     $homeUrl = route('dashboard');
-                } elseif (auth()->user()->branch) {
+
+                } elseif (!empty($restaurantSlug) && !empty($branchSlug)) {
+
                     $homeUrl = route('branch.dashboard', [
-                        'restaurant' => auth()->user()->restaurant->slug,
-                        'branch' => auth()->user()->branch->slug,
+                        'restaurant' => $restaurantSlug,
+                        'branch' => $branchSlug,
                     ]);
-                } elseif (auth()->user()->restaurant) {
+
+                } elseif (!empty($restaurantSlug)) {
+
                     $homeUrl = route('restaurant.dashboard', [
-                        'restaurant' => auth()->user()->restaurant->slug,
+                        'restaurant' => $restaurantSlug,
                     ]);
                 }
             }
         @endphp
 
-        <a href="{{ $homeUrl }}">Go Home</a>
+        <a href="{{ $homeUrl }}" class="btn premium-btn ghost-btn">
+            <i class="fas fa-arrow-left"></i>
+            Go Home
+        </a>
     </div>
 
 </body>

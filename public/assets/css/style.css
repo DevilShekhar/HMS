@@ -4370,11 +4370,13 @@ h6 .badge {
 .btn.btn-sm {
     padding: 0.1rem;
     font-size: 12px;
+    height: 1.5rem;
 }
 
-.d-flex{
+.d-flex {
     gap: 0.5rem;
 }
+
 .btn.btn-icon .ion,
 .btn.btn-icon .fas,
 .btn.btn-icon .far,
@@ -13548,32 +13550,32 @@ h1 {
     }
 }
 
-.plan-card{
-    border:2px solid #e5e7eb;
-    border-radius:14px;
-    padding:20px;
-    cursor:pointer;
-    transition:.3s;
-    height:100%;
+.plan-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: .3s;
+    height: 100%;
 }
 
-.plan-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 10px 25px rgba(0,0,0,.08);
+.plan-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
 }
 
-.plan-card:has(.plan-radio:checked){
-    border:2px solid #22c55e;
-    background:#ecfdf5;
+.plan-card:has(.plan-radio:checked) {
+    border: 2px solid #22c55e;
+    background: #ecfdf5;
 }
 
-.price-box{
-    text-align:center;
+.price-box {
+    text-align: center;
 }
 
-.price-box h3{
-    margin:0;
-    font-weight:700;
+.price-box h3 {
+    margin: 0;
+    font-weight: 700;
 }
 
 .gradient-card {
@@ -13585,7 +13587,7 @@ h1 {
 .gradient-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12),
-                0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Unique Gradients */
@@ -13633,7 +13635,7 @@ h1 {
 .gradient-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12),
-                0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        0 10px 10px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Smaller Card Body */
@@ -13641,8 +13643,10 @@ h1 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 130px;     /* Reduced from 160px */
-    padding: 1.2rem !important;   /* Reduced padding */
+    min-height: 130px;
+    /* Reduced from 160px */
+    padding: 1.2rem !important;
+    /* Reduced padding */
 }
 
 /* Light Gradients for Order Status */
@@ -13666,172 +13670,283 @@ h1 {
 }
 
 .gradient-card h2 {
-    font-size: 2.2rem;     /* Smaller than before */
+    font-size: 2.2rem;
+    /* Smaller than before */
     font-weight: 700;
     margin-bottom: 0;
 }
 
 .gradient-card i {
-    font-size: 2.4rem;     /* Smaller icon */
+    font-size: 2.4rem;
+    /* Smaller icon */
     margin-bottom: 12px;
 }
 
 /* Base Card Layout */
 .status-card {
-  width: 100%;
-  padding: 1.5rem;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.04);
+    width: 100%;
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* Icon Container Shape */
 .status-card__icon-wrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 /* Text Element Grouping */
 .status-card__content {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .status-card__label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .status-card__value {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.1;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.1;
 }
 
 /* Base Card Layout */
 .status-card {
-  width: 100%;
-  padding: 1.5rem;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  cursor: pointer;
+    width: 100%;
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    cursor: pointer;
 
-  /* Smooth transition for hover effects */
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    /* Smooth transition for hover effects */
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 /* Icon Container Shape */
 .status-card__icon-wrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
 
-  /* Smooth transition for icon background color change on hover */
-  transition: background-color 0.25s ease;
+    /* Smooth transition for icon background color change on hover */
+    transition: background-color 0.25s ease;
 }
 
 /* Text Element Grouping */
 .status-card__content {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .status-card__label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .status-card__value {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.1;
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.1;
 }
 
 /* --- Dynamic Hover States & Gradients --- */
 
 /* 1. Pending Status Theme */
 .status-card--pending {
-  background: linear-gradient(135deg, #fffcf0 0%, #fff3cd 100%);
+    background: linear-gradient(135deg, #fffcf0 0%, #fff3cd 100%);
 }
+
 .status-card--pending .status-card__icon-wrapper {
-  background-color: #ffeaa7;
-  color: #856404;
+    background-color: #ffeaa7;
+    color: #856404;
 }
-.status-card--pending .status-card__label { color: #856404; }
-.status-card--pending .status-card__value { color: #533f03; }
+
+.status-card--pending .status-card__label {
+    color: #856404;
+}
+
+.status-card--pending .status-card__value {
+    color: #533f03;
+}
 
 /* Pending Hover Effect */
 .status-card--pending:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(133, 100, 4, 0.12);
-  border-color: rgba(133, 100, 4, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(133, 100, 4, 0.12);
+    border-color: rgba(133, 100, 4, 0.2);
 }
+
 .status-card--pending:hover .status-card__icon-wrapper {
-  background-color: #fddb73; /* Slightly darker yellow on hover */
+    background-color: #fddb73;
+    /* Slightly darker yellow on hover */
 }
 
 
 /* 2. Preparing Status Theme */
 .status-card--preparing {
-  background: linear-gradient(135deg, #f4f9fc 0%, #d1ecf1 100%);
+    background: linear-gradient(135deg, #f4f9fc 0%, #d1ecf1 100%);
 }
+
 .status-card--preparing .status-card__icon-wrapper {
-  background-color: #bee5eb;
-  color: #0c5460;
+    background-color: #bee5eb;
+    color: #0c5460;
 }
-.status-card--preparing .status-card__label { color: #0c5460; }
-.status-card--preparing .status-card__value { color: #042d34; }
+
+.status-card--preparing .status-card__label {
+    color: #0c5460;
+}
+
+.status-card--preparing .status-card__value {
+    color: #042d34;
+}
 
 /* Preparing Hover Effect */
 .status-card--preparing:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(12, 84, 96, 0.12);
-  border-color: rgba(12, 84, 96, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(12, 84, 96, 0.12);
+    border-color: rgba(12, 84, 96, 0.2);
 }
+
 .status-card--preparing:hover .status-card__icon-wrapper {
-  background-color: #a3d7e0; /* Slightly darker cyan on hover */
+    background-color: #a3d7e0;
+    /* Slightly darker cyan on hover */
 }
 
 
 /* 3. Completed Status Theme */
 .status-card--completed {
-  background: linear-gradient(135deg, #f3fdf6 0%, #d4edda 100%);
+    background: linear-gradient(135deg, #f3fdf6 0%, #d4edda 100%);
 }
+
 .status-card--completed .status-card__icon-wrapper {
-  background-color: #c3e6cb;
-  color: #155724;
+    background-color: #c3e6cb;
+    color: #155724;
 }
-.status-card--completed .status-card__label { color: #155724; }
-.status-card--completed .status-card__value { color: #0b3014; }
+
+.status-card--completed .status-card__label {
+    color: #155724;
+}
+
+.status-card--completed .status-card__value {
+    color: #0b3014;
+}
 
 /* Completed Hover Effect */
 .status-card--completed:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(21, 87, 36, 0.12);
-  border-color: rgba(21, 87, 36, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(21, 87, 36, 0.12);
+    border-color: rgba(21, 87, 36, 0.2);
 }
+
 .status-card--completed:hover .status-card__icon-wrapper {
-  background-color: #aae0b5; /* Slightly darker green on hover */
+    background-color: #aae0b5;
+    /* Slightly darker green on hover */
+}
+
+.order-stepper {
+    padding: 20px 10px;
+}
+
+.order-stepper .step {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Lemon Mint Colors */
+:root {
+    --lemon-mint: #10e8a0;
+    --lemon-mint-dark: #0bc18a;
+}
+
+.order-stepper .step-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    border: 3.5px solid #dee2e6;
+    background: #f8f9fa;
+    color: #6c757d;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+/* Future */
+.order-stepper .step .step-icon {
+    background: #f8f9fa;
+    color: #adb5bd;
+}
+
+/* Active (Current) */
+.order-stepper .step.active .step-icon {
+    background: var(--lemon-mint);
+    color: #fff;
+    border-color: var(--lemon-mint);
+    box-shadow: 0 0 0 6px rgba(16, 232, 160, 0.25);
+}
+
+/* Completed - Success with Lemon Mint */
+.order-stepper .step.completed .step-icon {
+    background: var(--lemon-mint-dark);
+    color: white;
+    border-color: var(--lemon-mint-dark);
+}
+
+/* Fixed Connector - No Gap */
+.order-stepper .step-connector {
+    flex: 1;
+    height: 4px;
+    background: #dee2e6;
+    margin: 0 -8px;
+    /* This removes the gap */
+    align-self: center;
+    position: relative;
+    top: -27px;
+    z-index: 1;
+}
+
+.order-stepper .step-connector.active {
+    background: linear-gradient(to right, var(--lemon-mint-dark), var(--lemon-mint));
+}
+
+/* Labels */
+.order-stepper .step-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 8px;
+    color: #495057;
+}
+
+.order-stepper .step.active .step-label,
+.order-stepper .step.completed .step-label {
+    color: #212529;
+    font-weight: 600;
 }

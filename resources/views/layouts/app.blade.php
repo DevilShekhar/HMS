@@ -1197,7 +1197,7 @@
                     e.preventDefault();
 
                     Swal.fire({
-                        title: 'Deactivate Branch?',
+                        title: 'Deactivate?',
                         text: 'This action can be reverted later.',
                         icon: 'warning',
                         showCancelButton: true,

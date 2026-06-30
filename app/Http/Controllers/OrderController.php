@@ -809,6 +809,7 @@ class OrderController extends Controller
             'items.menuItem',
         ])
             ->where('customer_id', $customer->id)
+            ->where('status', 'completed')
             ->where('restaurant_id', $customer->restaurant_id)
             ->where('branch_id', $customer->branch_id)
             ->latest()

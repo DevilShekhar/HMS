@@ -12,6 +12,6 @@ class CustomerOffer extends Model
         'description',
         'status',
         'category', 'restaurant_id',
-        'branch_id',
+        'branch_id','other_description'
     ];
 }

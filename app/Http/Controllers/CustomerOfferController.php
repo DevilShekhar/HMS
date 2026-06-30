@@ -264,54 +264,52 @@ class CustomerOfferController extends Controller
     {
         $request->validate([
             'mobile_number' => 'required',
-            'category' => 'required',
+            'category' => 'required|in:birthday,anniversary,other',
+            'other_description' => 'required|string|min:10',
         ]);
 
-        // Find customer from users table first
         $customer = User::query()->where('phone', $request->mobile_number)
             ->where('role', 'customer')
             ->first();
 
         if (! $customer) {
-
             $order = Order::query()->where('mobile_number', $request->mobile_number)
                 ->latest()
                 ->first();
 
             if (! $order || ! $order->email) {
-                return back()->with(
-                    'error',
-                    'Customer email not available.'
-                );
+                return back()->with('error', 'Customer email not available.');
             }
 
-            $customer = new User;
-
-            $customer->name = $order->customer_name;
-            $customer->phone = $order->mobile_number;
-            $customer->email = $order->email;
-            $customer->birth_date = $order->birth_date;
-            $customer->anniversary_date = $order->anniversary_date;
+            $customer = new User([
+                'name' => $order->customer_name,
+                'phone' => $order->mobile_number,
+                'email' => $order->email,
+                'birth_date' => $order->birth_date,
+                'anniversary_date' => $order->anniversary_date,
+            ]);
         }
 
-        $offer = CustomerOffer::query()
-            ->where('category', $request->category)
-            ->where('status', 1)
-            ->latest()
-            ->first();
+        $message = $request->description;
 
-        if (! $offer) {
+        if ($request->category !== 'other') {
+            $offer = CustomerOffer::query()->where('category', $request->category)
+                ->where('status', 1)
+                ->latest()
+                ->first();
 
-            return back()->with(
-                'error',
-                'No offer found.'
-            );
+            if ($offer) {
+                $message = $offer->description;
+            }
         }
 
-        Mail::to($customer->email)->send(new CustomerOfferMail($customer, $offer));
+        if (empty($message)) {
+            return back()->with('error', 'Offer message is required.');
+        }
 
-        return redirect()
-            ->back()
-            ->with('success', 'Offer sent successfully!');
+        // Send Email
+        Mail::to($customer->email)->send(new CustomerOfferMail($customer, $message, $request->category));
+
+        return redirect()->back()->with('success', 'Offer sent successfully!');
     }
 }

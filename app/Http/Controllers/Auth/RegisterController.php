@@ -137,7 +137,7 @@ class RegisterController extends Controller
             'restaurant_id' => $restaurantModel->id,
             'branch_id' => $branchModel->id,
         ]);
-        // dd($user);
+        $user->syncRoles(['customer']);
 
         Auth::login($user);
 

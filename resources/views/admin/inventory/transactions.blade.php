@@ -10,7 +10,8 @@
                 <p>Inventory Stock IN / OUT History </p>
             </div>
             <div class="premium-head-actions">
-                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn ghost-btn">
+                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}"
+                    class="btn premium-btn ghost-btn">
                     <i class="fas fa-arrow-left"></i> Back To Inventory
                 </a>
             </div>
@@ -82,8 +83,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6"
-                                        class="text-center">
+                                    <td colspan="6" class="text-center">
                                         No Transactions Found
                                     </td>
                                 </tr>

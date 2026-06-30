@@ -11,10 +11,17 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:view-user')->only(['index', 'show']);
+        $this->middleware('permission:create-user')->only(['create', 'store']);
+        $this->middleware('permission:edit-user')->only(['edit', 'update']);
+        $this->middleware('permission:delete-user')->only(['destroy']);
+    }
+
     /**
      * User List
      */
-
     public function index(Request $request)
     {
         $authUser = Auth::user();

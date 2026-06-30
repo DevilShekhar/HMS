@@ -35,43 +35,73 @@
                         $currentStep = $statuses[$order->status] ?? 1;
                     @endphp
 
-                    <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="order-stepper mt-4">
+    <div class="d-flex justify-content-between align-items-center position-relative">
 
-                        <div class="text-center flex-fill">
-                            <div class="badge {{ $currentStep >= 1 ? 'bg-warning' : 'bg-secondary' }}">
-                                1
-                            </div>
-                            <div class="mt-2">Order Placed</div>
-                        </div>
+        <!-- Step 1 -->
+        <div class="step text-center flex-fill
+            {{ $currentStep > 1 ? 'completed' : '' }}
+            {{ $currentStep == 1 ? 'active' : '' }}">
+            <div class="step-icon mx-auto mb-2">
+                @if($currentStep > 1)
+                    <i class="fas fa-check"></i>
+                @else
+                    <i class="fas fa-shopping-cart"></i>
+                @endif
+            </div>
+            <div class="step-number">1</div>
+            <div class="step-label">Order Placed</div>
+        </div>
 
-                        <div class="flex-fill border-top"></div>
+        <div class="step-connector {{ $currentStep >= 2 ? 'active' : '' }}"></div>
 
-                        <div class="text-center flex-fill">
-                            <div class="badge {{ $currentStep >= 2 ? 'bg-info' : 'bg-secondary' }}">
-                                2
-                            </div>
-                            <div class="mt-2">Prepared</div>
-                        </div>
+        <!-- Step 2 -->
+        <div class="step text-center flex-fill
+            {{ $currentStep > 2 ? 'completed' : '' }}
+            {{ $currentStep == 2 ? 'active' : '' }}">
+            <div class="step-icon mx-auto mb-2">
+                @if($currentStep > 2)
+                    <i class="fas fa-check"></i>
+                @else
+                    <i class="fas fa-utensils"></i>
+                @endif
+            </div>
+            <div class="step-number">2</div>
+            <div class="step-label">Prepared</div>
+        </div>
 
-                        <div class="flex-fill border-top"></div>
+        <div class="step-connector {{ $currentStep >= 3 ? 'active' : '' }}"></div>
 
-                        <div class="text-center flex-fill">
-                            <div class="badge {{ $currentStep >= 3 ? 'bg-primary' : 'bg-secondary' }}">
-                                3
-                            </div>
-                            <div class="mt-2">Delivered</div>
-                        </div>
+        <!-- Step 3 -->
+        <div class="step text-center flex-fill
+            {{ $currentStep > 3 ? 'completed' : '' }}
+            {{ $currentStep == 3 ? 'active' : '' }}">
+            <div class="step-icon mx-auto mb-2">
+                @if($currentStep > 3)
+                    <i class="fas fa-check"></i>
+                @else
+                    <i class="fas fa-motorcycle"></i>
+                @endif
+            </div>
+            <div class="step-number">3</div>
+            <div class="step-label">Delivered</div>
+        </div>
 
-                        <div class="flex-fill border-top"></div>
+        <div class="step-connector {{ $currentStep >= 4 ? 'active' : '' }}"></div>
 
-                        <div class="text-center flex-fill">
-                            <div class="badge {{ $currentStep >= 4 ? 'bg-success' : 'bg-secondary' }}">
-                                4
-                            </div>
-                            <div class="mt-2">Completed</div>
-                        </div>
+        <!-- Step 4 -->
+        <div class="step text-center flex-fill
+            {{ $currentStep >= 4 ? 'completed' : '' }}
+            {{ $currentStep == 4 ? 'active' : '' }}">
+            <div class="step-icon mx-auto mb-2">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="step-number">4</div>
+            <div class="step-label">Completed</div>
+        </div>
 
-                    </div>
+    </div>
+</div>
                 </div>
                 <!-- Order Info -->
                 <div class="row mb-2">
