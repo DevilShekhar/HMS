@@ -39,25 +39,11 @@
                         </form>
                     </div>
                 @endif
-                {{-- <a href="{{ auth()->user()->role == 'branch_manager'
-                                                        ? route('branch.reports.revenue.pdf', [
-                                                            'restaurant' => request()->route('restaurant'),
-                                                            'branch' => request()->route('branch')
-                                                        ])
-                                                        : route('restaurant.reports.revenue.pdf', [
-                                                            'restaurant' => request()->route('restaurant')
-                                                        ]) }}" class="btn btn-danger" id="downloadPdf">
-
-                    <i class="fas fa-file-pdf"></i>
-                    Download PDF
-
-                </a> --}}
-               {{-- Download Button --}}
-<a href="{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}"
-   class="btn btn-danger"
-   id="downloadPdf">
-    <i class="fas fa-file-pdf"></i> Download PDF
-</a>
+                {{-- Download Button --}}
+                <a href="{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}"
+                    class="btn btn-danger" id="downloadPdf">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </a>
 
             </div>
         </section>
@@ -173,39 +159,39 @@
             </div>
         </section>
         <a href="{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}?branch_id=3"
-   class="btn btn-danger">
-    <i class="fas fa-file-pdf"></i> Test Single Branch (ID 5)
-</a>
+            class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> Test Single Branch (ID 5)
+        </a>
         <script>
-    document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
 
-        const branchSelect = document.getElementById('branchFilter');
-        const downloadBtn = document.getElementById('downloadPdf');
-        const baseUrl = "{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}";
+                const branchSelect = document.getElementById('branchFilter');
+                const downloadBtn = document.getElementById('downloadPdf');
+                const baseUrl = "{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}";
 
-        function updatePdfLink() {
-            if (!branchSelect || !downloadBtn) return;
+                function updatePdfLink() {
+                    if (!branchSelect || !downloadBtn) return;
 
-            const branchId = branchSelect.value;
-            let newUrl = baseUrl;
+                    const branchId = branchSelect.value;
+                    let newUrl = baseUrl;
 
-            if (branchId) {
-                newUrl += '?branch_id=' + branchId;
-            }
+                    if (branchId) {
+                        newUrl += '?branch_id=' + branchId;
+                    }
 
-            downloadBtn.href = newUrl;
-            console.log('PDF Link Updated:', newUrl);
-        }
+                    downloadBtn.href = newUrl;
+                    console.log('PDF Link Updated:', newUrl);
+                }
 
-        // Update when selection changes
-        if (branchSelect) {
-            branchSelect.addEventListener('change', updatePdfLink);
-        }
+                // Update when selection changes
+                if (branchSelect) {
+                    branchSelect.addEventListener('change', updatePdfLink);
+                }
 
-        // Initial update
-        updatePdfLink();
-    });
-</script>
+                // Initial update
+                updatePdfLink();
+            });
+        </script>
     @endsection
 
 @else

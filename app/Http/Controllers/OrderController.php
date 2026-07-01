@@ -44,6 +44,14 @@ class OrderController extends Controller
 
             $baseQuery->where('chef_id', $user->id);
 
+        } elseif ($user->role == 'cashier') {
+
+            $baseQuery->where('branch_id', $user->branch_id)
+                ->whereIn('status', [
+                    'delivered',
+                    'completed_waiting_cashier',
+                ]);
+
         } elseif ($user->role == 'customer') {
 
             $baseQuery->where('customer_id', $user->id);
@@ -98,6 +106,14 @@ class OrderController extends Controller
         } elseif ($user->role == 'chef') {
 
             $query->where('chef_id', $user->id);
+
+        } elseif ($user->role == 'cashier') {
+
+            $query->where('branch_id', $user->branch_id)
+                ->whereIn('status', [
+                    'delivered',
+                    'completed_waiting_cashier',
+                ]);
 
         } elseif ($user->role == 'customer') {
 
@@ -741,13 +757,16 @@ class OrderController extends Controller
         ]);
 
         $order = Order::findOrFail($request->order_id);
-        $order->payment_method = $request->payment_method;
 
-        $order->status = 'completed';
+        $order->update([
+            'payment_method' => $request->payment_method,
+            'payment_status' => 'pending',
+        ]);
 
-        $order->save();
-
-        return back()->with('success', 'Payment completed successfully.');
+        return back()->with(
+            'success',
+            'Payment submitted successfully. Waiting for cashier verification.'
+        );
     }
 
     public function getTablesByCategory($restaurant, $categoryId)
@@ -818,6 +837,19 @@ class OrderController extends Controller
         return view(
             'customer.orders.index',
             compact('orders')
+        );
+    }
+
+    public function verifyPayment(Order $order)
+    {
+        $order->update([
+            'payment_status' => 'verified',
+            'status' => 'completed',
+        ]);
+
+        return back()->with(
+            'success',
+            'Payment verified successfully.'
         );
     }
 }

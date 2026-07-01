@@ -27,7 +27,7 @@ class Order extends Model
         'branch_id',
         'payment_method',
         'birth_date',
-        'anniversary_date','email'
+        'anniversary_date', 'email', 'payment_status',
     ];
 
     public function orders()

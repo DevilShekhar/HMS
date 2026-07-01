@@ -26,8 +26,13 @@ class Restaurant extends Model
     {
         return 'slug';
     }
+
     public function subscription()
     {
         return $this->hasOne(SubscriptionPlan::class);
+    }
+    public function branches()
+    {
+        return $this->hasMany(Branch::class);
     }
 }

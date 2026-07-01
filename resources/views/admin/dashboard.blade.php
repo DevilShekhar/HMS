@@ -34,6 +34,11 @@
                 </div>
             @endif
 
+
+
+
+
+
             {{-- Revenue Cards --}}
             @can('today-revenue')
                 <div class="col-md-3 mb-4">
@@ -100,8 +105,339 @@
                     </div>
                 </div>
             @endcan
-
         </div>
+
+        @can('superadmin-view')
+            <div class="row mb-4">
+                <div class="col-12">
+
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-header bg-white text-dark">
+                            <h5 class="mb-0">
+                                <i data-feather="calendar"></i>
+                                Subscription Overview
+                            </h5>
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+                                        <th>Restaurant</th>
+                                        <th>Branch</th>
+                                        <th>Plan</th>
+                                        <th>End Date</th>
+                                        <th>Days Left</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @forelse($subscriptions as $subscription)
+
+                                        @php
+                                            $endDate = \Carbon\Carbon::parse($subscription->end_date);
+                                            $days = now()->diffInDays($endDate, false);
+                                        @endphp
+
+                                        <tr>
+
+                                            <td>
+                                                {{ $subscription->branch?->restaurant?->name ?? 'N/A' }}
+                                            </td>
+
+                                            <td>
+                                                {{ $subscription->branch?->name ?? 'N/A' }}
+                                            </td>
+
+                                            <td>
+                                                {{ $subscription->billing_cycle ?? 'N/A' }}
+                                            </td>
+
+                                            <td>
+                                                {{ $endDate->format('d M Y') }}
+                                            </td>
+
+                                            <td>
+                                                {{ $days }}
+                                            </td>
+
+                                            <td>
+
+                                                @if($days <= 7)
+
+                                                    <span class="badge bg-danger">
+                                                        Critical
+                                                    </span>
+
+                                                @elseif($days <= 30)
+
+                                                    <span class="badge bg-warning text-dark">
+                                                        Expiring Soon
+                                                    </span>
+
+                                                @else
+
+                                                    <span class="badge bg-success">
+                                                        Active
+                                                    </span>
+
+                                                @endif
+
+                                            </td>
+
+                                        </tr>
+
+                                    @empty
+
+                                        <tr>
+
+                                            <td colspan="6" class="text-center py-4">
+                                                No subscriptions nearing expiry.
+                                            </td>
+
+                                        </tr>
+
+                                    @endforelse
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-header bg-white text-dark">
+
+                            <h5 class="mb-0">
+                                <i data-feather="alert-triangle"></i>
+                                Inventory Alerts
+                            </h5>
+
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th>Restaurant</th>
+                                        <th>Branch</th>
+                                        <th>Item</th>
+                                        <th>Remaining</th>
+                                        <th>Minimum</th>
+                                        <th>Status</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    @forelse($inventoryAlerts as $item)
+
+                                        <tr>
+
+                                            <td>
+                                                {{ $item->restaurant?->name ?? 'N/A' }}
+                                            </td>
+
+                                            <td>
+                                                {{ $item->branch?->name ?? 'N/A' }}
+                                            </td>
+
+                                            <td>
+                                                <strong>{{ $item->name }}</strong>
+                                            </td>
+
+                                            <td>
+                                                {{ $item->remaining_stock }} {{ $item->unit }}
+                                            </td>
+
+                                            <td>
+                                                {{ $item->minimum_stock }} {{ $item->unit }}
+                                            </td>
+
+                                            <td>
+
+                                                @if($item->remaining_stock <= 0)
+
+                                                    <span class="badge bg-danger">
+                                                        Out of Stock
+                                                    </span>
+
+                                                @elseif($item->remaining_stock <= $item->minimum_stock)
+
+                                                    <span class="badge bg-warning text-dark">
+                                                        Low Stock
+                                                    </span>
+
+                                                @else
+
+                                                    <span class="badge bg-success">
+                                                        In Stock
+                                                    </span>
+
+                                                @endif
+
+                                            </td>
+
+                                        </tr>
+
+                                    @empty
+
+                                        <tr>
+
+                                            <td colspan="6" class="text-center py-4">
+                                                No inventory alerts.
+                                            </td>
+
+                                        </tr>
+
+                                    @endforelse
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+
+                    <div class="card shadow-sm border-0">
+
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center text-dark">
+                            <h5 class="mb-0">
+                                <i data-feather="trending-up" class="me-2"></i>
+                                Top Restaurants by Revenue
+                            </h5>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Restaurant</th>
+                                        <th>Branches</th>
+                                        <th>Orders</th>
+                                        <th class="text-end">Revenue</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    @forelse($topRestaurants as $restaurant)
+
+                                        <tr>
+
+                                            <td>{{ $loop->iteration }}</td>
+
+                                            <td>
+                                                <strong>{{ $restaurant->name ?? 'N/A' }}</strong>
+                                            </td>
+
+                                            <td>{{ $restaurant->total_branches }}</td>
+
+                                            <td>{{ number_format($restaurant->total_orders) }}</td>
+
+                                            <td class="text-end fw-bold text-success">
+                                                ₹{{ number_format($restaurant->total_revenue, 2) }}
+                                            </td>
+
+                                        </tr>
+
+                                    @empty
+
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4">
+                                                No data available.
+                                            </td>
+                                        </tr>
+
+                                    @endforelse
+
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        @endcan
+        @can('view-payment')
+            <div class="row">
+                {{-- Pending Verification --}}
+                <div class="col-md-4 mb-4">
+                    <div class="card bg-warning text-white shadow border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                            <h6 class="mb-2">Pending Verification</h6>
+                            <h2 class="fw-bold">{{ $pendingVerification }}</h2>
+                            <small>Payments Awaiting Approval</small>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Verified Today --}}
+                <div class="col-md-4 mb-4">
+                    <div class="card bg-success text-white shadow border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                            <h6 class="mb-2">Verified Today</h6>
+                            <h2 class="fw-bold">{{ $verifiedToday }}</h2>
+                            <small>Payments Approved Today</small>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Today's Collection --}}
+                <div class="col-md-4 mb-4">
+                    <div class="card bg-primary text-white shadow border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="fas fa-wallet fa-2x"></i>
+                            </div>
+                            <h6 class="mb-2">Today's Collection</h6>
+                            <h2 class="fw-bold">₹{{ number_format($todayCollection) }}</h2>
+                            <small>Verified Payment Amount</small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        @endcan
 
         @can('order-status')
             <div class="row g-4 mt-3 mb-4">
@@ -324,6 +660,9 @@
                 </div>
             </div>
         @endcan
+
+
+
 
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
