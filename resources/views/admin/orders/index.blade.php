@@ -42,7 +42,7 @@
                     {{ session('success') }}
                 </div>
             @endif
-            
+
             <div class="card premium-block">
                 <div class="card-header premium-card-header">
                     <div>
@@ -150,6 +150,11 @@
                                                 <span class="badge bg-info">
                                                     Prepared
                                                 </span>
+                                            @elseif($order->status == 'completed_waiting_cashier')
+
+                                                <span class="badge bg-warning text-dark">
+                                                    Waiting Cashier Approval
+                                                </span>
                                             @elseif($order->status == 'completed')
                                                 <span class="badge bg-success">
                                                     Completed
@@ -169,8 +174,24 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($order->status == 'completed')
-                                                {{ strtoupper($order->payment_method ?? 'N/A') }}
+                                            @if($order->payment_method)
+
+                                                {{ strtoupper($order->payment_method) }}
+
+                                                @if($order->payment_status == 'pending')
+
+                                                    <span class="badge bg-warning">
+                                                        Pending Verification
+                                                    </span>
+
+                                                @else
+
+                                                    <span class="badge bg-success">
+                                                        Verified
+                                                    </span>
+
+                                                @endif
+
                                             @else
                                                 -
                                             @endif
@@ -253,8 +274,26 @@
                                                         </button>
                                                     @endif
                                                 @endcan
+                                                @can('verify-payment')
 
+                                                    @if($order->status == 'delivered' && $order->payment_status == 'pending')
+
+                                                        <form method="POST" action="{{ route('orders.verify.payment', $order->id) }}"
+                                                            class="verify-payment-form">
+
+                                                            @csrf
+
+                                                            <button type="submit" class="btn btn-success btn-sm" title="Verify Payment">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+
+                                                        </form>
+
+                                                    @endif
+
+                                                @endcan
                                             </div>
+
                                         </td>
                                     </tr>
                                 @empty
@@ -427,6 +466,39 @@
             });
 
         });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            document.querySelectorAll('.verify-payment-form').forEach(form => {
+
+                form.addEventListener('submit', function (e) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: 'Verify Payment?',
+                        text: 'Are you sure you have received the payment? This action cannot be undone.It will show in Completed',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#198754',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Verify',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+
+                    });
+
+                });
+
+            });
+
+        });
+
     </script>
     @push('scripts')
         <script>

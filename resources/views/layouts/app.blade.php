@@ -127,8 +127,7 @@
                             $user = session('user');
                         @endphp
 
-                        <a href="#" data-toggle="dropdown"
-                            class="nav-link dropdown-toggle nav-link-lg nav-link-user">
+                        <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle nav-link-lg nav-link-user">
 
                             @if ($user && !empty($user['profile_photo']))
                                 <img src="{{ env('API_BASE_URL') }}/storage/{{ $user['profile_photo'] }}"
@@ -155,8 +154,7 @@
                                 @else
                                     Guest
                                 @endif
-                                <a href="profile.html" class="dropdown-item has-icon"> <i
-                                        class="far
+                                <a href="profile.html" class="dropdown-item has-icon"> <i class="far
 										fa-user"></i> Profile
                                 </a>
                                 <a href="timeline.html" class="dropdown-item has-icon"> <i class="fas fa-bolt"></i>
@@ -179,19 +177,17 @@
                                     </form>
                                 @else
                                     @auth
-                                        <form
-                                            action="{{ route('restaurant.logout', [
-                                                'restaurant' => optional(auth()->user()->restaurant)->slug,
-                                            ]) }}"
-                                            method="POST">
+                                                                <form action="{{ route('restaurant.logout', [
+                                            'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                        ]) }}" method="POST">
 
-                                            @csrf
+                                                                    @csrf
 
-                                            <button type="submit" class="dropdown-item has-icon text-danger">
-                                                <i class="fas fa-sign-out-alt"></i>
-                                                Logout
-                                            </button>
-                                        </form>
+                                                                    <button type="submit" class="dropdown-item has-icon text-danger">
+                                                                        <i class="fas fa-sign-out-alt"></i>
+                                                                        Logout
+                                                                    </button>
+                                                                </form>
                                     @endauth
                                 @endif
 
@@ -227,39 +223,36 @@
                     <ul class="sidebar-menu">
                         @can('view-dashboard')
 
-                            {{-- Dashboard --}}
-                            <li
-                                class="{{ request()->routeIs('dashboard') ||
-                                request()->routeIs('restaurant.dashboard') ||
-                                request()->routeIs('branch.dashboard')
-                                    ? 'active'
-                                    : '' }}">
+                                            {{-- Dashboard --}}
+                                            <li class="{{ request()->routeIs('dashboard') ||
+                            request()->routeIs('restaurant.dashboard') ||
+                            request()->routeIs('branch.dashboard')
+                            ? 'active'
+                            : '' }}">
 
-                                @if (auth()->user()->role == 'super_admin')
-                                    <a href="{{ route('dashboard') }}" class="nav-link">
-                                        <i data-feather="monitor"></i>
-                                        <span>Dashboard</span>
-                                    </a>
-                                @elseif(!empty($restaurantSlug) && !empty($BranchSlug))
-                                    <a href="{{ route('branch.dashboard', [
-                                        'restaurant' => $restaurantSlug,
-                                        'branch' => $BranchSlug,
-                                    ]) }}"
-                                        class="nav-link">
-                                        <i data-feather="monitor"></i>
-                                        <span>Dashboard</span>
-                                    </a>
-                                @elseif(!empty($restaurantSlug))
-                                    <a href="{{ route('restaurant.dashboard', [
-                                        'restaurant' => $restaurantSlug,
-                                    ]) }}"
-                                        class="nav-link">
-                                        <i data-feather="monitor"></i>
-                                        <span>Dashboard</span>
-                                    </a>
-                                @endif
+                                                @if (auth()->user()->role == 'super_admin')
+                                                    <a href="{{ route('dashboard') }}" class="nav-link">
+                                                        <i data-feather="monitor"></i>
+                                                        <span>Dashboard</span>
+                                                    </a>
+                                                @elseif(!empty($restaurantSlug) && !empty($BranchSlug))
+                                                                        <a href="{{ route('branch.dashboard', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'branch' => $BranchSlug,
+                                                    ]) }}" class="nav-link">
+                                                                            <i data-feather="monitor"></i>
+                                                                            <span>Dashboard</span>
+                                                                        </a>
+                                                @elseif(!empty($restaurantSlug))
+                                                                        <a href="{{ route('restaurant.dashboard', [
+                                                        'restaurant' => $restaurantSlug,
+                                                    ]) }}" class="nav-link">
+                                                                            <i data-feather="monitor"></i>
+                                                                            <span>Dashboard</span>
+                                                                        </a>
+                                                @endif
 
-                            </li>
+                                            </li>
                         @endcan
 
                         {{-- User Management existing code --}}
@@ -299,45 +292,41 @@
 
                                         {{-- BRANCH LEVEL --}}
                                     @elseif(!empty($restaurantSlug) && !empty($BranchSlug))
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.users.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $BranchSlug,
-                                                ]) }}">
-                                                User List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.users.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $BranchSlug,
+                                        ]) }}">
+                                                                        User List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.users.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $BranchSlug,
-                                                ]) }}">
-                                                Create User
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.users.create', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $BranchSlug,
+                                        ]) }}">
+                                                                        Create User
+                                                                    </a>
+                                                                </li>
 
-                                        {{-- RESTAURANT LEVEL --}}
+                                                                {{-- RESTAURANT LEVEL --}}
                                     @elseif(!empty($restaurantSlug))
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.users.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                User List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.users.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        User List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.users.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Create User
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.users.create', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Create User
+                                                                    </a>
+                                                                </li>
                                     @endif
 
                                 </ul>
@@ -369,107 +358,100 @@
                                 <ul class="dropdown-menu">
 
                                     @if ($branchSlug)
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.customer-offers.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Customer Offers List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.customer-offers.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Customer Offers List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.customer-offers.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Add Customer Offers
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.customer-offers.create', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Add Customer Offers
+                                                                    </a>
+                                                                </li>
                                     @else
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.customer-offers.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Customer Offers List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.customer-offers.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Customer Offers List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.customer-offers.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Add Customer Offers
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.customer-offers.create', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Add Customer Offers
+                                                                    </a>
+                                                                </li>
                                     @endif
 
                                 </ul>
                             </li>
                         @endcan
                         @can('view-customer-offers')
-                            <li>
-                                <a
-                                    href="{{ $branchSlug
-                                        ? route('branch.registered-customers.index', [
-                                            'restaurant' => $restaurantSlug,
-                                            'branch' => $branchSlug,
-                                        ])
-                                        : route('restaurant.registered-customers.index', [
-                                            'restaurant' => $restaurantSlug,
-                                        ]) }}">
+                                            <li>
+                                                <a href="{{ $branchSlug
+                            ? route('branch.registered-customers.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ])
+                            : route('restaurant.registered-customers.index', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}">
 
-                                    <i data-feather="mail"></i>
-                                    <span>Send Offer</span>
-                                </a>
-                            </li>
+                                                    <i data-feather="mail"></i>
+                                                    <span>Send Offer</span>
+                                                </a>
+                                            </li>
                         @endcan
 
                         @can('view-reports')
-                        <li class="dropdown">
+                                            <li class="dropdown">
 
-                            <a href="#" class="nav-link has-dropdown">
-                                <i data-feather="bar-chart-2"></i>
-                                <span>Report</span>
-                            </a>
+                                                <a href="#" class="nav-link has-dropdown">
+                                                    <i data-feather="bar-chart-2"></i>
+                                                    <span>Report</span>
+                                                </a>
 
-                            <ul class="dropdown-menu">
+                                                <ul class="dropdown-menu">
 
-                                <li>
-                                    <a
-                                        href="{{ $branchSlug
-                                            ? route('branch.reports.revenue', [
-                                                'restaurant' => $restaurantSlug,
-                                                'branch' => $branchSlug,
-                                            ])
-                                            : route('restaurant.reports.revenue', [
-                                                'restaurant' => $restaurantSlug,
-                                            ]) }}">
-                                        Revenue
-                                    </a>
-                                </li>
+                                                    <li>
+                                                        <a href="{{ $branchSlug
+                            ? route('branch.reports.revenue', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ])
+                            : route('restaurant.reports.revenue', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}">
+                                                            Revenue
+                                                        </a>
+                                                    </li>
 
-                                <li>
-                                    <a
-                                        href="{{ $branchSlug
-                                            ? route('branch.reports.top-selling', [
-                                                'restaurant' => $restaurantSlug,
-                                                'branch' => $branchSlug,
-                                            ])
-                                            : route('restaurant.reports.top-selling', [
-                                                'restaurant' => $restaurantSlug,
-                                            ]) }}">
-                                        Top Selling Items
-                                    </a>
-                                </li>
+                                                    <li>
+                                                        <a href="{{ $branchSlug
+                            ? route('branch.reports.top-selling', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ])
+                            : route('restaurant.reports.top-selling', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}">
+                                                            Top Selling Items
+                                                        </a>
+                                                    </li>
 
-                            </ul>
+                                                </ul>
 
-                        </li>
+                                            </li>
                         @endcan
 
                         {{-- Restaurants --}}
@@ -486,10 +468,10 @@
                             @php
                                 $route =
                                     auth()->user()->role === 'super_admin'
-                                        ? route('branches.index')
-                                        : route('restaurant.branches.index', [
-                                            'restaurant' => optional(auth()->user()->restaurant)->slug,
-                                        ]);
+                                    ? route('branches.index')
+                                    : route('restaurant.branches.index', [
+                                        'restaurant' => optional(auth()->user()->restaurant)->slug,
+                                    ]);
                             @endphp
 
                             <li
@@ -500,9 +482,18 @@
                                 </a>
                             </li>
                         @endcan
+
+                        @can('view-insights')
+                            <li class="{{ request()->routeIs('superadmin.insights') ? 'active' : '' }}">
+                                <a href="{{ route('superadmin.insights') }}" class="nav-link">
+                                    <i data-feather="bar-chart-2"></i>
+                                    <span>Insights</span>
+                                </a>
+                            </li>
+                        @endcan
+
                         {{-- Categories --}}
                         @php
-                            // ALWAYS use route as source of truth
                             $restaurantSlug = request()->route('restaurant');
                             $branchSlug = request()->route('branch');
                         @endphp
@@ -531,43 +522,39 @@
                                                 </a>
                                             </li>
                                         @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.categories.index', [
-                                                        'restaurant' => $restaurantSlug,
-                                                        'branch' => $branchSlug,
-                                                    ]) }}">
-                                                    Category List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.categories.index', [
+                                                'restaurant' => $restaurantSlug,
+                                                'branch' => $branchSlug,
+                                            ]) }}">
+                                                                        Category List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.categories.create', [
-                                                        'restaurant' => $restaurantSlug,
-                                                        'branch' => $branchSlug,
-                                                    ]) }}">
-                                                    Create Category
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.categories.create', [
+                                                'restaurant' => $restaurantSlug,
+                                                'branch' => $branchSlug,
+                                            ]) }}">
+                                                                        Create Category
+                                                                    </a>
+                                                                </li>
                                         @elseif(!empty($restaurantSlug))
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.categories.index', [
-                                                        'restaurant' => $restaurantSlug,
-                                                    ]) }}">
-                                                    Category List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.categories.index', [
+                                                'restaurant' => $restaurantSlug,
+                                            ]) }}">
+                                                                        Category List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.categories.create', [
-                                                        'restaurant' => $restaurantSlug,
-                                                    ]) }}">
-                                                    Create Category
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.categories.create', [
+                                                'restaurant' => $restaurantSlug,
+                                            ]) }}">
+                                                                        Create Category
+                                                                    </a>
+                                                                </li>
                                         @endif
 
                                     </ul>
@@ -596,43 +583,39 @@
                                 <ul class="dropdown-menu">
 
                                     @if ($branchSlug)
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.menu-items.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Menu List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.menu-items.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Menu List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.menu-items.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Add Menu Item
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.menu-items.create', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Add Menu Item
+                                                                    </a>
+                                                                </li>
                                     @else
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.menu-items.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Menu List
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.menu-items.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Menu List
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.menu-items.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Add Menu Item
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.menu-items.create', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Add Menu Item
+                                                                    </a>
+                                                                </li>
                                     @endif
 
                                 </ul>
@@ -655,43 +638,39 @@
                                     <ul class="dropdown-menu">
 
                                         @if (currentRestaurantSlug() && currentBranchSlug())
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.inventory.index', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'branch' => currentBranchSlug(),
-                                                    ]) }}">
-                                                    Inventory List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.inventory.index', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'branch' => currentBranchSlug(),
+                                            ]) }}">
+                                                                        Inventory List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.inventory.create', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'branch' => currentBranchSlug(),
-                                                    ]) }}">
-                                                    Add Inventory Item
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.inventory.create', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'branch' => currentBranchSlug(),
+                                            ]) }}">
+                                                                        Add Inventory Item
+                                                                    </a>
+                                                                </li>
                                         @elseif(currentRestaurantSlug())
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.inventory.index', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                    ]) }}">
-                                                    Inventory List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.inventory.index', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                            ]) }}">
+                                                                        Inventory List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.inventory.create', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                    ]) }}">
-                                                    Add Inventory Item
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.inventory.create', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                            ]) }}">
+                                                                        Add Inventory Item
+                                                                    </a>
+                                                                </li>
                                         @endif
 
                                     </ul>
@@ -710,43 +689,39 @@
                                     <ul class="dropdown-menu">
 
                                         @if (currentRestaurantSlug() && currentBranchSlug())
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.recipe.index', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'branch' => currentBranchSlug(),
-                                                    ]) }}">
-                                                    Recipe List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.recipe.index', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'branch' => currentBranchSlug(),
+                                            ]) }}">
+                                                                        Recipe List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('branch.recipe.create', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'branch' => currentBranchSlug(),
-                                                    ]) }}">
-                                                    Add Recipe
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.recipe.create', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'branch' => currentBranchSlug(),
+                                            ]) }}">
+                                                                        Add Recipe
+                                                                    </a>
+                                                                </li>
                                         @elseif(currentRestaurantSlug())
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.recipe.index', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                    ]) }}">
-                                                    Recipe List
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.recipe.index', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                            ]) }}">
+                                                                        Recipe List
+                                                                    </a>
+                                                                </li>
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.recipe.create', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                    ]) }}">
-                                                    Add Recipe
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.recipe.create', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                            ]) }}">
+                                                                        Add Recipe
+                                                                    </a>
+                                                                </li>
                                         @endif
 
                                     </ul>
@@ -793,65 +768,59 @@
 
                                         {{-- BRANCH LEVEL --}}
                                     @elseif (!empty($restaurantSlug) && !empty($branchSlug))
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.table-categories.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Table Categories
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.table-categories.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Table Categories
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.tables.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Tables
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.tables.index', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Tables
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('branch.tables.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                    'branch' => $branchSlug,
-                                                ]) }}">
-                                                Add Table
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.tables.create', [
+                                            'restaurant' => $restaurantSlug,
+                                            'branch' => $branchSlug,
+                                        ]) }}">
+                                                                        Add Table
+                                                                    </a>
+                                                                </li>
 
 
-                                        {{-- RESTAURANT LEVEL --}}
+                                                                {{-- RESTAURANT LEVEL --}}
                                     @elseif (!empty($restaurantSlug))
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.table-categories.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Table Categories
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.table-categories.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Table Categories
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.tables.index', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Tables
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.tables.index', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Tables
+                                                                    </a>
+                                                                </li>
 
-                                        <li>
-                                            <a
-                                                href="{{ route('restaurant.tables.create', [
-                                                    'restaurant' => $restaurantSlug,
-                                                ]) }}">
-                                                Add Table
-                                            </a>
-                                        </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.tables.create', [
+                                            'restaurant' => $restaurantSlug,
+                                        ]) }}">
+                                                                        Add Table
+                                                                    </a>
+                                                                </li>
                                     @endif
 
                                 </ul>
@@ -871,24 +840,22 @@
 
                                         @can('order-list')
                                             @if (auth()->user()->branch_id)
-                                                <li>
-                                                    <a
-                                                        href="{{ route('branch.orders.index', [
-                                                            'restaurant' => currentRestaurantSlug(),
-                                                            'branch' => currentBranchSlug(),
-                                                        ]) }}">
-                                                        Order List
-                                                    </a>
-                                                </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.orders.index', [
+                                                    'restaurant' => currentRestaurantSlug(),
+                                                    'branch' => currentBranchSlug(),
+                                                ]) }}">
+                                                                        Order List
+                                                                    </a>
+                                                                </li>
                                             @else
-                                                <li>
-                                                    <a
-                                                        href="{{ route('restaurant.orders.index', [
-                                                            'restaurant' => currentRestaurantSlug(),
-                                                        ]) }}">
-                                                        Order List
-                                                    </a>
-                                                </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.orders.index', [
+                                                    'restaurant' => currentRestaurantSlug(),
+                                                ]) }}">
+                                                                        Order List
+                                                                    </a>
+                                                                </li>
                                             @endif
                                         @endcan
 
@@ -896,58 +863,53 @@
 
                                         @can('create-order')
                                             @if (auth()->user()->branch_id)
-                                                <li>
-                                                    <a
-                                                        href="{{ route('branch.orders.create', [
-                                                            'restaurant' => currentRestaurantSlug(),
-                                                            'branch' => currentBranchSlug(),
-                                                        ]) }}">
-                                                        Create Order
-                                                    </a>
-                                                </li>
+                                                                <li>
+                                                                    <a href="{{ route('branch.orders.create', [
+                                                    'restaurant' => currentRestaurantSlug(),
+                                                    'branch' => currentBranchSlug(),
+                                                ]) }}">
+                                                                        Create Order
+                                                                    </a>
+                                                                </li>
                                             @else
-                                                <li>
-                                                    <a
-                                                        href="{{ route('restaurant.orders.create', [
-                                                            'restaurant' => currentRestaurantSlug(),
-                                                        ]) }}">
-                                                        Create Order
-                                                    </a>
-                                                </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.orders.create', [
+                                                    'restaurant' => currentRestaurantSlug(),
+                                                ]) }}">
+                                                                        Create Order
+                                                                    </a>
+                                                                </li>
                                             @endif
                                         @endcan
                                         @can('prepare-order')
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.orders.statusorder', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'status' => 'preparing',
-                                                    ]) }}">
-                                                    Preparing Orders
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.orders.statusorder', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'status' => 'preparing',
+                                            ]) }}">
+                                                                        Preparing Orders
+                                                                    </a>
+                                                                </li>
                                         @endcan
-                                        @can('complete-order-order')
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.orders.statusorder', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'status' => 'completed',
-                                                    ]) }}">
-                                                    Completed Orders
-                                                </a>
-                                            </li>
+                                        @can('complete-order')
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.orders.statusorder', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'status' => 'completed',
+                                            ]) }}">
+                                                                        Completed Orders
+                                                                    </a>
+                                                                </li>
                                         @endcan
                                         @can('deliver-order')
-                                            <li>
-                                                <a
-                                                    href="{{ route('restaurant.orders.statusorder', [
-                                                        'restaurant' => currentRestaurantSlug(),
-                                                        'status' => 'delivered',
-                                                    ]) }}">
-                                                    Delivered Orders
-                                                </a>
-                                            </li>
+                                                                <li>
+                                                                    <a href="{{ route('restaurant.orders.statusorder', [
+                                                'restaurant' => currentRestaurantSlug(),
+                                                'status' => 'delivered',
+                                            ]) }}">
+                                                                        Delivered Orders
+                                                                    </a>
+                                                                </li>
                                         @endcan
 
                                     </ul>
@@ -957,31 +919,31 @@
                         @endcan
 
                         @if (auth()->check() && auth()->user()->role === 'customer')
-                            <li>
-                                <a
-                                    href="{{ route('restaurant.orders.index', [
-                                        'restaurant' => auth()->user()->restaurant->slug,
-                                        'branch' => auth()->user()->branch->slug,
-                                    ]) }}">
+                                                <li>
+                                                    <a href="{{ route('restaurant.orders.index', [
+                                'restaurant' => auth()->user()->restaurant->slug,
+                                'branch' => auth()->user()->branch->slug,
+                            ]) }}">
 
-                                    <i data-feather="shopping-bag"></i>
-                                    <span>My Orders</span>
-                                </a>
-                            </li>
+                                                        <i data-feather="shopping-bag"></i>
+                                                        <span>My Orders</span>
+                                                    </a>
+                                                </li>
                         @endif
-                        @if (auth()->check() &&
-                                auth()->user()->role === 'customer' &&
-                                auth()->user()->orders()->where('restaurant_id', auth()->user()->restaurant_id)->where('branch_id', auth()->user()->branch_id)->exists())
-                            <li>
-                                <a
-                                    href="{{ route('customer.orders', [
-                                        'restaurant' => auth()->user()->restaurant->slug,
-                                        'branch' => auth()->user()->branch->slug,
-                                    ]) }}">
-                                    <i data-feather="shopping-bag"></i>
-                                    <span>My History</span>
-                                </a>
-                            </li>
+                        @if (
+                                                    auth()->check() &&
+                                                    auth()->user()->role === 'customer' &&
+                                                    auth()->user()->orders()->where('restaurant_id', auth()->user()->restaurant_id)->where('branch_id', auth()->user()->branch_id)->exists()
+                                                )
+                                                <li>
+                                                    <a href="{{ route('customer.orders', [
+                                'restaurant' => auth()->user()->restaurant->slug,
+                                'branch' => auth()->user()->branch->slug,
+                            ]) }}">
+                                                        <i data-feather="shopping-bag"></i>
+                                                        <span>My History</span>
+                                                    </a>
+                                                </li>
                         @endif
 
                         {{-- Restaurant Info --}}
@@ -1025,13 +987,11 @@
             </form>
 
             @if (auth()->check() && auth()->user()->role != 'super_admin' && $restaurantSlug)
-                <form id="restaurant-logout-form"
-                    action="{{ route('restaurant.logout', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}"
-                    method="POST" style="display:none;">
-                    @csrf
-                </form>
+                        <form id="restaurant-logout-form" action="{{ route('restaurant.logout', [
+                    'restaurant' => $restaurantSlug,
+                ]) }}" method="POST" style="display:none;">
+                            @csrf
+                        </form>
             @endif
 
 
@@ -1066,7 +1026,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             const notificationSound = document.getElementById('notificationSound');
             let isProcessing = false;
@@ -1076,7 +1036,7 @@
                 notificationSound.play().then(() => {
                     notificationSound.pause();
                     notificationSound.currentTime = 0;
-                }).catch(() => {});
+                }).catch(() => { });
                 document.removeEventListener('click', unlockAudio);
             }, {
                 once: true
@@ -1103,7 +1063,7 @@
                     // Start looping sound
                     notificationSound.currentTime = 0;
                     notificationSound.loop = true;
-                    notificationSound.play().catch(() => {});
+                    notificationSound.play().catch(() => { });
 
                     let title = nData.status === 'prepared' ? '✅ Order Prepared!' : '🛎 New Order Assigned';
 
@@ -1164,7 +1124,7 @@
                 }
             }
         });
-        $(document).ready(function() {
+        $(document).ready(function () {
 
             $('#description').summernote({
                 height: 250,
@@ -1175,7 +1135,7 @@
     </script>
     @if (session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -1188,11 +1148,11 @@
     @endif
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             document.querySelectorAll('.delete-form').forEach(form => {
 
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
 
                     e.preventDefault();
 

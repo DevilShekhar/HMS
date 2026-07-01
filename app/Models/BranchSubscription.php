@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class BranchSubscription extends Model
 {
-    //
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
     protected $fillable = [
         'branch_id',
         'subscription_plan_id',

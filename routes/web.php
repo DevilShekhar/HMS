@@ -47,7 +47,13 @@ Route::get('/customer-history', [OrderController::class, 'customerHistory'])->na
 Route::get('{restaurant}/{branch}/my-orders', [OrderController::class, 'myOrders'])->name('customer.orders');
 Route::resource('customer-offers', CustomerOfferController::class);
 Route::post('/customer-offers/send', [CustomerOfferController::class, 'sendOffer'])->name('customer-offers.send');
+Route::post('/orders/{order}/verify-payment', [OrderController::class, 'verifyPayment'])->name('orders.verify.payment');
 
+Route::get('/insights', [DashboardController::class, 'dashboardinsights'])->name('superadmin.insights');
+Route::get('/insights/restaurants/{restaurant}/branches', [DashboardController::class, 'getBranches'])->name('admin.insights.branches');
+Route::get('/insights/restaurants/{restaurant}/data', [DashboardController::class, 'getInsights'])->name('admin.insights.data');
+Route::get('/insights/pdf', [DashboardController::class, 'insightsPdf'])
+    ->name('admin.insights.pdf');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
