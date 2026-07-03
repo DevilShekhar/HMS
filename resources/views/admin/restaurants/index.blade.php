@@ -1,20 +1,51 @@
 @can('view-restaurant')
     @extends('layouts.app')
     @section('content')
+   
         <section class="section premium-dashboard">
             <div class="premium-page-head">
                 <div class="premium-page-title">
-                    <span class="mini-badge">
+                     <span class="page-badge">
+                        <i class="fas fa-store"></i>
                         Restaurant Management
                     </span>
                     <h2>Restaurant List</h2>
                     <p> Manage all restaurants </p>
                 </div>
                 <div class="premium-head-actions">
-                    <a href="{{ route('restaurants.create') }}" class="btn premium-btn btn-main-premium">
+                    <a href="{{ route('restaurants.create') }}" class="btn btn-create">
                         <i class="fas fa-plus"></i>
                         Add Restaurant
                     </a>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-lg-4">
+                    <div class="dashboard-card">
+                        <div>
+                            <small>Total Restaurants</small>
+                            <h3>{{ $restaurants->total() }}</h3>
+                        </div>
+                        <i class="fas fa-store icon"></i>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="dashboard-card success">
+                        <div>
+                            <small>Active</small>
+                            <h3>{{ $restaurants->where('status',1)->count() }}</h3>
+                        </div>
+                        <i class="fas fa-check-circle icon"></i>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="dashboard-card danger">
+                        <div>
+                            <small>Inactive</small>
+                            <h3>{{ $restaurants->where('status',0)->count() }}</h3>
+                        </div>
+                        <i class="fas fa-times-circle icon"></i>
+                    </div>
                 </div>
             </div>
         </section>
@@ -31,7 +62,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
+                                    <table class="table table-striped table-hover" id="tableExport">
                                         <thead>
                                             <tr>
                                                 <th>#</th>
@@ -47,36 +78,47 @@
                                                     <td>
                                                         {{ $restaurants->firstItem() + $loop->index }}
                                                     </td>
-                                                    <td>
-                                                        <strong>{{ $restaurant->name }}</strong>
+                                                   <td>
+                                                        <div class="restaurant-info">
+                                                            <div class="restaurant-avatar">
+                                                                {{ strtoupper(substr($restaurant->name,0,1)) }}
+                                                            </div>
+                                                            <div>
+                                                                <h6>{{ $restaurant->name }}</h6>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                     <td>
-                                                        <span class="badge badge-info"> {{ $restaurant->slug }} </span>
-                                                    </td>
+                                                        <span class="slug-badge">
+                                                        {{ $restaurant->slug }}
+                                                        </span>
+                                                        </td>
                                                     <td>
-                                                        @if ($restaurant->status)
-                                                            <span class="badge badge-success">Active</span>
+                                                        @if($restaurant->status)
+                                                            <span class="status active">
+                                                                <i class="fas fa-circle"></i>Active
+                                                            </span>
                                                         @else
-                                                            <span class="badge badge-danger">Inactive</span>
+                                                            <span class="status inactive">
+                                                                <i class="fas fa-circle"></i>Inactive
+                                                            </span>
                                                         @endif
                                                     </td>
                                                     @if($restaurant->status == 1)
-                                                    <td>
-                                                        <div class="d-flex">
-                                                            <a href="{{ route('restaurants.edit', $restaurant->id) }}"
-                                                                class="btn btn-sm btn-primary mr-2">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            <form action="{{ route('restaurants.destroy', $restaurant->id) }}"
-                                                                method="POST" class="delete-form">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </td>
+                                                        <td class="text-center">
+                                                            <div class="action-buttons">
+                                                                <a href="{{ route('restaurants.edit',$restaurant->id) }}" class="btn-action edit">
+                                                                    <i class="fas fa-pen"></i>
+                                                                </a>
+                                                                <form action="{{ route('restaurants.destroy',$restaurant->id) }}" method="POST" class="delete-form">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn-action delete">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </td>
                                                     @endif
                                                 </tr>
                                             @empty
@@ -86,10 +128,7 @@
                                             @endforelse
                                         </tbody>
                                     </table>
-                                </div>
-                                <div class="mt-4">
-                                    {{ $restaurants->links() }}
-                                </div>
+                                </div>                               
                             </div>
                         </div>
                     </div>
