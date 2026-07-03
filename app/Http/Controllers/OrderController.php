@@ -735,6 +735,8 @@ class OrderController extends Controller
 
     public function statusOrders(Restaurant $restaurant, $status)
     {
+        $user = Auth::user();
+
         $orders = Order::with(['branch', 'chef'])
             ->where('restaurant_id', $restaurant->id)
             ->where('status', $status);
@@ -742,10 +744,41 @@ class OrderController extends Controller
         if (Auth::user()->branch_id) {
             $orders->where('branch_id', Auth::user()->branch_id);
         }
+        $baseQuery = Order::query()
+            ->where('restaurant_id', $restaurant->id);
+
+        if ($user->branch_id) {
+            $baseQuery->where('branch_id', $user->branch_id);
+        }
+
+        $counts = [
+            'all' => (clone $baseQuery)->count(),
+
+            'today' => (clone $baseQuery)
+                ->whereDate('created_at', today())
+                ->count(),
+
+            'customer' => (clone $baseQuery)
+                ->whereNotNull('customer_id')
+                ->count(),
+
+            'waiter' => (clone $baseQuery)
+                ->whereHas('creator', function ($q) {
+                    $q->where('role', 'waiter');
+                })
+                ->count(),
+
+            'waiter_head' => (clone $baseQuery)
+                ->whereHas('creator', function ($q) {
+                    $q->where('role', 'waiter_head');
+                })
+                ->count(),
+        ];
 
         return view('admin.orders.index', [
             'orders' => $orders->latest()->get(),
             'restaurant' => $restaurant,
+            'counts' => $counts,
         ]);
     }
 
@@ -758,8 +791,23 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($request->order_id);
 
+        if (in_array($request->payment_method, ['cash', 'card'])) {
+
+            $order->update([
+                'payment_method' => $request->payment_method,
+                'payment_status' => 'verified',
+                'status' => 'completed',
+            ]);
+
+            return back()->with(
+                'success',
+                'Payment completed successfully.'
+            );
+        }
+
+        // UPI Payment
         $order->update([
-            'payment_method' => $request->payment_method,
+            'payment_method' => 'upi',
             'payment_status' => 'pending',
         ]);
 
@@ -850,6 +898,57 @@ class OrderController extends Controller
         return back()->with(
             'success',
             'Payment verified successfully.'
+        );
+    }
+
+    public function generateBill($restaurant, $branch = null, $order = null)
+    {
+        if ($order == null && is_numeric($branch)) {
+            $order = $branch;
+            $branch = null;
+        }
+        $restaurant = app('restaurant');
+        $order = Order::with([
+            'branch', 'items.menuItems',
+        ])
+            ->where('restaurant_id', $restaurant->id)
+            ->findOrFail($order);
+        if (! $order->bill_generated_at) {
+            $billNo = $this->generateBillNumber($order);
+            $order->update([
+                'bill_no' => $billNo,
+                'bill_generated_at' => now(),
+            ]);
+            $order->refresh();
+        }
+
+        return view('admin.orders.bill', compact('order'));
+    }
+
+    private function generateBillNumber(Order $order)
+    {
+        $prefix = 'BILL-'.now()->format('Ymd').'-';
+
+        $lastOrder = Order::query()
+            ->whereNotNull('bill_no')
+            ->latest('id')
+            ->first();
+
+        $lastNumber = 0;
+
+        if ($lastOrder) {
+
+            preg_match('/(\d+)$/', $lastOrder->bill_no, $matches);
+
+            $lastNumber = $matches[1] ?? 0;
+
+        }
+
+        return $prefix.str_pad(
+            $lastNumber + 1,
+            4,
+            '0',
+            STR_PAD_LEFT
         );
     }
 }

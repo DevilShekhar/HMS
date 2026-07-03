@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Branch;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -19,7 +18,7 @@ class CategoryController extends Controller
 
             $categories = Category::with([
                 'branch',
-                'creator'
+                'creator',
             ])
                 ->where('restaurant_id', $user->restaurant_id)
                 ->latest()
@@ -32,7 +31,7 @@ class CategoryController extends Controller
 
             $categories = Category::with([
                 'branch',
-                'creator'
+                'creator',
             ])
                 ->where('branch_id', $branchId)
                 ->latest()
@@ -72,8 +71,8 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
-            'description' => 'nullable',
-            'is_active' => 'nullable'
+            'description' => 'required',
+            'is_active' => 'nullable',
         ]);
 
         $user = Auth::user();
@@ -81,24 +80,25 @@ class CategoryController extends Controller
         if ($user->role == 'owner') {
 
             $request->validate([
-                'branch_id' => 'required|exists:branches,id'
+                'branch_id' => 'required|exists:branches,id',
             ]);
 
             $branchId = $request->branch_id;
-        } else {
+        } $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
 
-            $branchId = Branch::query()
-                ->where('branch_manager_id', $user->id)
-                ->value('id');
+        if (! $branch) {
+            return back()->with('error', 'No branch assigned to this branch manager.');
         }
+
+        $branchId = $branch->id;
 
         Category::create([
             'restaurant_id' => $user->restaurant_id,
-            'branch_id'     => $branchId,
-            'created_by'    => $user->id,
-            'name'          => $request->name,
-            'description'   => $request->description,
-            'is_active'     => $request->is_active ?? 1,
+            'branch_id' => $branchId,
+            'created_by' => $user->id,
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => $request->is_active ?? 1,
         ]);
 
         if (Auth::user()->role === 'super_admin') {
@@ -108,10 +108,8 @@ class CategoryController extends Controller
                 ->with('success', 'Category created successfully.');
         }
 
-
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.categories.index', [
@@ -120,7 +118,6 @@ class CategoryController extends Controller
                 ])
                 ->with('success', 'Category created successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {
@@ -131,6 +128,7 @@ class CategoryController extends Controller
                 ->with('success', 'Category created successfully.');
         }
     }
+
     public function edit($restaurant, $branch = null, $category = null)
     {
         if ($category === null) {
@@ -181,10 +179,8 @@ class CategoryController extends Controller
                 ->with('success', 'Category created successfully.');
         }
 
-
         // Branch Manager
         if (Auth::user()->role === 'branch_manager') {
-
 
             return redirect()
                 ->route('branch.categories.index', [
@@ -193,7 +189,6 @@ class CategoryController extends Controller
                 ])
                 ->with('success', 'Category created successfully.');
         }
-
 
         // Owner
         if (Auth::user()->role === 'owner') {
@@ -205,9 +200,10 @@ class CategoryController extends Controller
         }
     }
 
-public function destroy($restaurant, Category $category)    {
+    public function destroy($restaurant, Category $category)
+    {
         $category->update([
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         // SUPER ADMIN
@@ -218,13 +214,11 @@ public function destroy($restaurant, Category $category)    {
                 ->with('success', 'Category deavtivated successfully.');
         }
 
-
         $restaurantSlug = request()->route('restaurant');
         $branchSlug = request()->route('branch');
 
-
         // BRANCH LEVEL
-        if (!empty($restaurantSlug) && !empty($branchSlug)) {
+        if (! empty($restaurantSlug) && ! empty($branchSlug)) {
 
             return redirect()
                 ->route('branch.categories.index', [
@@ -233,7 +227,6 @@ public function destroy($restaurant, Category $category)    {
                 ])
                 ->with('success', 'Category deavtivated successfully.');
         }
-
 
         // RESTAURANT LEVEL
         return redirect()

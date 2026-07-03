@@ -813,6 +813,27 @@
                                                                         Tables
                                                                     </a>
                                                                 </li>
+                                                                <li>
+                                                                    @php
+                                                                        $restaurantSlug = request()->route('restaurant');
+                                                                        $branchSlug = request()->route('branch');
+                                                                    @endphp
+
+                                                                    @if($branchSlug)
+                                                                                                <a href="{{ route('branch.table-allocations.index', [
+                                                                            'restaurant' => $restaurantSlug,
+                                                                            'branch' => $branchSlug,
+                                                                        ]) }}">
+                                                                                                    Table Allocations
+                                                                                                </a>
+                                                                    @else
+                                                                                                <a href="{{ route('restaurant.table-allocations.index', [
+                                                                            'restaurant' => $restaurantSlug,
+                                                                        ]) }}">
+                                                                                                    Table Allocations
+                                                                                                </a>
+                                                                    @endif
+                                                                </li>
 
                                                                 <li>
                                                                     <a href="{{ route('restaurant.tables.create', [
@@ -1014,6 +1035,7 @@
     <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script src="{{ asset('assets/bundles/summernote/summernote-bs4.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1132,7 +1154,9 @@
             });
 
         });
+
     </script>
+
     @if (session('success'))
         <script>
             document.addEventListener('DOMContentLoaded', function () {

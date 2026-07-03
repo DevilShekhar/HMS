@@ -349,7 +349,9 @@
                                 <div class="order-item-controls">
                                     <div class="qty-control">
                                         <button type="button" class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
-                                        <span class="qty-value">${item.qty}</span>
+
+                                        <input type="number"  class="qty-input" value="${item.qty}" min="1" onchange="setQty(${id}, this.value)"/>
+
                                         <button type="button" class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
                                     </div>
                                     <div class="order-item-total">₹${lineTotal.toFixed(2)}</div>
@@ -396,6 +398,19 @@
                 updateHiddenFields();
             }
         }
+        function setQty(id, value) {
+                let qty = parseInt(value);
+
+                if (isNaN(qty) || qty <= 0) {
+                    delete order[id];
+                } else {
+                    order[id].qty = qty;
+                }
+
+                renderOrderSummary();
+                updateCardHighlights();
+                updateHiddenFields();
+            }
 
         function removeItem(id) {
             delete order[id];

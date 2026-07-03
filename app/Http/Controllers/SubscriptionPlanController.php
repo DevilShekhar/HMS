@@ -32,11 +32,11 @@ class SubscriptionPlanController extends Controller
         // dd($request->all());
         $request->validate([
             'name' => 'required|string|max:100',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'monthly_price' => 'required|numeric|min:0',
-            'quarterly_price' => 'nullable|numeric|min:0',
-            'half_yearly_price' => 'nullable|numeric|min:0',
-            'yearly_price' => 'nullable|numeric|min:0',
+            'quarterly_price' => 'required|numeric|min:0',
+            'half_yearly_price' => 'required|numeric|min:0',
+            'yearly_price' => 'required|numeric|min:0',
         ]);
 
         $data = $request->all();

@@ -125,6 +125,24 @@
                         <p>{{ $branch->longitude ?? '-' }}</p>
                     </div>
                     <div class="col-lg-3 col-md-6 mb-4">
+                        <label><strong>GST Details</strong></label>
+
+                        <div class="row g-2 mt-1">
+                            <div class="col-4">
+                                <small class="text-muted">GST (%)</small>
+                                <p class="mb-0 fw-bold">{{ $branch->gst ?? '-' }}</p>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">CGST (%)</small>
+                                <p class="mb-0 fw-bold">{{ $branch->cgst ?? '-' }}</p>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">SGST (%)</small>
+                                <p class="mb-0 fw-bold">{{ $branch->sgst ?? '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
                         <label><strong>Created At</strong></label>
                         <p>{{ $branch->created_at?->format('d M Y h:i A') }}</p>
                     </div>

@@ -18,6 +18,8 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
+        $selectedRestaurant = request('restaurant_id');
+        $selectedBranch = request('branch_id');
         $user = Auth::user();
         $restaurant = app()->bound('restaurant')
             ? app('restaurant')
@@ -33,8 +35,22 @@ class DashboardController extends Controller
             $orders = Order::whereIn('branch_id', $branchIds);
             $totalOrders = Order::whereIn('branch_id', $branchIds);
         } else {
-            // Super Admin - all data
-            $branchIds = Branch::pluck('id');
+            // Super Admin
+            if ($selectedRestaurant) {
+
+                $branchIds = Branch::query()->where('restaurant_id', $selectedRestaurant)
+                    ->pluck('id');
+
+                if ($selectedBranch) {
+                    $branchIds = collect([$selectedBranch]);
+                }
+
+            } else {
+
+                $branchIds = Branch::pluck('id');
+
+            }
+
             $orders = Order::whereIn('branch_id', $branchIds);
             $totalOrders = Order::query()->whereIn('branch_id', $branchIds);
         }
@@ -172,6 +188,9 @@ class DashboardController extends Controller
             'completed' => (clone $orders)
                 ->where('status', 'completed')
                 ->count(),
+            'delivered' => (clone $orders)
+                ->where('status', 'delivered')
+                ->count(),
         ];
         $preparedOrders = (clone $orders)
             ->whereIn('status', ['prepared', 'pending'])
@@ -218,24 +237,155 @@ class DashboardController extends Controller
             ->whereBetween('end_date', [
                 now(),
                 now()->addDays(30),
-            ])
+            ]);
+
+        if ($selectedRestaurant) {
+            $subscriptions->whereHas('branch', function ($q) use ($selectedRestaurant) {
+                $q->where('restaurant_id', $selectedRestaurant);
+            });
+        }
+
+        if ($selectedBranch) {
+            $subscriptions->where('branch_id', $selectedBranch);
+        }
+
+        $subscriptions = $subscriptions
             ->orderBy('end_date')
+            ->get();
+        $expiredSubscriptionCount = BranchSubscription::whereDate('end_date', '<=', today())->count();
+        $expiredSubscriptions = BranchSubscription::with([
+            'branch.restaurant',
+            'plan',
+        ])
+            ->whereDate('end_date', '<', today())
+            ->orderByDesc('end_date')
             ->get();
         $inventoryAlerts = InventoryItem::with([
             'restaurant',
             'branch',
         ])
-            ->whereColumn('remaining_stock', '<=', 'minimum_stock')
+            ->whereColumn('remaining_stock', '<=', 'minimum_stock');
+
+        if ($selectedRestaurant) {
+            $inventoryAlerts->where('restaurant_id', $selectedRestaurant);
+        }
+
+        if ($selectedBranch) {
+            $inventoryAlerts->where('branch_id', $selectedBranch);
+        }
+
+        $inventoryAlerts = $inventoryAlerts
             ->orderBy('remaining_stock')
             ->take(15)
             ->get();
+
+        // After $revenue calculation...
+        $revenueData = [
+            'orders' => [
+                $revenue['today']['orders'],
+                $revenue['yesterday']['orders'],
+                $revenue['weekly']['orders'],
+                $revenue['monthly']['orders'],
+                $revenue['yearly']['orders'],
+            ],
+            'amount' => [
+                $revenue['today']['amount'],
+                $revenue['yesterday']['amount'],
+                $revenue['weekly']['amount'],
+                $revenue['monthly']['amount'],
+                $revenue['yearly']['amount'],
+            ],
+        ];
+
+        // Order Status for Donut
+        $orderStatusData = [
+            'labels' => ['Pending', 'Preparing', 'Completed'],
+            'data' => [
+                $orderStatus['pending'],
+                $orderStatus['preparing'],
+                $orderStatus['completed'],
+            ],
+        ];
+        $restaurants = Restaurant::all();
 
         return view('admin.dashboard', compact(
             'revenue',
             'totalRestaurants',
             'nearExpirySubscriptions',
-            'totalBranches', 'inventoryStocks', 'orderStatus', 'preparedOrders', 'pendingVerification', 'verifiedToday', 'todayCollection', 'topRestaurants', 'subscriptions', 'inventoryAlerts'
+            'expiredSubscriptionCount', 'expiredSubscriptions', 'totalBranches', 'inventoryStocks', 'orderStatus', 'preparedOrders', 'pendingVerification', 'verifiedToday', 'todayCollection', 'topRestaurants', 'subscriptions', 'inventoryAlerts',
+            'revenue', 'revenueData', 'orderStatusData', 'restaurants'
         ));
+    }
+
+    public function dashboardData(Request $request)
+    {
+
+        $restaurantId = $request->restaurant_id;
+        $branchId = $request->branch_id;
+
+        if ($branchId) {
+            $branchIds = [$branchId];
+        } elseif ($restaurantId) {
+            $branchIds = Branch::where('restaurant_id', $restaurantId)
+                ->pluck('id')
+                ->toArray();
+
+            // dd($branchIds);
+        } else {
+            $branchIds = Branch::pluck('id')->toArray();
+        }
+
+        $orders = Order::whereIn('branch_id', $branchIds);
+
+        $revenue = [
+            'today' => [
+                'orders' => (clone $orders)->whereDate('created_at', today())->count(),
+                'amount' => (clone $orders)->whereDate('created_at', today())->sum('total'),
+            ],
+
+            'yesterday' => [
+                'orders' => (clone $orders)->whereDate('created_at', today()->subDay())->count(),
+                'amount' => (clone $orders)->whereDate('created_at', today()->subDay())->sum('total'),
+            ],
+
+            'weekly' => [
+                'orders' => (clone $orders)
+                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                    ->count(),
+
+                'amount' => (clone $orders)
+                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                    ->sum('total'),
+            ],
+
+            'monthly' => [
+                'orders' => (clone $orders)->whereMonth('created_at', now()->month)->count(),
+                'amount' => (clone $orders)->whereMonth('created_at', now()->month)->sum('total'),
+            ],
+
+            'yearly' => [
+                'orders' => (clone $orders)->whereYear('created_at', now()->year)->count(),
+                'amount' => (clone $orders)->whereYear('created_at', now()->year)->sum('total'),
+            ],
+
+            'total' => [
+                'orders' => (clone $orders)->count(),
+                'amount' => (clone $orders)->sum('total'),
+            ],
+        ];
+
+        $orderStatus = [
+            'pending' => (clone $orders)->where('status', 'pending')->count(),
+            'preparing' => (clone $orders)
+                ->whereIn('status', ['preparing', 'prepared'])
+                ->count(),
+            'completed' => (clone $orders)->where('status', 'completed')->count(),
+        ];
+
+        return response()->json([
+            'revenue' => $revenue,
+            'orderStatus' => $orderStatus,
+        ]);
     }
 
     public function dashboardInsights()

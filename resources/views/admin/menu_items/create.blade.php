@@ -20,22 +20,20 @@
                         Back To Menu Items
                     </a>
                 @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                    <a href="{{ route('branch.menu-items.index', [
+                            <a href="{{ route('branch.menu-items.index', [
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Menu Items
-                    </a>
+                    ]) }}" class="btn premium-btn ghost-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Menu Items
+                            </a>
                 @elseif(!empty($restaurantSlug))
-                    <a href="{{ route('restaurant.menu-items.index', [
+                            <a href="{{ route('restaurant.menu-items.index', [
                         'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Menu Items
-                    </a>
+                    ]) }}" class="btn premium-btn ghost-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Menu Items
+                            </a>
                 @endif
 
             </div>
@@ -59,7 +57,7 @@
                         @if (auth()->user()->hasRole('owner'))
                             <div class="col-md-6 mb-4">
                                 <label>Branch</label>
-                                <select name="branch_id" id="branch_id" class="form-control premium-input" required>
+                                <select name="branch_id" id="branch_id" class="form-control premium-input">
                                     <option value="">
                                         Select Branch
                                     </option>
@@ -69,18 +67,24 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('branch_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         @else
                             <input type="hidden" name="branch_id" value="{{ $branches->first()->id }}">
                             <div class="col-md-6 mb-4">
                                 <label>Branch</label>
-                                <input type="text" class="form-control premium-input"
-                                    value="{{ $branches->first()->name }}" readonly>
+                                <input type="text" class="form-control premium-input" value="{{ $branches->first()->name }}"
+                                    readonly>
+                                @error('branch_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         @endif
                         <div class="col-md-6 mb-4">
                             <label>Category</label>
-                            <select name="category_id" id="category_id" class="form-control premium-input" required>
+                            <select name="category_id" id="category_id" class="form-control premium-input">
                                 <option value="">
                                     Select Category
                                 </option>
@@ -92,14 +96,23 @@
                                     @endforeach
                                 @endif
                             </select>
+                            @error('category_id')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Menu Name</label>
-                            <input type="text" name="name" class="form-control premium-input" required>
+                            <input type="text" name="name" class="form-control premium-input">
+                            @error('name')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Price</label>
-                            <input type="number" step="0.01" name="price" class="form-control premium-input" required>
+                            <input type="number" step="0.01" name="price" class="form-control premium-input">
+                            @error('number')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Food Type</label>
@@ -107,6 +120,9 @@
                                 <option value="veg">Veg</option>
                                 <option value="non_veg">Non Veg</option>
                             </select>
+                            @error('food_type')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Available</label>
@@ -114,6 +130,9 @@
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
                             </select>
+                            @error('is_available')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Image</label>
@@ -122,6 +141,9 @@
                         <div class="col-md-12 mb-4">
                             <label>Description</label>
                             <textarea name="description" rows="4" class="form-control premium-input"></textarea>
+                            @error('description')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
                     </div>
                 </div>
@@ -135,7 +157,7 @@
     </section>
     @if (auth()->user()->hasRole('owner'))
         <script>
-            document.getElementById('branch_id').addEventListener('change', function() {
+            document.getElementById('branch_id').addEventListener('change', function () {
                 let branchId = this.value;
                 fetch('/{{ request()->route('restaurant') }}/categories-by-branch/' + branchId)
                     .then(response => response.json())
@@ -143,11 +165,11 @@
                         let category = document.getElementById('category_id');
                         category.innerHTML =
                             '<option value="">Select Category</option>';
-                        data.forEach(function(item) {
+                        data.forEach(function (item) {
                             category.innerHTML +=
                                 `<option value="${item.id}">
-                                ${item.name}
-                            </option>`;
+                                        ${item.name}
+                                    </option>`;
                         });
                     });
             });

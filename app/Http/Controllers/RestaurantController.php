@@ -22,6 +22,15 @@ class RestaurantController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => ['required','string','max:255',],
+            'status' => ['nullable','boolean',],
+        ], [
+            'name.required' => 'Restaurant name is required.',
+            'name.unique' => 'A restaurant with this name already exists.',
+            'name.max' => 'Restaurant name may not be greater than 255 characters.',
+            'status.boolean' => 'Invalid status selected.',
+        ]);
         Restaurant::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
@@ -59,7 +68,7 @@ class RestaurantController extends Controller
         $restaurant = Restaurant::findOrFail($id);
 
         $restaurant->update([
-            'status' => 0
+            'status' => 0,
         ]);
 
         return redirect()

@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    protected $casts = [
+        'bill_generated_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'restaurant_id',
         'branch_id',
@@ -27,7 +31,7 @@ class Order extends Model
         'branch_id',
         'payment_method',
         'birth_date',
-        'anniversary_date', 'email', 'payment_status',
+        'anniversary_date', 'email', 'payment_status', 'bill_no', 'bill_generated_at',
     ];
 
     public function orders()
