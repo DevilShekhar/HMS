@@ -772,96 +772,12 @@
             </div>
         @endcan
 
-
-            <div class="row mb-4">
-            <div class="col-12 col-sm-12 col-lg-12">
-                <div class="rms-dashboard-card">
-                    <div class="rms-filter-group">
-
-                        @if(!app()->bound('restaurant'))
-                            <select id="restaurantFilter" class="form-select">
-                                <option value="">All Restaurants</option>
-                                @foreach($restaurants as $r)
-                                    <option value="{{ $r->id }}">{{ $r->name }}</option>
-                                @endforeach
-                            </select>
-                        @endif
-
-                        <select id="branchFilter" class="form-select">
-                            <option value="">All Branches</option>
-                        </select>
-
-                    </div>
-                    <div class="rms-card-body">
-                        <div class="row">
-                            <div class="col-lg-9">
-                                <div id="chart1" class="rms-chart-container"></div>
-
-                                <div class="rms-revenue-stats">
-                                    <div class="rms-revenue-item">
-                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-week"></i></div>
-                                        <div class="rms-revenue-value" id="weeklyRevenue">
-                                            ₹{{ number_format($revenue['weekly']['amount']) }}
-                                        </div>
-                                        <div class="rms-revenue-label">Weekly Earnings</div>
-                                    </div>
-                                    <div class="rms-revenue-item">
-                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-month"></i></div>
-                                        <div class="rms-revenue-value" id="monthlyRevenue">
-                                            ₹{{ number_format($revenue['monthly']['amount']) }}
-                                        </div>
-                                        <div class="rms-revenue-label">Monthly Earnings</div>
-                                    </div>
-                                    <div class="rms-revenue-item">
-                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-year"></i></div>
-                                        <div class="rms-revenue-value" id="yearlyRevenue">
-                                            ₹{{ number_format($revenue['yearly']['amount']) }}
-                                        </div>
-                                        <div class="rms-revenue-label">Yearly Earnings</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-3">
-                                <div class="rms-stats-panel">
-                                    <div class="rms-stat-row">
-                                        <span class="rms-stat-label"><i class="fas fa-shopping-cart"></i> Total Orders</span>
-                                        <span class="rms-stat-value" id="totalOrders">
-                                            {{ number_format($revenue['total']['orders']) }}
-                                        </span>
-                                    </div>
-                                    <div class="rms-stat-row">
-                                        <span class="rms-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</span>
-                                        <span class="rms-stat-value text-success" id="totalRevenue">
-                                            ₹{{ number_format($revenue['total']['amount']) }}
-                                        </span>
-                                    </div>
-                                    <div class="rms-stat-row">
-                                        <span class="rms-stat-label"><i class="fas fa-store"></i> Restaurants</span>
-                                        <span class="rms-stat-value">{{ $restaurants->count() }}</span>
-                                    </div>
-                                    <div class="rms-stat-row">
-                                        <span class="rms-stat-label"><i class="fas fa-users"></i> Total Users</span>
-                                        <span class="rms-stat-value">{{ $totalUsers ?? 'N/A' }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-
     </section>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
 
     {{-- Your dashboard script --}}
 
     <script>
-        let currentRestaurant = "{{ app()->bound('restaurant') ? app('restaurant')->id : '' }}";
-        let currentBranch = '';
 
         document.addEventListener('DOMContentLoaded', function () {
 
