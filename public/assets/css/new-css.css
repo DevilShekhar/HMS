@@ -1,0 +1,665 @@
+/* ========================================
+   EHT USER MANAGEMENT - COMPLETE CSS
+   Color: #FA5603
+   ======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+/* ----- container ----- */
+.eht-container {
+    max-width: 1492px;
+    margin: 0 auto;
+    padding: 20px 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ----- header ----- */
+.eht-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    padding: 0.5rem 0;
+    margin-bottom: 1.8rem;
+    gap: 15px;
+}
+
+.eht-page-title .eht-badge {
+    display: inline-block;
+    background: #fff0e8;
+    color: #FA5603;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 1.2rem;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.eht-page-title h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin: 0;
+}
+
+.eht-page-title p {
+    color: #5e7a93;
+    margin: 0.2rem 0 0 0;
+    font-size: 0.95rem;
+}
+
+/* ----- buttons ----- */
+.eht-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.eht-btn-primary {
+    background: #FA5603;
+    color: #ffffff;
+}
+
+.eht-btn-primary:hover {
+    background: #d94a02;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(250, 86, 3, 0.3);
+}
+
+.eht-btn-ghost {
+    border: 2px solid #FA5603;
+    color: #FA5603;
+    background: transparent;
+}
+
+.eht-btn-ghost:hover {
+    background: #FA5603;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.eht-btn-large {
+    padding: 12px 40px;
+    font-size: 1.1rem;
+}
+
+/* ----- main card ----- */
+.eht-main-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+/* ----- card header (minimal) ----- */
+.eht-card-header {
+    background: transparent;
+    color: #1a2a3a;
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.eht-card-header h3 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #1a2a3a;
+}
+
+.eht-card-header .header-subtext {
+    margin: 0;
+    color: #5e7a93;
+    font-size: 0.85rem;
+}
+
+.eht-card-header .total-badge {
+    background: #fff0e8;
+    color: #FA5603;
+    font-weight: 600;
+    padding: 0.3rem 1rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+}
+
+.eht-card-body {
+    padding: 1.5rem;
+}
+
+/* ----- form grid ----- */
+.eht-form-grid {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.eht-left-form {
+    flex: 1;
+    min-width: 300px;
+}
+
+.eht-profile-section {
+    width: 320px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.section-title {
+    margin-bottom: 20px;
+    color: #222;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-bottom: 3px solid #FA5603;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* ----- form fields grid (4 columns) ----- */
+.eht-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.eht-field.full-width {
+    grid-column: span 4;
+}
+
+.eht-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.eht-field .required {
+    color: #e74c3c;
+}
+
+.eht-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.eht-input:focus {
+    border-color: #FA5603;
+    box-shadow: 0 0 0 4px rgba(250, 86, 3, 0.12);
+    outline: none;
+}
+
+.eht-input.is-invalid {
+    border-color: #e74c3c;
+}
+
+.eht-input.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.12);
+}
+
+.eht-input[type="file"] {
+    padding: 10px;
+}
+
+/* ----- profile photo ----- */
+.eht-profile-img {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 1px solid #FA5603;
+    margin-bottom: 15px;
+    object-fit: cover;
+    margin-top: 10px;
+}
+
+.eht-file-input {
+    margin: 15px auto;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.eht-file-input:hover {
+    border-color: #FA5603;
+    background: #fef8f5;
+}
+
+.eht-help-text {
+    color: #666;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 8px;
+}
+
+/* ----- form footer ----- */
+.eht-form-footer {
+    background: #f8f9fa;
+    padding: 25px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+/* ----- error messages ----- */
+.text-danger {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* ----- table ----- */
+.eht-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.eht-table thead th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    padding: 0.8rem 1rem;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.eht-table tbody td {
+    padding: 0.8rem 1rem;
+    vertical-align: middle;
+}
+
+.eht-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* ----- role badge ----- */
+.eht-role-badge {
+    background: #FA5603;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ----- action buttons ----- */
+.eht-action-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.eht-action-btns .btn {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+}
+
+/* ----- profile image in table ----- */
+.eht-profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ----- empty state ----- */
+.eht-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: #5e7a93;
+}
+
+.eht-empty i {
+    font-size: 2.5rem;
+    color: #dee2e6;
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
+/* ----- Select2 override ----- */
+.eht-select2 .select2-container--default .select2-selection--single {
+    border-radius: 10px !important;
+    border: 2px solid #ddd !important;
+    height: 48px !important;
+    padding: 0.2rem 0.5rem;
+}
+
+.eht-select2 .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 42px !important;
+    color: #333;
+}
+
+.eht-select2 .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 44px !important;
+}
+
+.eht-select2 .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #FA5603 !important;
+    box-shadow: 0 0 0 4px rgba(250, 86, 3, 0.12);
+}
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
+
+/* Large screens (1200px and below) */
+@media (max-width: 1200px) {
+    .eht-fields-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .eht-field.full-width {
+        grid-column: span 2;
+    }
+}
+
+/* Tablets (992px and below) */
+@media (max-width: 992px) {
+    .eht-form-grid {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .eht-profile-section {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    .eht-card-body {
+        padding: 25px 20px;
+    }
+
+    .eht-page-title h1 {
+        font-size: 1.6rem;
+    }
+}
+
+/* Mobile (768px and below) */
+@media (max-width: 768px) {
+    .eht-container {
+        padding: 15px 10px;
+    }
+
+    .eht-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 0.5rem 0;
+    }
+
+    .eht-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem 1rem 0.25rem 1rem;
+    }
+
+    .eht-card-body {
+        padding: 18px 15px;
+    }
+
+    .eht-fields-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .eht-field.full-width {
+        grid-column: span 1;
+    }
+
+    .eht-profile-img {
+        width: 130px;
+        height: 130px;
+    }
+
+    .eht-btn-large {
+        padding: 10px 30px;
+        font-size: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .eht-form-footer {
+        padding: 18px 15px;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+    }
+
+    .eht-badge {
+        font-size: 0.75rem;
+        padding: 4px 14px;
+    }
+
+    .eht-page-title h1 {
+        font-size: 1.4rem;
+    }
+
+    .eht-page-title p {
+        font-size: 0.85rem;
+    }
+
+    .eht-input {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .eht-btn {
+        padding: 6px 16px;
+        font-size: 0.85rem;
+    }
+
+    .eht-table thead th,
+    .eht-table tbody td {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .eht-action-btns .btn {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+}
+
+/* Small phones (576px and below) */
+@media (max-width: 576px) {
+    .eht-container {
+        padding: 10px 8px;
+    }
+
+    .eht-header {
+        padding: 0.5rem 0;
+    }
+
+    .eht-card-header {
+        padding: 0.8rem 0.8rem 0.25rem 0.8rem;
+    }
+
+    .eht-card-body {
+        padding: 15px 12px;
+    }
+
+    .eht-form-grid {
+        gap: 20px;
+    }
+
+    .eht-profile-section {
+        max-width: 100%;
+    }
+
+    .eht-profile-img {
+        width: 110px;
+        height: 110px;
+    }
+
+    .eht-fields-grid {
+        gap: 12px;
+    }
+
+    .eht-field label {
+        font-size: 0.8rem;
+    }
+
+    .eht-input {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    .eht-btn-large {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .eht-page-title h1 {
+        font-size: 1.2rem;
+    }
+
+    .eht-page-title p {
+        font-size: 0.8rem;
+    }
+
+    .eht-btn {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+    }
+
+    .eht-badge {
+        font-size: 0.65rem;
+        padding: 3px 10px;
+    }
+
+    .eht-form-footer {
+        padding: 15px 10px;
+    }
+
+    .eht-file-input {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    .eht-help-text {
+        font-size: 0.75rem;
+    }
+
+    .eht-table thead th,
+    .eht-table tbody td {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.65rem;
+    }
+
+    .eht-action-btns {
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .eht-action-btns .btn {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.4rem;
+    }
+}
+
+/* Extra small (400px and below) */
+@media (max-width: 400px) {
+    .eht-container {
+        padding: 8px 5px;
+    }
+
+    .eht-card-body {
+        padding: 12px 8px;
+    }
+
+    .eht-profile-img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .eht-page-title h1 {
+        font-size: 1rem;
+    }
+
+    .eht-input {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .eht-btn-large {
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ========================================
+   PAGINATION STYLES
+   ======================================== */
+
+.pagination-hover-btn:hover {
+    background-color: #ffebe0 !important;
+    color: #FA5603 !important;
+}
+
+.page-item.active .page-link {
+    background-color: #FA5603 !important;
+    border-color: #FA5603 !important;
+}
+
+.page-item.disabled .page-link {
+    opacity: 0.5;
+}
+
+.page-link {
+    border-radius: 6px !important;
+    width: 34px !important;
+    height: 34px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s !important;
+}
+
+/* ========================================
+   SIDEBAR AUTO-CLOSE (Mobile)
+   ======================================== */
+
+@media (max-width: 768px) {
+    .sidebar.active.show,
+    .eht-sidebar.active.show,
+    #sidebar.active.show,
+    .main-sidebar.active.show {
+        display: none !important;
+    }
+}

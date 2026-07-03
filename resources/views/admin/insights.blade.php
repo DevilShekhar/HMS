@@ -104,9 +104,6 @@
             </div>
         </div>
 
-        <!-- ==========================================
-                            INSIGHTS CONTAINER
-                            ========================================== -->
         <div class="mt-4" id="insightsContainer" style="display:none;">
 
             <!-- Metric Selection Cards -->

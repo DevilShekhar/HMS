@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,21 +25,15 @@
             text-align: center;
         }
 
-        .mb-10 {
-            margin-bottom: 10px;
-        }
-
-        .mb-20 {
-            margin-bottom: 20px;
-        }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
 
         table {
             width: 100%;
             border-collapse: collapse;
         }
 
-        table th,
-        table td {
+        table th, table td {
             padding: 8px 4px;
         }
 
@@ -65,6 +58,11 @@
             font-weight: bold;
             border-top: 1px solid #000;
             border-bottom: 1px solid #000;
+        }
+
+        .gst-row {
+            font-size: 14px;
+            color: #444;
         }
 
         .footer {
@@ -99,24 +97,20 @@
         }
 
         @media print {
-
             body {
                 background: #fff;
                 padding: 0;
             }
-
             .bill-container {
                 width: 100%;
                 border: none;
                 box-shadow: none;
             }
-
             .actions {
                 display: none;
             }
         }
     </style>
-
 </head>
 
 <body>
@@ -125,52 +119,26 @@
 
         <div class="text-center mb-20">
             <h2>{{ $order->branch?->restaurant?->name ?? $order->restaurant?->name }}</h2>
-
             <div>{{ $order->branch?->name }}</div>
+            <small>{{ $order->branch?->address }}</small>
 
-            <small>
-                {{ $order->branch?->address }}
-            </small>
+            @if($order->branch?->gst_number)
+                <div class="mt-2">
+                    <strong>GST No:</strong> {{ $order->branch->gst_number }}
+                </div>
+            @endif
         </div>
 
         <table class="mb-20">
-
-            <tr>
-                <td><strong>Bill No</strong></td>
-                <td class="right">{{ $order->bill_no }}</td>
-            </tr>
-
-            <tr>
-                <td><strong>Token</strong></td>
-                <td class="right">{{ $order->token_no }}</td>
-            </tr>
-
-            <tr>
-                <td><strong>Date</strong></td>
-                <td class="right">
-                    {{ $order->bill_generated_at?->format('d M Y h:i A') }}
-                </td>
-            </tr>
-
-            <tr>
-                <td><strong>Customer</strong></td>
-                <td class="right">{{ $order->customer_name }}</td>
-            </tr>
-
-            <tr>
-                <td><strong>Mobile</strong></td>
-                <td class="right">{{ $order->mobile_number }}</td>
-            </tr>
-
-            <tr>
-                <td><strong>Table</strong></td>
-                <td class="right">{{ $order->table_no }}</td>
-            </tr>
-
+            <tr><td><strong>Bill No</strong></td><td class="right">{{ $order->bill_no }}</td></tr>
+            <tr><td><strong>Token</strong></td><td class="right">{{ $order->token_no }}</td></tr>
+            <tr><td><strong>Date</strong></td><td class="right">{{ $order->bill_generated_at?->format('d M Y h:i A') }}</td></tr>
+            <tr><td><strong>Customer</strong></td><td class="right">{{ $order->customer_name }}</td></tr>
+            <tr><td><strong>Mobile</strong></td><td class="right">{{ $order->mobile_number }}</td></tr>
+            <tr><td><strong>Table</strong></td><td class="right">{{ $order->table_no }}</td></tr>
         </table>
 
         <table>
-
             <thead>
                 <tr>
                     <th align="left">Item</th>
@@ -179,99 +147,68 @@
                     <th class="right">Amount</th>
                 </tr>
             </thead>
-
             <tbody>
-
                 @foreach($order->items as $item)
-
                     <tr>
-
-                        <td>
-                            {{ $item->menuItem->name }}
-                        </td>
-
-                        <td class="right">
-                            {{ $item->quantity }}
-                        </td>
-
-                        <td class="right">
-                            ₹{{ number_format($item->price,2) }}
-                        </td>
-
-                        <td class="right">
-                            ₹{{ number_format($item->subtotal,2) }}
-                        </td>
-
+                        <td>{{ $item->menuItem->name }}</td>
+                        <td class="right">{{ $item->quantity }}</td>
+                        <td class="right">₹{{ number_format($item->price, 2) }}</td>
+                        <td class="right">₹{{ number_format($item->subtotal, 2) }}</td>
                     </tr>
-
                 @endforeach
-
             </tbody>
-
         </table>
 
         <br>
 
         <table class="summary">
-
             <tr>
-
                 <td>Subtotal</td>
-
-                <td class="right">
-                    ₹{{ number_format($order->subtotal,2) }}
-                </td>
-
+                <td class="right">₹{{ number_format($order->subtotal, 2) }}</td>
             </tr>
 
-            <tr>
+            @php
+                $gstAmount = 0;
+                $cgst = 0;
+                $sgst = 0;
 
-                <td>Tax</td>
+                if($order->branch?->gst_enabled && $order->branch?->gst > 0) {
+                    $gstAmount = ($order->subtotal * $order->branch->gst) / 100;
+                    $cgst = $gstAmount / 2;
+                    $sgst = $gstAmount / 2;
+                }
+            @endphp
 
-                <td class="right">
-                    ₹{{ number_format($order->tax,2) }}
-                </td>
-
-            </tr>
+            @if($gstAmount > 0)
+                <tr class="gst-row">
+                    <td>CGST ({{ number_format($order->branch->gst / 2, 2) }}%)</td>
+                    <td class="right">₹{{ number_format($cgst, 2) }}</td>
+                </tr>
+                <tr class="gst-row">
+                    <td>SGST ({{ number_format($order->branch->gst / 2, 2) }}%)</td>
+                    <td class="right">₹{{ number_format($sgst, 2) }}</td>
+                </tr>
+            @endif
 
             <tr class="total">
-
-                <td>Total</td>
-
+                <td><strong>Total (Incl. GST)</strong></td>
                 <td class="right">
-                    ₹{{ number_format($order->total,2) }}
+                    <strong>₹{{ number_format($order->subtotal + $gstAmount, 2) }}</strong>
                 </td>
-
             </tr>
-
         </table>
 
         <div class="footer">
-
-            <p>
-                Thank You For Visiting!
-            </p>
-
-            <small>
-                Please Visit Again.
-            </small>
-
+            <p>Thank You For Visiting!</p>
+            <small>Please Visit Again.</small>
         </div>
 
         <div class="actions">
-
-            <button onclick="window.print()" class="btn-print">
-                Print Bill
-            </button>
-
-            <a href="{{ url()->previous() }}" class="btn-back">
-                Back
-            </a>
-
+            <button onclick="window.print()" class="btn-print">Print Bill</button>
+            <a href="{{ url()->previous() }}" class="btn-back">Back</a>
         </div>
 
     </div>
 
 </body>
-
 </html>
