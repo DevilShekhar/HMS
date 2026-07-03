@@ -60,7 +60,7 @@
                         @if (auth()->user()->hasRole('owner'))
                             <div class="col-md-6 mb-4">
                                 <label>Branch</label>
-                                <select name="branch_id" class="form-control premium-input">
+                                <select name="branch_id" class="form-control premium-input" required>
                                     <option value=""> Select Branch</option>
                                     @foreach ($branches as $branch)
                                         <option value="{{ $branch->id }}"
@@ -86,7 +86,7 @@
                         <div class="col-md-6 mb-4">
                             <label>Item Name</label>
                             <input type="text" name="name" value="{{ old('name') }}"
-                                class="form-control premium-input" placeholder="Oil, Rice, Atta, Tomato">
+                                class="form-control premium-input" placeholder="Oil, Rice, Atta, Tomato" required>
                             @error('name')
                                 <small class="text-danger">
                                     {{ $message }}
@@ -95,7 +95,7 @@
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Unit</label>
-                            <select name="unit" class="form-control premium-input">
+                            <select name="unit" class="form-control premium-input" required>
                                 <option value="">Select Unit</option>
                                 <option value="kg">Kg</option>
                                 <option value="gram">Gram</option>
@@ -113,7 +113,7 @@
                         <div class="col-md-6 mb-4">
                             <label>Total Stock</label>
                             <input type="number" step="0.01" name="total_stock" value="{{ old('total_stock') }}"
-                                class="form-control premium-input">
+                                class="form-control premium-input" required>
                             @error('total_stock')
                                 <small class="text-danger">
                                     {{ $message }}
@@ -123,7 +123,7 @@
                         <div class="col-md-6 mb-4">
                             <label>Minimum Stock</label>
                             <input type="number" step="0.01" name="minimum_stock" value="{{ old('minimum_stock') }}"
-                                class="form-control premium-input">
+                                class="form-control premium-input" required>
                             @error('minimum_stock')
                                 <small class="text-danger">
                                     {{ $message }}

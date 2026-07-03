@@ -96,27 +96,44 @@ class BranchController extends Controller
             'restaurant_id' => 'required|exists:restaurants,id',
             'owner_id' => 'required|exists:users,id',
             'name' => 'required|max:255',
-            'code' => 'nullable|max:50',
-            'phone' => 'nullable|max:20',
-            'email' => 'nullable|email',
-            'address' => 'nullable',
-            'city' => 'nullable|max:100',
-            'state' => 'nullable|max:100',
+            'code' => 'required|max:50',
+            'phone' => 'required|max:20',
+            'email' => 'required|email',
+            'address' => 'required',
+            'city' => 'required|max:100',
+            'state' => 'required|max:100',
             'country' => 'nullable|max:100',
             'postal_code' => 'nullable|max:20',
             'latitude' => 'nullable',
             'longitude' => 'nullable',
-            'gst_number' => 'nullable|max:100',
-            'fssai_license' => 'nullable|max:100',
-            'opening_time' => 'nullable',
-            'closing_time' => 'nullable',
+            'gst_number' => 'required|max:100',
+            'fssai_license' => 'required|max:100',
+            'opening_time' => 'required',
+            'closing_time' => 'required',
             'branch_manager_id' => 'nullable|exists:users,id',
             'subscription_plan_id' => 'required|exists:subscription_plans,id',
             'billing_cycle' => 'required|in:monthly,quarterly,half_yearly,yearly',
+            'gst_enabled' => 'nullable|boolean',
+            'gst' => 'nullable|numeric|min:0|max:100',
         ]);
 
         $validated['is_active'] = 1;
         $validated['slug'] = Str::slug($validated['name']);
+        $validated['gst_enabled'] = $request->boolean('gst_enabled');
+
+        if ($validated['gst_enabled']) {
+
+            $validated['gst'] = (float) $request->gst;
+            $validated['cgst'] = $validated['gst'] / 2;
+            $validated['sgst'] = $validated['gst'] / 2;
+
+        } else {
+
+            $validated['gst'] = 0;
+            $validated['cgst'] = 0;
+            $validated['sgst'] = 0;
+
+        }
         $branch = Branch::create($validated);
 
         $registrationUrl = config('app.url').'/'.
@@ -511,4 +528,46 @@ class BranchController extends Controller
 
         return 'QR regenerated: '.$url;
     }
+
+public function updateGst(Request $request, Restaurant $restaurant, Branch $branch)
+{
+    // Better permission check
+    $user = Auth::user();
+
+    if ($user->role === 'super_admin') {
+    } elseif ($user->role === 'owner' && $user->restaurant_id === $restaurant->id) {
+    } elseif ($user->role === 'branch_manager' && $user->branch_id === $branch->id) {
+    } else {
+        abort(403, 'You do not have permission to update GST details.');
+    }
+
+    $validated = $request->validate([
+        'gst_enabled' => 'boolean|nullable',
+        'gst_number' => 'nullable|string|max:255',
+        'gst' => 'nullable|numeric|min:0|max:100',
+    ]);
+
+    // If GST is enabled, GST % is required
+    if ($request->boolean('gst_enabled') && empty($validated['gst'])) {
+        return back()->withErrors(['gst' => 'GST percentage is required when GST is enabled.']);
+    }
+
+    $branch->update([
+        'gst_enabled' => $request->boolean('gst_enabled'),
+        'gst_number' => $validated['gst_number'] ?? null,
+        'gst' => $validated['gst'] ?? null,
+        'cgst' => $request->boolean('gst_enabled') && $validated['gst']
+                        ? round($validated['gst'] / 2, 2)
+                        : null,
+        'sgst' => $request->boolean('gst_enabled') && $validated['gst']
+                        ? round($validated['gst'] / 2, 2)
+                        : null,
+    ]);
+
+    return redirect()
+        ->route('restaurant.branches.index', [
+            'restaurant' => $restaurant->slug,
+        ])
+        ->with('success', 'GST details updated successfully for branch: '.$branch->name);
+}
 }

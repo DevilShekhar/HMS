@@ -17,6 +17,7 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RestaurantTableController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubscriptionPlanController;
+use App\Http\Controllers\TableAllocationController;
 use App\Http\Controllers\TableCategoryController;
 use App\Http\Controllers\UserController;
 use App\Models\Branch;
@@ -29,6 +30,20 @@ Route::get('/login', function () {
 });
 
 Auth::routes();
+// Route::get('/dashboard/branches/{restaurant}', [DashboardController::class, 'getDashboardBranches'])
+//      ->name('dashboard.branches');
+
+Route::get('/dashboard/branches/{restaurantId}', function ($restaurantId) {
+
+    return Branch::query()->where('restaurant_id', $restaurantId)
+        ->orderBy('name')
+        ->get(['id', 'name']);
+
+})->name('dashboard.branches');
+
+Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
+    ->name('dashboard.data');
+
 Route::get('{restaurant}/{branch}/register', [RegisterController::class, 'showBranchRegister'])
     ->name('branch.register');
 
@@ -54,6 +69,7 @@ Route::get('/insights/restaurants/{restaurant}/branches', [DashboardController::
 Route::get('/insights/restaurants/{restaurant}/data', [DashboardController::class, 'getInsights'])->name('admin.insights.data');
 Route::get('/insights/pdf', [DashboardController::class, 'insightsPdf'])
     ->name('admin.insights.pdf');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
@@ -197,11 +213,17 @@ Route::prefix('{restaurant}')
             'update' => 'restaurant.recipe.update',
             'destroy' => 'restaurant.recipe.destroy',
         ]);
+        Route::put('branches/{branch}/gst', [BranchController::class, 'updateGst'])
+            ->name('restaurant.branches.update-gst');
+        Route::resource('table-allocations', TableAllocationController::class)
+            ->names('restaurant.table-allocations');
 
         Route::get(
             '/registered-customers',
             [CustomerOfferController::class, 'registeredCustomers']
         )->name('restaurant.registered-customers.index');
+
+        Route::get('/orders/{order}/bill', [OrderController::class, 'generateBill'])->name('restaurant.orders.bill');
 
         Route::get('orders/tables/{categoryId}', [OrderController::class, 'getTablesByCategory'])->name('restaurant.orders.tables');
         Route::get('/login', [LoginController::class, 'showRestaurantLogin'])
@@ -253,6 +275,9 @@ Route::prefix('{restaurant}')
                     [CustomerOfferController::class, 'registeredCustomers']
                 )->name('branch.registered-customers.index');
 
+                Route::get('/orders/{order}/bill', [OrderController::class, 'generateBill'])->name('branch.orders.bill');
+                Route::resource('table-allocations', TableAllocationController::class)
+                    ->names('branch.table-allocations');
                 Route::resource('categories', CategoryController::class)->names([
                     'index' => 'branch.categories.index',
                     'create' => 'branch.categories.create',

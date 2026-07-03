@@ -42,199 +42,201 @@
         @endif
 
         @if ($branchSlug)
-            <form
-                action="{{ route('branch.recipe.store', [
+            <form action="{{ route('branch.recipe.store', [
+                'restaurant' => $restaurantSlug,
+                'branch' => $branchSlug,
+            ]) }}" method="POST">
+        @else
+                    <form action="{{ route('restaurant.recipe.store', [
                     'restaurant' => $restaurantSlug,
-                    'branch' => $branchSlug,
-                ]) }}"
-                method="POST">
-            @else
-                <form action="{{ route('restaurant.recipe.store', [
-                    'restaurant' => $restaurantSlug,
-                ]) }}"
-                    method="POST">
-        @endif
+                ]) }}" method="POST">
+            @endif
 
-        @csrf
+                @csrf
 
-        <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
+                <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
 
-        <div class="card premium-block">
+                <div class="card premium-block">
 
-            <div class="card-header premium-card-header">
+                    <div class="card-header premium-card-header">
 
-                <div>
+                        <div>
 
-                    <h4>
-                        Recipe Information
-                    </h4>
+                            <h4>
+                                Recipe Information
+                            </h4>
 
-                    <p class="header-subtext">
-                        Configure ingredients required for preparing menu items.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                <div class="row">
-
-                    {{-- Restaurant --}}
-                    <div class="col-md-6 mb-4">
-
-                        <label>
-                            Restaurant
-                        </label>
-
-                        <input type="text" class="form-control premium-input" value="{{ $restaurant->name }}" readonly>
-
-                    </div>
-
-                    {{-- Branch --}}
-                    <div class="col-md-6 mb-4">
-
-                        <label>
-                            Branch
-                        </label>
-
-                        <select name="branch_id" class="form-control premium-input">
-
-                            <option value="">
-                                Select Branch
-                            </option>
-
-                            @foreach ($branches as $branch)
-                                <option value="{{ $branch->id }}">
-                                    {{ $branch->name }}
-                                </option>
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-                    {{-- Menu Item --}}
-                    <div class="col-md-12 mb-4">
-
-                        <label>
-                            Menu Item
-                        </label>
-
-                        <select name="menu_item_id" class="form-control premium-input">
-
-                            <option value="">
-                                Select Menu Item
-                            </option>
-
-                            @foreach ($menuItems as $item)
-                                <option value="{{ $item->id }}">
-                                    {{ $item->name }}
-                                </option>
-                            @endforeach
-
-                        </select>
-
-                    </div>
-
-                    {{-- Ingredients Section --}}
-                    <div class="col-md-12">
-
-                        <hr>
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-
-                            <h5 class="mb-0">
-                                Recipe Ingredients
-                            </h5>
-
-                            <button type="button" id="addIngredient" class="btn btn-success btn-sm">
-
-                                <i class="fas fa-plus"></i>
-                                Add Ingredient
-
-                            </button>
+                            <p class="header-subtext">
+                                Configure ingredients required for preparing menu items.
+                            </p>
 
                         </div>
 
-                        <div id="recipeRows">
+                    </div>
 
-                            {{-- First Ingredient Row --}}
-                            <div class="recipe-row border rounded p-3 mb-3">
+                    <div class="card-body">
 
-                                <div class="row">
+                        <div class="row">
 
-                                    <div class="col-md-4">
+                            {{-- Restaurant --}}
+                            <div class="col-md-6 mb-4">
 
-                                        <label>
-                                            Inventory Item
-                                        </label>
+                                <label>
+                                    Restaurant
+                                </label>
 
-                                        <select name="inventory_id[]" class="form-control premium-input">
+                                <input type="text" class="form-control premium-input" value="{{ $restaurant->name }}"
+                                    readonly>
 
-                                            <option value="">
-                                                Select Ingredient
-                                            </option>
+                            </div>
 
-                                            @foreach ($inventoryItems as $inventory)
-                                                <option value="{{ $inventory->id }}">
-                                                    {{ $inventory->name }}
-                                                    ({{ $inventory->unit }})
-                                                </option>
-                                            @endforeach
+                            {{-- Branch --}}
+                            <div class="col-md-6 mb-4">
 
-                                        </select>
+                                <label>
+                                    Branch
+                                </label>
 
-                                    </div>
+                                <select name="branch_id" class="form-control premium-input" required>
 
-                                    <div class="col-md-2">
+                                    <option value="">
+                                        Select Branch
+                                    </option>
 
-                                        <label>
-                                            Quantity
-                                        </label>
+                                    @foreach ($branches as $branch)
+                                        <option value="{{ $branch->id }}">
+                                            {{ $branch->name }}
+                                        </option>
+                                    @endforeach
 
-                                        <input type="number" step="0.001" name="quantity_required[]"
-                                            class="form-control premium-input" placeholder="30">
+                                </select>
 
-                                    </div>
+                            </div>
 
-                                    <div class="col-md-2">
+                            {{-- Menu Item --}}
+                            <div class="col-md-12 mb-4">
 
-                                        <label>
-                                            Unit
-                                        </label>
+                                <label>
+                                    Menu Item
+                                </label>
 
-                                        <select name="recipe_unit[]" class="form-control premium-input">
+                                <select name="menu_item_id" class="form-control premium-input" required>
 
-                                            <option value="Gram">Gram</option>
-                                            <option value="Kg">Kg</option>
-                                            <option value="ML">ML</option>
-                                            <option value="Litre">Litre</option>
-                                            <option value="Piece">Piece</option>
+                                    <option value="">
+                                        Select Menu Item
+                                    </option>
 
-                                        </select>
+                                    @foreach ($menuItems as $item)
+                                        <option value="{{ $item->id }}">
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
 
-                                    </div>
+                                </select>
 
-                                    <div class="col-md-3">
+                            </div>
 
-                                        <label>
-                                            Remarks
-                                        </label>
+                            {{-- Ingredients Section --}}
+                            <div class="col-md-12">
 
-                                        <input type="text" name="remarks[]" class="form-control premium-input"
-                                            placeholder="Optional">
+                                <hr>
 
-                                    </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
 
-                                    <div class="col-md-1 d-flex align-items-end">
+                                    <h5 class="mb-0">
+                                        Recipe Ingredients
+                                    </h5>
 
-                                        <button type="button" class="btn btn-danger removeRow">
+                                    <button type="button" id="addIngredient" class="btn btn-success btn-sm">
 
-                                            <i class="fas fa-trash"></i>
+                                        <i class="fas fa-plus"></i>
+                                        Add Ingredient
 
-                                        </button>
+                                    </button>
+
+                                </div>
+
+                                <div id="recipeRows">
+
+                                    {{-- First Ingredient Row --}}
+                                    <div class="recipe-row border rounded p-3 mb-3">
+
+                                        <div class="row">
+
+                                            <div class="col-md-4">
+
+                                                <label>
+                                                    Inventory Item
+                                                </label>
+
+                                                <select name="inventory_id[]" class="form-control premium-input" required>
+
+                                                    <option value="">
+                                                        Select Ingredient
+                                                    </option>
+
+                                                    @foreach ($inventoryItems as $inventory)
+                                                        <option value="{{ $inventory->id }}">
+                                                            {{ $inventory->name }}
+                                                            ({{ $inventory->unit }})
+                                                        </option>
+                                                    @endforeach
+
+                                                </select>
+
+                                            </div>
+
+                                            <div class="col-md-2">
+
+                                                <label>
+                                                    Quantity
+                                                </label>
+
+                                                <input type="number" step="0.001" name="quantity_required[]"
+                                                    class="form-control premium-input" placeholder="30" required>
+
+                                            </div>
+
+                                            <div class="col-md-2">
+
+                                                <label>
+                                                    Unit
+                                                </label>
+
+                                                <select name="recipe_unit[]" class="form-control premium-input" required>
+
+                                                    <option value="Gram">Gram</option>
+                                                    <option value="Kg">Kg</option>
+                                                    <option value="ML">ML</option>
+                                                    <option value="Litre">Litre</option>
+                                                    <option value="Piece">Piece</option>
+
+                                                </select>
+
+                                            </div>
+
+                                            <div class="col-md-3">
+
+                                                <label>
+                                                    Remarks
+                                                </label>
+
+                                                <input type="text" name="remarks[]" class="form-control premium-input"
+                                                    placeholder="Optional">
+
+                                            </div>
+
+                                            <div class="col-md-1 d-flex align-items-end">
+
+                                                <button type="button" class="btn btn-danger removeRow">
+
+                                                    <i class="fas fa-trash"></i>
+
+                                                </button>
+
+                                            </div>
+
+                                        </div>
 
                                     </div>
 
@@ -248,29 +250,25 @@
 
                 </div>
 
-            </div>
+                <div class="mt-4">
 
-        </div>
+                    <button type="submit" class="btn btn-primary">
 
-        <div class="mt-4">
+                        Save Recipe
 
-            <button type="submit" class="btn btn-primary">
+                    </button>
 
-                Save Recipe
+                </div>
 
-            </button>
-
-        </div>
-
-        </form>
+            </form>
 
     </section>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('addIngredient')
-                .addEventListener('click', function() {
+                .addEventListener('click', function () {
 
                     let firstRow =
                         document.querySelector('.recipe-row');
@@ -294,7 +292,7 @@
 
                 });
 
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
 
                 if (e.target.closest('.removeRow')) {
 

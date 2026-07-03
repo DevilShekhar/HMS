@@ -27,7 +27,10 @@ class Branch extends Model
         'opening_time',
         'closing_time',
         'is_active',
-        'slug','registration_qrcode'
+        'slug', 'registration_qrcode', 'gst_enabled',
+        'gst',
+        'cgst',
+        'sgst',
     ];
 
     public function restaurant()
@@ -64,6 +67,6 @@ class Branch extends Model
     {
         return $this->hasOne(BranchSubscription::class)
             ->where('status', 'active');
-            // ->latestOfMany();
+        // ->latestOfMany();
     }
 }

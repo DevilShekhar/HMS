@@ -36,72 +36,72 @@
                     @endphp
 
                     <div class="order-stepper mt-4">
-    <div class="d-flex justify-content-between align-items-center position-relative">
+                        <div class="d-flex justify-content-between align-items-center position-relative">
 
-        <!-- Step 1 -->
-        <div class="step text-center flex-fill
-            {{ $currentStep > 1 ? 'completed' : '' }}
-            {{ $currentStep == 1 ? 'active' : '' }}">
-            <div class="step-icon mx-auto mb-2">
-                @if($currentStep > 1)
-                    <i class="fas fa-check"></i>
-                @else
-                    <i class="fas fa-shopping-cart"></i>
-                @endif
-            </div>
-            <div class="step-number">1</div>
-            <div class="step-label">Order Placed</div>
-        </div>
+                            <!-- Step 1 -->
+                            <div class="step text-center flex-fill
+                        {{ $currentStep > 1 ? 'completed' : '' }}
+                        {{ $currentStep == 1 ? 'active' : '' }}">
+                                <div class="step-icon mx-auto mb-2">
+                                    @if($currentStep > 1)
+                                        <i class="fas fa-check"></i>
+                                    @else
+                                        <i class="fas fa-shopping-cart"></i>
+                                    @endif
+                                </div>
+                                <div class="step-number">1</div>
+                                <div class="step-label">Order Placed</div>
+                            </div>
 
-        <div class="step-connector {{ $currentStep >= 2 ? 'active' : '' }}"></div>
+                            <div class="step-connector {{ $currentStep >= 2 ? 'active' : '' }}"></div>
 
-        <!-- Step 2 -->
-        <div class="step text-center flex-fill
-            {{ $currentStep > 2 ? 'completed' : '' }}
-            {{ $currentStep == 2 ? 'active' : '' }}">
-            <div class="step-icon mx-auto mb-2">
-                @if($currentStep > 2)
-                    <i class="fas fa-check"></i>
-                @else
-                    <i class="fas fa-utensils"></i>
-                @endif
-            </div>
-            <div class="step-number">2</div>
-            <div class="step-label">Prepared</div>
-        </div>
+                            <!-- Step 2 -->
+                            <div class="step text-center flex-fill
+                        {{ $currentStep > 2 ? 'completed' : '' }}
+                        {{ $currentStep == 2 ? 'active' : '' }}">
+                                <div class="step-icon mx-auto mb-2">
+                                    @if($currentStep > 2)
+                                        <i class="fas fa-check"></i>
+                                    @else
+                                        <i class="fas fa-utensils"></i>
+                                    @endif
+                                </div>
+                                <div class="step-number">2</div>
+                                <div class="step-label">Prepared</div>
+                            </div>
 
-        <div class="step-connector {{ $currentStep >= 3 ? 'active' : '' }}"></div>
+                            <div class="step-connector {{ $currentStep >= 3 ? 'active' : '' }}"></div>
 
-        <!-- Step 3 -->
-        <div class="step text-center flex-fill
-            {{ $currentStep > 3 ? 'completed' : '' }}
-            {{ $currentStep == 3 ? 'active' : '' }}">
-            <div class="step-icon mx-auto mb-2">
-                @if($currentStep > 3)
-                    <i class="fas fa-check"></i>
-                @else
-                    <i class="fas fa-motorcycle"></i>
-                @endif
-            </div>
-            <div class="step-number">3</div>
-            <div class="step-label">Delivered</div>
-        </div>
+                            <!-- Step 3 -->
+                            <div class="step text-center flex-fill
+                        {{ $currentStep > 3 ? 'completed' : '' }}
+                        {{ $currentStep == 3 ? 'active' : '' }}">
+                                <div class="step-icon mx-auto mb-2">
+                                    @if($currentStep > 3)
+                                        <i class="fas fa-check"></i>
+                                    @else
+                                        <i class="fas fa-motorcycle"></i>
+                                    @endif
+                                </div>
+                                <div class="step-number">3</div>
+                                <div class="step-label">Delivered</div>
+                            </div>
 
-        <div class="step-connector {{ $currentStep >= 4 ? 'active' : '' }}"></div>
+                            <div class="step-connector {{ $currentStep >= 4 ? 'active' : '' }}"></div>
 
-        <!-- Step 4 -->
-        <div class="step text-center flex-fill
-            {{ $currentStep >= 4 ? 'completed' : '' }}
-            {{ $currentStep == 4 ? 'active' : '' }}">
-            <div class="step-icon mx-auto mb-2">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="step-number">4</div>
-            <div class="step-label">Completed</div>
-        </div>
+                            <!-- Step 4 -->
+                            <div class="step text-center flex-fill
+                        {{ $currentStep >= 4 ? 'completed' : '' }}
+                        {{ $currentStep == 4 ? 'active' : '' }}">
+                                <div class="step-icon mx-auto mb-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="step-number">4</div>
+                                <div class="step-label">Completed</div>
+                            </div>
 
-    </div>
-</div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Order Info -->
                 <div class="row mb-2">
@@ -216,7 +216,8 @@
                         @if ($order->status == 'pending' && auth()->user()->role == 'chef')
                             <form method="POST"
                                 action="{{ route('restaurant.orders.prepare', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
-                                onsubmit="return confirm('Mark this order as Prepared?')">
+                                class="swal-confirm" data-title="Mark this order as Prepared?"
+                                data-text="Are you sure you want to mark this order as prepared?">
                                 @csrf
                                 <button type="submit" class="btn btn-success btn-sm">
                                     <i class="fas fa-check"></i> Mark Prepared
@@ -227,7 +228,8 @@
                         @if ($order->status == 'prepared' && in_array(auth()->user()->role, ['waiter', 'waiter_head']))
                             <form method="POST"
                                 action="{{ route('restaurant.orders.delivered', ['restaurant' => $restaurant->slug, 'order' => $order->id]) }}"
-                                onsubmit="return confirm('Mark this order as Delivered?')">
+                                class="swal-confirm" data-title="Mark this order as Delivered?"
+                                data-text="Are you sure you want to mark this order as delivered?">
                                 @csrf
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="fas fa-truck"></i> Mark Delivered
@@ -251,7 +253,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
 
         const notificationSound = document.getElementById('notificationSound');
         let isProcessing = false;
@@ -260,7 +262,7 @@
             notificationSound.play().then(() => {
                 notificationSound.pause();
                 notificationSound.currentTime = 0;
-            }).catch(() => {});
+            }).catch(() => { });
             document.removeEventListener('click', unlockAudio);
         }, {
             once: true
@@ -282,7 +284,7 @@
                 const d = notif.data;
 
                 notificationSound.currentTime = 0;
-                notificationSound.play().catch(() => {});
+                notificationSound.play().catch(() => { });
 
                 Swal.fire({
                     icon: 'success',
@@ -320,6 +322,31 @@
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': token
+                }
+            });
+        }
+    });
+    document.addEventListener('submit', function (e) {
+
+        const form = e.target;
+
+        if (form.classList.contains('swal-confirm')) {
+            e.preventDefault();
+
+            let title = form.dataset.title || 'Are you sure?';
+            let text = form.dataset.text || '';
+
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Confirm'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
                 }
             });
         }

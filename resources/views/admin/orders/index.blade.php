@@ -178,16 +178,22 @@
 
                                                 {{ strtoupper($order->payment_method) }}
 
-                                                @if($order->payment_status == 'pending')
+                                                @if($order->payment_method == 'upi')
 
-                                                    <span class="badge bg-warning">
-                                                        Pending Verification
-                                                    </span>
+                                                    @if($order->payment_status == 'pending')
+                                                        <span class="badge bg-warning">
+                                                            Pending Verification
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-success">
+                                                            Verified
+                                                        </span>
+                                                    @endif
 
-                                                @else
+                                                @elseif(in_array($order->payment_method, ['cash', 'card']))
 
                                                     <span class="badge bg-success">
-                                                        Verified
+                                                        Paid
                                                     </span>
 
                                                 @endif
@@ -201,99 +207,164 @@
                                             <td>{{ $order->chef?->name ?? 'Not Assigned' }}</td>
                                         @endif
                                         <td>
-                                            <div class="d-flex gap-2">
+                                            @php
+                                                if (!empty($restaurantSlug) && !empty($branchSlug)) {
+                                                    $billRoute = route('branch.orders.bill', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'branch' => $branchSlug,
+                                                        'order' => $order->id,
+                                                    ]);
+                                                } elseif (!empty($restaurantSlug)) {
+                                                    $billRoute = route('restaurant.orders.bill', [
+                                                        'restaurant' => $restaurantSlug,
+                                                        'order' => $order->id,
+                                                    ]);
+                                                } else {
+                                                    $billRoute = route('orders.bill', [
+                                                        'order' => $order->id,
+                                                    ]);
+                                                }
+                                                $canEdit = $order->created_at->gt(now()->subSeconds(10));
+                                            @endphp
+                                            <div class="dropdown">
 
-                                                {{-- View Button - Always visible --}}
-                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                    <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @elseif(!empty($restaurantSlug))
-                                                    <a href="{{ route('restaurant.orders.show', ['restaurant' => $restaurantSlug, 'order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('orders.show', ['order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @endif
+                                                <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
 
-                                                @can('edit-order')
-                                                    @if ($order->status === 'pending')
-                                                        @php
-                                                            $canEdit = true;
-                                                            $createdAt = \Carbon\Carbon::parse($order->created_at);
-                                                            $timeDiff = $createdAt->diffInSeconds(now());
+                                                <ul class="dropdown-menu dropdown-menu-end">
 
-                                                            if ($timeDiff > 10) {
-                                                                $canEdit = false;
-                                                            }
-                                                        @endphp
-
-                                                        @if ($canEdit)
-                                                            @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                                            <a href="{{ route('branch.orders.edit', [
-                                                                    'restaurant' => $restaurantSlug,
-                                                                    'branch' => $branchSlug,
-                                                                    'order' => $order->id,
-                                                                ]) }}" class="btn btn-warning btn-sm">
-                                                                                <i class="fas fa-edit"></i>
-                                                                            </a>
-                                                            @elseif(!empty($restaurantSlug))
-                                                                            <a href="{{ route('restaurant.orders.edit', [
-                                                                    'restaurant' => $restaurantSlug,
-                                                                    'order' => $order->id,
-                                                                ]) }}" class="btn btn-warning btn-sm">
-                                                                                <i class="fas fa-edit"></i>
-                                                                            </a>
-                                                            @else
-                                                                <a href="{{ route('orders.edit', ['order' => $order->id]) }}"
-                                                                    class="btn btn-warning btn-sm">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
-                                                            @endif
+                                                    {{-- View --}}
+                                                    <li>
+                                                        @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                                                            <a class="dropdown-item" href="{{ route('branch.orders.show', [
+                                                                'restaurant' => $restaurantSlug,
+                                                                'branch' => $branchSlug,
+                                                                'order' => $order->id,
+                                                            ]) }}">
+                                                                                                <i class="fas fa-eye me-2 text-info"></i>
+                                                                                                View
+                                                                                            </a>
+                                                        @elseif(!empty($restaurantSlug))
+                                                                                            <a class="dropdown-item" href="{{ route('restaurant.orders.show', [
+                                                                'restaurant' => $restaurantSlug,
+                                                                'order' => $order->id,
+                                                            ]) }}">
+                                                                                                <i class="fas fa-eye me-2 text-info"></i>
+                                                                                                View
+                                                                                            </a>
                                                         @else
-                                                            <button class="btn btn-secondary btn-sm" disabled title="Editing time expired">
-                                                                <i class="fas fa-edit"></i> Expired
-                                                            </button>
+                                                            <a class="dropdown-item" href="{{ route('orders.show', $order->id) }}">
+                                                                <i class="fas fa-eye me-2 text-info"></i>
+                                                                View
+                                                            </a>
                                                         @endif
+                                                    </li>
+
+                                                    {{-- Edit --}}
+                                                    @can('edit-order')
+
+                                                        @if ($order->status == 'pending')
+
+                                                            @php
+                                                                $canEdit = $order->created_at->gt(now()->subSeconds(10));
+                                                            @endphp
+
+                                                            @if($canEdit)
+                                                                <li>
+                                                                    <a class="dropdown-item"
+                                                                        href="{{ !empty($restaurantSlug) && !empty($branchSlug)
+                                                                            ? route('branch.orders.edit', [
+                                                                                'restaurant' => $restaurantSlug,
+                                                                                'branch' => $branchSlug,
+                                                                                'order' => $order->id,
+                                                                            ])
+                                                                            : route('restaurant.orders.edit', [
+                                                                                'restaurant' => $restaurantSlug,
+                                                                                'order' => $order->id,
+                                                                            ]) }}">
+
+                                                                        <i class="fas fa-edit me-2 text-warning"></i>
+                                                                        Edit
+                                                                    </a>
+                                                                </li>
+
+                                                            @else
+                                                                <li>
+                                                                    <button class="dropdown-item text-muted" disabled>
+                                                                        <i class="fas fa-lock me-2"></i>
+                                                                        Edit Expired
+                                                                    </button>
+                                                                </li>
+                                                            @endif
+                                                        @endif
+                                                    @endcan
+
+                                                    {{-- Generate/View Bill --}}
+                                                    @if($order->status == 'delivered')
+
+                                                    @can('view-bill')
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ $billRoute }}">
+                                                                @if(!$order->bill_generated_at)
+                                                                    <i class="fas fa-file-invoice me-2 text-warning"></i>
+                                                                    Generate Bill
+                                                                @else
+                                                                    <i class="fas fa-receipt me-2 text-warning"></i>
+                                                                    View Bill
+                                                                @endif
+                                                            </a>
+                                                        </li>
+                                                    @endcan
                                                     @endif
-                                                @endcan
 
-                                                {{-- Payment Button --}}
-                                                @can('make-payment')
-                                                    @if ($order->status == 'delivered')
-                                                        <button type="button" class="btn btn-success btn-sm paymentBtn"
-                                                            data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                                            data-order="{{ $order->id }}"
-                                                            data-qr="{{ asset($order->branch?->qrcode ?? '') }}">
-                                                            Make Payment
-                                                        </button>
-                                                    @endif
-                                                @endcan
-                                                @can('verify-payment')
+                                                    {{-- Make Payment --}}
+                                                    @can('make-payment')
+                                                        @if($order->status == 'delivered')
+                                                            <li>
+                                                                <button type="button" class="dropdown-item paymentBtn"
+                                                                    data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                                    data-order="{{ $order->id }}"
+                                                                    data-qr="{{ asset($order->branch?->qrcode ?? '') }}">
 
-                                                    @if($order->status == 'delivered' && $order->payment_status == 'pending')
+                                                                    <i class="fas fa-money-bill-wave me-2 text-success"></i>
 
-                                                        <form method="POST" action="{{ route('orders.verify.payment', $order->id) }}"
-                                                            class="verify-payment-form">
+                                                                    Make Payment
 
-                                                            @csrf
+                                                                </button>
+                                                            </li>
+                                                        @endif
+                                                    @endcan
 
-                                                            <button type="submit" class="btn btn-success btn-sm" title="Verify Payment">
-                                                                <i class="fas fa-check"></i>
-                                                            </button>
+                                                    {{-- Verify Payment --}}
+                                                    @can('verify-payment')
+                                                        @if($order->status == 'delivered' && $order->payment_method == 'upi' && $order->payment_status == 'pending')
 
-                                                        </form>
+                                                            <li>
+                                                                <form method="POST"
+                                                                    action="{{ route('orders.verify.payment', $order->id) }}"
+                                                                    class="verify-payment-form">
 
-                                                    @endif
+                                                                    @csrf
 
-                                                @endcan
+                                                                    <button type="submit" class="dropdown-item">
+
+                                                                        <i class="fas fa-check me-2 text-success"></i>
+
+                                                                        Verify Payment
+
+                                                                    </button>
+
+                                                                </form>
+                                                            </li>
+
+                                                        @endif
+                                                    @endcan
+
+                                                </ul>
+
                                             </div>
-
                                         </td>
                                     </tr>
                                 @empty

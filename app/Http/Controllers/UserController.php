@@ -342,7 +342,7 @@ class UserController extends Controller
 
             return redirect()
                 ->route('users.index')
-                ->with('success', 'User created successfully.');
+                ->with('success', 'User deleted successfully.');
         }
 
         // Branch Manager
@@ -353,7 +353,7 @@ class UserController extends Controller
                     'restaurant' => Auth::user()->restaurant?->slug,
                     'branch' => Auth::user()->branch?->slug,
                 ])
-                ->with('success', 'User created successfully.');
+                ->with('success', 'User deleted successfully.');
         }
 
         // Owner
@@ -362,7 +362,7 @@ class UserController extends Controller
                 ->route('restaurant.users.index', [
                     'restaurant' => Auth::user()->restaurant?->slug,
                 ])
-                ->with('success', 'User created successfully.');
+                ->with('success', 'User deleted successfully.');
         }
     }
 }

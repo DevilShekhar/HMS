@@ -70,7 +70,7 @@ class CustomerOfferController extends Controller
         // dd($request->all());
         $request->validate([
             'title' => 'required',
-            'description' => 'nullable',
+            'description' => 'required',
             'category' => 'required',
         ]);
 
