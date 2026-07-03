@@ -30,15 +30,14 @@ Route::get('/login', function () {
 });
 
 Auth::routes();
-// Route::get('/dashboard/branches/{restaurant}', [DashboardController::class, 'getDashboardBranches'])
-//      ->name('dashboard.branches');
 
 Route::get('/dashboard/branches/{restaurantId}', function ($restaurantId) {
-
-    return Branch::query()->where('restaurant_id', $restaurantId)
+    $branches = Branch::query()
+        ->where('restaurant_id', $restaurantId)
         ->orderBy('name')
         ->get(['id', 'name']);
 
+    return response()->json($branches);
 })->name('dashboard.branches');
 
 Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
@@ -127,6 +126,8 @@ Route::middleware(['auth'])->group(function () {
             'update' => 'permissions.update',
             'destroy' => 'permissions.destroy',
         ]);
+        Route::get('/dashboard/revenue-data', [DashboardController::class, 'getRevenueData'])
+     ->name('dashboard.revenue.data');
     });
     Route::middleware(['auth'])->group(function () {
         Route::resource('categories', CategoryController::class);

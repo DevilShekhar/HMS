@@ -116,452 +116,339 @@
         </div>
 
         @can('superadmin-view')
-            <div class="row mb-4">
-                <div class="col-12">
-
-                    <div class="card shadow-sm border-0">
-
-                        <div class="card-header bg-white text-dark">
-                            <h5 class="mb-0">
-                                <i data-feather="x-circle"></i>
-                                Expired Subscriptions
-                            </h5>
-                        </div>
-
-                        <div class="table-responsive">
-
-                            <table class="table table-hover align-middle mb-0">
-
-                                <thead class="table-light">
+        {{-- ===== EXPIRED SUBSCRIPTIONS ===== --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-times-circle"></i>
+                            Expired Subscriptions
+                        </h5>
+                        <span class="rms-badge rms-badge--danger">
+                            <i class="fas fa-clock"></i> Urgent
+                        </span>
+                    </div>
+                    <div class="rms-table-wrap">
+                        <table class="rms-table">
+                            <thead>
+                                <tr>
+                                    <th>Restaurant</th>
+                                    <th>Branch</th>
+                                    <th>Plan</th>
+                                    <th>End Date</th>
+                                    <th>Expired Since</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($expiredSubscriptions as $subscription)
+                                    @php
+                                        $endDate = \Carbon\Carbon::parse($subscription->end_date);
+                                        $expiredDays = $endDate->diffInDays(now());
+                                    @endphp
                                     <tr>
-                                        <th>Restaurant</th>
-                                        <th>Branch</th>
-                                        <th>Plan</th>
-                                        <th>End Date</th>
-                                        <th>Expired Since</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    @forelse($expiredSubscriptions as $subscription)
-
-                                        @php
-                                            $endDate = \Carbon\Carbon::parse($subscription->end_date);
-                                            $expiredDays = $endDate->diffInDays(now());
-                                        @endphp
-
-                                        <tr>
-
-                                            <td>
-                                                {{ $subscription->branch?->restaurant?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $subscription->branch?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $subscription->plan?->name ?? $subscription->billing_cycle }}
-                                            </td>
-
-                                            <td>
-                                                {{ $endDate->format('d M Y') }}
-                                            </td>
-
-                                            <td>
+                                        <td>{{ $subscription->branch?->restaurant?->name ?? 'N/A' }}</td>
+                                        <td>{{ $subscription->branch?->name ?? 'N/A' }}</td>
+                                        <td>{{ $subscription->plan?->name ?? $subscription->billing_cycle }}</td>
+                                        <td>{{ $endDate->format('d M Y') }}</td>
+                                        <td>
+                                            <span class="fw-bold text-danger">
                                                 {{ (int) $expiredDays }} day{{ (int) $expiredDays > 1 ? 's' : '' }} ago
-                                            </td>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="rms-badge rms-badge--danger">
+                                                <i class="fas fa-exclamation-circle"></i> Expired
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="rms-empty-state">
+                                            <i class="fas fa-check-circle" style="color: #27ae60;"></i>
+                                            <p>No expired subscriptions found.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                                            <td>
-                                                <span class="badge bg-danger">
-                                                    Expired
+        {{-- ===== SUBSCRIPTION OVERVIEW ===== --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-calendar-alt"></i>
+                            Subscription Overview
+                        </h5>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="rms-badge rms-badge--success"><i class="fas fa-check"></i> Active</span>
+                            <span class="rms-badge rms-badge--warning"><i class="fas fa-clock"></i> Expiring Soon</span>
+                            <span class="rms-badge rms-badge--critical"><i class="fas fa-exclamation-triangle"></i> Critical</span>
+                        </div>
+                    </div>
+                    <div class="rms-table-wrap">
+                        <table class="rms-table">
+                            <thead>
+                                <tr>
+                                    <th>Restaurant</th>
+                                    <th>Branch</th>
+                                    <th>Plan</th>
+                                    <th>End Date</th>
+                                    <th>Days Left</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($subscriptions as $subscription)
+                                    @php
+                                        $endDate = \Carbon\Carbon::parse($subscription->end_date);
+                                        $days = now()->diffInDays($endDate, false);
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $subscription->branch?->restaurant?->name ?? 'N/A' }}</td>
+                                        <td>{{ $subscription->branch?->name ?? 'N/A' }}</td>
+                                        <td>{{ $subscription->billing_cycle ?? 'N/A' }}</td>
+                                        <td>{{ $endDate->format('d M Y') }}</td>
+                                        <td>
+                                            <span class="fw-bold {{ $days <= 7 ? 'text-danger' : ($days <= 30 ? 'text-warning' : 'text-success') }}">
+                                                {{ (int) $days }} day{{ (int) $days > 1 ? 's' : '' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if($days <= 7)
+                                                <span class="rms-badge rms-badge--critical">
+                                                    <i class="fas fa-exclamation-triangle"></i> Critical
                                                 </span>
-                                            </td>
-
-                                        </tr>
-
-                                    @empty
-
-                                        <tr>
-                                            <td colspan="6" class="text-center py-4">
-                                                No expired subscriptions found.
-                                            </td>
-                                        </tr>
-
-                                    @endforelse
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
+                                            @elseif($days <= 30)
+                                                <span class="rms-badge rms-badge--warning">
+                                                    <i class="fas fa-clock"></i> Expiring Soon
+                                                </span>
+                                            @else
+                                                <span class="rms-badge rms-badge--success">
+                                                    <i class="fas fa-check"></i> Active
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="rms-empty-state">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <p>No subscriptions nearing expiry.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-
                 </div>
             </div>
-            <div class="row mb-4">
-                <div class="col-12">
+        </div>
 
-                    <div class="card shadow-sm border-0">
-
-                        <div class="card-header bg-white text-dark">
-                            <h5 class="mb-0">
-                                <i data-feather="calendar"></i>
-                                Subscription Overview
-                            </h5>
+        {{-- ===== INVENTORY ALERTS ===== --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Inventory Alerts
+                        </h5>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="rms-badge rms-badge--danger"><i class="fas fa-times"></i> Out of Stock</span>
+                            <span class="rms-badge rms-badge--warning"><i class="fas fa-minus"></i> Low Stock</span>
+                            <span class="rms-badge rms-badge--success"><i class="fas fa-check"></i> In Stock</span>
                         </div>
-
-                        <div class="table-responsive">
-
-                            <table class="table table-hover align-middle mb-0">
-
-                                <thead class="table-light">
-
-                                    <tr>
-                                        <th>Restaurant</th>
-                                        <th>Branch</th>
-                                        <th>Plan</th>
-                                        <th>End Date</th>
-                                        <th>Days Left</th>
-                                        <th>Status</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    @forelse($subscriptions as $subscription)
-
-                                        @php
-                                            $endDate = \Carbon\Carbon::parse($subscription->end_date);
-                                            $days = now()->diffInDays($endDate, false);
-                                        @endphp
-
-                                        <tr>
-
-                                            <td>
-                                                {{ $subscription->branch?->restaurant?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $subscription->branch?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $subscription->billing_cycle ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $endDate->format('d M Y') }}
-                                            </td>
-
-                                            <td>
-                                                {{ (int) $expiredDays }}
-                                            </td>
-
-
-                                            <td>
-
-                                                @if($days <= 7)
-
-                                                    <span class="badge bg-danger">
-                                                        Critical
-                                                    </span>
-
-                                                @elseif($days <= 30)
-
-                                                    <span class="badge bg-warning text-dark">
-                                                        Expiring Soon
-                                                    </span>
-
-                                                @else
-
-                                                    <span class="badge bg-success">
-                                                        Active
-                                                    </span>
-
-                                                @endif
-
-                                            </td>
-
-                                        </tr>
-
-                                    @empty
-
-                                        <tr>
-
-                                            <td colspan="6" class="text-center py-4">
-                                                No subscriptions nearing expiry.
-                                            </td>
-
-                                        </tr>
-
-                                    @endforelse
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
                     </div>
-
-                </div>
-            </div>
-
-
-            <div class="row">
-                <div class="col-12">
-
-                    <div class="card shadow-sm border-0">
-
-                        <div class="card-header bg-white text-dark">
-
-                            <h5 class="mb-0">
-                                <i data-feather="alert-triangle"></i>
-                                Inventory Alerts
-                            </h5>
-
-                        </div>
-
-                        <div class="table-responsive">
-
-                            <table class="table table-hover align-middle mb-0">
-
-                                <thead class="table-light">
-
+                    <div class="rms-table-wrap">
+                        <table class="rms-table">
+                            <thead>
+                                <tr>
+                                    <th>Restaurant</th>
+                                    <th>Branch</th>
+                                    <th>Item</th>
+                                    <th>Remaining</th>
+                                    <th>Minimum</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($inventoryAlerts as $item)
                                     <tr>
-
-                                        <th>Restaurant</th>
-                                        <th>Branch</th>
-                                        <th>Item</th>
-                                        <th>Remaining</th>
-                                        <th>Minimum</th>
-                                        <th>Status</th>
-
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    @forelse($inventoryAlerts as $item)
-
-                                        <tr>
-
-                                            <td>
-                                                {{ $item->restaurant?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                {{ $item->branch?->name ?? 'N/A' }}
-                                            </td>
-
-                                            <td>
-                                                <strong>{{ $item->name }}</strong>
-                                            </td>
-
-                                            <td>
+                                        <td>{{ $item->restaurant?->name ?? 'N/A' }}</td>
+                                        <td>{{ $item->branch?->name ?? 'N/A' }}</td>
+                                        <td><strong>{{ $item->name }}</strong></td>
+                                        <td>
+                                            <span class="fw-bold {{ $item->remaining_stock <= 0 ? 'text-danger' : ($item->remaining_stock <= $item->minimum_stock ? 'text-warning' : 'text-success') }}">
                                                 {{ $item->remaining_stock }} {{ $item->unit }}
-                                            </td>
-
-                                            <td>
-                                                {{ $item->minimum_stock }} {{ $item->unit }}
-                                            </td>
-
-                                            <td>
-
-                                                @if($item->remaining_stock <= 0)
-
-                                                    <span class="badge bg-danger">
-                                                        Out of Stock
-                                                    </span>
-
-                                                @elseif($item->remaining_stock <= $item->minimum_stock)
-
-                                                    <span class="badge bg-warning text-dark">
-                                                        Low Stock
-                                                    </span>
-
-                                                @else
-
-                                                    <span class="badge bg-success">
-                                                        In Stock
-                                                    </span>
-
-                                                @endif
-
-                                            </td>
-
-                                        </tr>
-
-                                    @empty
-
-                                        <tr>
-
-                                            <td colspan="6" class="text-center py-4">
-                                                No inventory alerts.
-                                            </td>
-
-                                        </tr>
-
-                                    @endforelse
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-
-                    <div class="card shadow-sm border-0">
-
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center text-dark">
-                            <h5 class="mb-0">
-                                <i data-feather="trending-up" class="me-2"></i>
-                                Top Restaurants by Revenue
-                            </h5>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Restaurant</th>
-                                        <th>Branches</th>
-                                        <th>Orders</th>
-                                        <th class="text-end">Revenue</th>
+                                            </span>
+                                        </td>
+                                        <td>{{ $item->minimum_stock }} {{ $item->unit }}</td>
+                                        <td>
+                                            @if($item->remaining_stock <= 0)
+                                                <span class="rms-badge rms-badge--danger">
+                                                    <i class="fas fa-times-circle"></i> Out of Stock
+                                                </span>
+                                            @elseif($item->remaining_stock <= $item->minimum_stock)
+                                                <span class="rms-badge rms-badge--warning">
+                                                    <i class="fas fa-exclamation-circle"></i> Low Stock
+                                                </span>
+                                            @else
+                                                <span class="rms-badge rms-badge--success">
+                                                    <i class="fas fa-check-circle"></i> In Stock
+                                                </span>
+                                            @endif
+                                        </td>
                                     </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    @forelse($topRestaurants as $restaurant)
-
-                                        <tr>
-
-                                            <td>{{ $loop->iteration }}</td>
-
-                                            <td>
-                                                <strong>{{ $restaurant->name ?? 'N/A' }}</strong>
-                                            </td>
-
-                                            <td>{{ $restaurant->total_branches }}</td>
-
-                                            <td>{{ number_format($restaurant->total_orders) }}</td>
-
-                                            <td class="text-end fw-bold text-success">
-                                                ₹{{ number_format($restaurant->total_revenue, 2) }}
-                                            </td>
-
-                                        </tr>
-
-                                    @empty
-
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4">
-                                                No data available.
-                                            </td>
-                                        </tr>
-
-                                    @endforelse
-
-                                </tbody>
-
-                            </table>
-                        </div>
-
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="rms-empty-state">
+                                            <i class="fas fa-check-circle" style="color: #27ae60;"></i>
+                                            <p>No inventory alerts.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-
                 </div>
             </div>
-            <div class="row">
-            <div class="col-12 col-sm-12 col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Revenue Chart</h4>
-                        <select id="restaurantFilter" class="form-control w-auto">
-                            <option value="">All Restaurants</option>
-                            @foreach($restaurants as $r)
-                                <option value="{{ $r->id }}">{{ $r->name }}</option>
-                            @endforeach
-                        </select>
+        </div>
 
-                        <!-- Branch Dropdown (will be populated dynamically) -->
-                        <select id="branchFilter" class="form-control w-auto">
+        {{-- ===== TOP RESTAURANTS BY REVENUE ===== --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-trophy"></i>
+                            Top Restaurants by Revenue
+                        </h5>
+                        <span class="rms-badge rms-badge--info">
+                            <i class="fas fa-calendar"></i> {{ now()->format('M Y') }}
+                        </span>
+                    </div>
+                    <div class="rms-table-wrap">
+                        <table class="rms-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Restaurant</th>
+                                    <th>Branches</th>
+                                    <th>Orders</th>
+                                    <th class="text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topRestaurants as $restaurant)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{{ $loop->iteration <= 3 ? 'warning' : 'light' }} text-dark rounded-circle"
+                                                  style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700;">
+                                                {{ $loop->iteration }}
+                                            </span>
+                                        </td>
+                                        <td><strong>{{ $restaurant->name ?? 'N/A' }}</strong></td>
+                                        <td>{{ $restaurant->total_branches }}</td>
+                                        <td>{{ number_format($restaurant->total_orders) }}</td>
+                                        <td class="text-end fw-bold text-success">
+                                            <i class="fas fa-rupee-sign"></i> {{ number_format($restaurant->total_revenue, 2) }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="rms-empty-state">
+                                            <i class="fas fa-chart-line"></i>
+                                            <p>No data available.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ===== REVENUE CHART ===== --}}
+        <div class="row mb-4">
+            <div class="col-12 col-sm-12 col-lg-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-filter-group">
+
+                        @if(!app()->bound('restaurant'))
+                            <select id="restaurantFilter" class="form-select">
+                                <option value="">All Restaurants</option>
+                                @foreach($restaurants as $r)
+                                    <option value="{{ $r->id }}">{{ $r->name }}</option>
+                                @endforeach
+                            </select>
+                        @endif
+
+                        <select id="branchFilter" class="form-select">
                             <option value="">All Branches</option>
                         </select>
+
                     </div>
-                    <div class="card-body">
+                    <div class="rms-card-body">
                         <div class="row">
                             <div class="col-lg-9">
-                                <div id="chart1" style="min-height: 380px;"></div>
+                                <div id="chart1" class="rms-chart-container"></div>
 
-                                <div class="row mb-0 mt-4">
-                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <div class="list-inline text-center">
-                                            <div class="list-inline-item p-r-30">
-                                                <i data-feather="arrow-up-circle" class="col-green"></i>
-                                                <h5 class="m-b-0" id="weeklyRevenue">
-                                                    ₹{{ number_format($revenue['weekly']['amount']) }}
-                                                </h5>
-                                                <p class="text-muted font-14 m-b-0">Weekly Earnings</p>
-                                            </div>
+                                <div class="rms-revenue-stats">
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-week"></i></div>
+                                        <div class="rms-revenue-value" id="weeklyRevenue">
+                                            ₹{{ number_format($revenue['weekly']['amount']) }}
                                         </div>
+                                        <div class="rms-revenue-label">Weekly Earnings</div>
                                     </div>
-                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <div class="list-inline text-center">
-                                            <div class="list-inline-item p-r-30">
-                                                <i data-feather="arrow-up-circle" class="col-green"></i>
-                                                <h5 class="m-b-0" id="monthlyRevenue">
-                                                    ₹{{ number_format($revenue['monthly']['amount']) }}
-                                                </h5>
-                                                <p class="text-muted font-14 m-b-0">Monthly Earnings</p>
-                                            </div>
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-month"></i></div>
+                                        <div class="rms-revenue-value" id="monthlyRevenue">
+                                            ₹{{ number_format($revenue['monthly']['amount']) }}
                                         </div>
+                                        <div class="rms-revenue-label">Monthly Earnings</div>
                                     </div>
-                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
-                                        <div class="list-inline text-center">
-                                            <div class="list-inline-item p-r-30">
-                                                <i data-feather="arrow-up-circle" class="col-green"></i>
-                                               <h5 class="mb-0 m-b-0" id="yearlyRevenue">
-                                                    ₹{{ number_format($revenue['yearly']['amount']) }}
-                                                </h5>
-                                                <p class="text-muted font-14 m-b-0">Yearly Earnings</p>
-                                            </div>
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-year"></i></div>
+                                        <div class="rms-revenue-value" id="yearlyRevenue">
+                                            ₹{{ number_format($revenue['yearly']['amount']) }}
                                         </div>
+                                        <div class="rms-revenue-label">Yearly Earnings</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-lg-3">
-                                <div class="row mt-5">
-                                    <div class="col-7 col-xl-7 mb-3">Total Orders</div>
-                                    <div class="col-5 col-xl-5 mb-3">
-                                        <span id="totalOrders" class="text-big">
+                                <div class="rms-stats-panel">
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-shopping-cart"></i> Total Orders</span>
+                                        <span class="rms-stat-value" id="totalOrders">
                                             {{ number_format($revenue['total']['orders']) }}
-                                        </span><span
-                                            class="text-big">{{ number_format($revenue['total']['orders']) }}</span>
+                                        </span>
                                     </div>
-                                    <div class="col-7 col-xl-7 mb-3">Total Revenue</div>
-                                    <div class="col-5 col-xl-5 mb-3">
-                                        <span id="totalRevenue" class="text-big">
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</span>
+                                        <span class="rms-stat-value text-success" id="totalRevenue">
                                             ₹{{ number_format($revenue['total']['amount']) }}
                                         </span>
                                     </div>
-                                    <!-- Add more stats as needed -->
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-store"></i> Restaurants</span>
+                                        <span class="rms-stat-value">{{ $restaurants->count() }}</span>
+                                    </div>
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-users"></i> Total Users</span>
+                                        <span class="rms-stat-value">{{ $totalUsers ?? 'N/A' }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -570,43 +457,36 @@
             </div>
         </div>
 
-        <!-- Small Charts Row -->
+        {{-- ===== SMALL CHARTS ===== --}}
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Order Status</h4>
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-chart-pie"></i>
+                            Order Status
+                        </h5>
                     </div>
-                    <div class="card-body">
-                        <div id="chart4" class="chartsh" style="min-height: 300px;"></div>
+                    <div class="rms-card-body">
+                        <div id="chart4" class="rms-chart-small"></div>
                     </div>
                 </div>
             </div>
 
             <div class="col-12 col-sm-12 col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Revenue Trend</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart3" class="chartsh" style="min-height: 300px;"></div>
+                <div class="rms-dashboard-card">
+                    <div class="rms-card-header">
+                        <h5>
+                            <i class="fas fa-chart-line"></i>
+                            Revenue Trend
+                        </h5>
+                        </div>
+                        <div class="rms-card-body">
+                            <div id="chart3" class="rms-chart-small"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-        </div>
-            {{-- <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i data-feather="bar-chart-2"></i> Revenue Overview</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="revenueBarChart" height="120"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div> --}}
         @endcan
         @can('view-payment')
             <div class="row">
@@ -710,7 +590,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4 mt-3">
                     <div class="status-card status-card--completed">
                         <div class="status-card__icon-wrapper">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
@@ -893,7 +773,84 @@
         @endcan
 
 
+            <div class="row mb-4">
+            <div class="col-12 col-sm-12 col-lg-12">
+                <div class="rms-dashboard-card">
+                    <div class="rms-filter-group">
 
+                        @if(!app()->bound('restaurant'))
+                            <select id="restaurantFilter" class="form-select">
+                                <option value="">All Restaurants</option>
+                                @foreach($restaurants as $r)
+                                    <option value="{{ $r->id }}">{{ $r->name }}</option>
+                                @endforeach
+                            </select>
+                        @endif
+
+                        <select id="branchFilter" class="form-select">
+                            <option value="">All Branches</option>
+                        </select>
+
+                    </div>
+                    <div class="rms-card-body">
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <div id="chart1" class="rms-chart-container"></div>
+
+                                <div class="rms-revenue-stats">
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-week"></i></div>
+                                        <div class="rms-revenue-value" id="weeklyRevenue">
+                                            ₹{{ number_format($revenue['weekly']['amount']) }}
+                                        </div>
+                                        <div class="rms-revenue-label">Weekly Earnings</div>
+                                    </div>
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-month"></i></div>
+                                        <div class="rms-revenue-value" id="monthlyRevenue">
+                                            ₹{{ number_format($revenue['monthly']['amount']) }}
+                                        </div>
+                                        <div class="rms-revenue-label">Monthly Earnings</div>
+                                    </div>
+                                    <div class="rms-revenue-item">
+                                        <div class="rms-revenue-icon"><i class="fas fa-calendar-year"></i></div>
+                                        <div class="rms-revenue-value" id="yearlyRevenue">
+                                            ₹{{ number_format($revenue['yearly']['amount']) }}
+                                        </div>
+                                        <div class="rms-revenue-label">Yearly Earnings</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="rms-stats-panel">
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-shopping-cart"></i> Total Orders</span>
+                                        <span class="rms-stat-value" id="totalOrders">
+                                            {{ number_format($revenue['total']['orders']) }}
+                                        </span>
+                                    </div>
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</span>
+                                        <span class="rms-stat-value text-success" id="totalRevenue">
+                                            ₹{{ number_format($revenue['total']['amount']) }}
+                                        </span>
+                                    </div>
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-store"></i> Restaurants</span>
+                                        <span class="rms-stat-value">{{ $restaurants->count() }}</span>
+                                    </div>
+                                    <div class="rms-stat-row">
+                                        <span class="rms-stat-label"><i class="fas fa-users"></i> Total Users</span>
+                                        <span class="rms-stat-value">{{ $totalUsers ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -903,6 +860,17 @@
     {{-- Your dashboard script --}}
 
     <script>
+        let currentRestaurant = "{{ app()->bound('restaurant') ? app('restaurant')->id : '' }}";
+        let currentBranch = '';
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            if (currentRestaurant) {
+                loadBranches();
+                refreshAllData();
+            }
+
+        });
         let revenueChart;
         let donutChart;
 
@@ -968,34 +936,82 @@
               legend: {
                     position: 'bottom'
                 }
-        };
+              };
 
               donutChart = new ApexCharts(document.querySelector("#chart4"), options4);
                donutChart.render();
 
 
-             // Orders Bar Chart
-           var  options3 = {
-                series: [{
-                    name: 'Orders',
-                    data: @json($revOrders)
-                }],
-            chart: {
+                // Orders Bar Chart
+                var options3 = {
+                series: [
+                    {
+                        name: 'Orders',
+                        type: 'column',
+                        data: @json($revOrders)
+                    },
+                    {
+                        name: 'Revenue (₹)',
+                        type: 'line',
+                        data: @json($revAmount)
+                    }
+                ],
+                chart: {
                     height: 300,
-                    type: 'bar'
+                    type: 'line'
                 },
-                colors: ['#4e73df'],
-             plotOptions: {
-                 bar:    {
+                colors: ['#4e73df', '#28a745'],
+                stroke: {
+                    width: [0, 3]
+                },
+                plotOptions: {
+                    bar: {
                         borderRadius: 4
                     }
                 },
-              xaxis: {
+                xaxis: {
                     categories: ['Today', 'Yesterday', 'Week', 'Month', 'Year']
+                },
+                yaxis: [
+                    {
+                        title: {
+                            text: 'Orders'
+                        }
+                    },
+                    {
+                        opposite: true,
+                        title: {
+                            text: 'Revenue (₹)'
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return '₹' + Number(val).toLocaleString();
+                            }
+                        }
+                    }
+                ],
+                tooltip: {
+                    y: [
+                        {
+                            formatter: function(val) {
+                                return val + ' Orders';
+                            }
+                        },
+                        {
+                            formatter: function(val) {
+                                return '₹' + Number(val).toLocaleString();
+                            }
+                        }
+                    ]
                 }
-        };
+            };
 
-         new ApexCharts(document.querySelector("#chart3"), options3).render();
+            revenueTrendChart = new ApexCharts(
+                document.querySelector("#chart3"),
+                options3
+            );
+
+            revenueTrendChart.render();
 
 
              // Inventory Chart
@@ -1030,34 +1046,34 @@
     <script>
 
         let currentRestaurant = '';
-    let currentBranch = '';
+        let currentBranch = '';
 
-    document.getElementById('restaurantFilter').addEventListener('change', function () {
+        document.getElementById('restaurantFilter').addEventListener('change', function () {
 
-            currentRestaurant = this.value;
-        currentBranch = '';
+                currentRestaurant = this.value;
+            currentBranch = '';
 
-                loadBranches();
-        refreshAllData();
+                    loadBranches();
+            refreshAllData();
 
-    });
+        });
 
-    document.getElementById('branchFilter').addEventListener('change', function () {
+        document.getElementById('branchFilter').addEventListener('change', function () {
 
-               currentBranch = this.value;
-        refreshAllData();
+                currentBranch = this.value;
+            refreshAllData();
 
-    });
+        });
 
-    function loadBranches() {
+        function loadBranches() {
 
           const branchSelect = document.getElementById('branchFilter');
 
-         branchSelect.innerHTML = '<option value="">All Branches</option>';
+             branchSelect.innerHTML = '<option value="">All Branches</option>';
 
             if ( !currentRestaurant) {
                 return;
-        }
+             }
 
             fetch('/dashboard/branches/' + currentRestaurant)
                 .then(response => response.json())
@@ -1076,57 +1092,52 @@
 
     function refreshAllData() {
 
-        fetch(`/dashboard/data?restaurant_id=${currentRestaurant}&branch_id=${currentBranch}`)
+    fetch(`/dashboard/data?restaurant_id=${currentRestaurant}&branch_id=${currentBranch}`)
+        .then(response => response.json())
+        .then(data => {
 
-            .then(response => response.json())
+            console.log("Dashboard Data:", data);
 
-               .then(data => {
+            // Revenue Chart
+            revenueChart.updateSeries([{
+                data: [
+                    Number(data.revenue.today.amount),
+                    Number(data.revenue.yesterday.amount),
+                    Number(data.revenue.weekly.amount),
+                    Number(data.revenue.monthly.amount),
+                    Number(data.revenue.yearly.amount)
+                ]
+            }]);
 
-                  console.log(data);
+            // Donut Chart
+            donutChart.updateSeries([
+                data.orderStatus.pending,
+                data.orderStatus.preparing,
+                data.orderStatus.completed,
+                data.orderStatus.delivered ?? 0
+            ]);
 
-                  revenueChart.updateSeries([{
+            // Revenue Cards
+            document.getElementById('totalOrders').innerHTML =
+                data.revenue.total.orders;
 
-                        data  : [
-                            data.revenue.today.amount,
-                            data.revenue.yesterday.amount,
-                            data.revenue.weekly.amount,
-                            data.revenue.monthly.amount,
-                            data.revenue.yearly.amount
-                    ]
+            document.getElementById('totalRevenue').innerHTML =
+                '₹' + Number(data.revenue.total.amount).toLocaleString();
 
-                 }]);
+            document.getElementById('weeklyRevenue').innerHTML =
+                '₹' + Number(data.revenue.weekly.amount).toLocaleString();
 
-                 donutChart.updateSeries([
+            document.getElementById('monthlyRevenue').innerHTML =
+                '₹' + Number(data.revenue.monthly.amount).toLocaleString();
 
-                         data.orderStatus.pending,
-                         data.orderStatus.preparing,
-                         data.orderStatus.completed
-                         data.orderStatus.delivered
-                    ]);
+            document.getElementById('yearlyRevenue').innerHTML =
+                '₹' + Number(data.revenue.yearly.amount).toLocaleString();
 
-                document.getElementById('totalOrders').innerHTML =
-                    data.revenue.total.orders;
-
-                    document.getElementById('totalRevenue').innerHTML =
-                    '₹' + Number(data.revenue.total.amount).toLocaleString();
-                    document.getElementById('weeklyRevenue').innerHTML =
-                    '₹' + Number(data.revenue.weekly.amount).toLocaleString();
-
-                    document.getElementById('monthlyRevenue').innerHTML =
-                    '₹' + Number(data.revenue.monthly.amount).toLocaleString();
-
-                    document.getElementById('yearlyRevenue').innerHTML =
-                    '₹' + Number(data.revenue.yearly.amount).toLocaleString();
-
-               })
-
-               .catch(function (error) {
-
-                   console.log(error);
-
-               });
-
-    }
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+}
 
     </script>
 @endsection

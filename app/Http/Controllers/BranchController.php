@@ -529,45 +529,45 @@ class BranchController extends Controller
         return 'QR regenerated: '.$url;
     }
 
-public function updateGst(Request $request, Restaurant $restaurant, Branch $branch)
-{
-    // Better permission check
-    $user = Auth::user();
+    public function updateGst(Request $request, Restaurant $restaurant, Branch $branch)
+    {
+        // Better permission check
+        $user = Auth::user();
 
-    if ($user->role === 'super_admin') {
-    } elseif ($user->role === 'owner' && $user->restaurant_id === $restaurant->id) {
-    } elseif ($user->role === 'branch_manager' && $user->branch_id === $branch->id) {
-    } else {
-        abort(403, 'You do not have permission to update GST details.');
+        if ($user->role === 'super_admin') {
+        } elseif ($user->role === 'owner' && $user->restaurant_id === $restaurant->id) {
+        } elseif ($user->role === 'branch_manager' && $user->branch_id === $branch->id) {
+        } else {
+            abort(403, 'You do not have permission to update GST details.');
+        }
+
+        $validated = $request->validate([
+            'gst_enabled' => 'boolean|nullable',
+            'gst_number' => 'nullable|string|max:255',
+            'gst' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        // If GST is enabled, GST % is required
+        if ($request->boolean('gst_enabled') && empty($validated['gst'])) {
+            return back()->withErrors(['gst' => 'GST percentage is required when GST is enabled.']);
+        }
+
+        $branch->update([
+            'gst_enabled' => $request->boolean('gst_enabled'),
+            'gst_number' => $validated['gst_number'] ?? null,
+            'gst' => $validated['gst'] ?? null,
+            'cgst' => $request->boolean('gst_enabled') && $validated['gst']
+                            ? round($validated['gst'] / 2, 2)
+                            : null,
+            'sgst' => $request->boolean('gst_enabled') && $validated['gst']
+                            ? round($validated['gst'] / 2, 2)
+                            : null,
+        ]);
+
+        return redirect()
+            ->route('restaurant.branches.index', [
+                'restaurant' => $restaurant->slug,
+            ])
+            ->with('success', 'GST details updated successfully for branch: '.$branch->name);
     }
-
-    $validated = $request->validate([
-        'gst_enabled' => 'boolean|nullable',
-        'gst_number' => 'nullable|string|max:255',
-        'gst' => 'nullable|numeric|min:0|max:100',
-    ]);
-
-    // If GST is enabled, GST % is required
-    if ($request->boolean('gst_enabled') && empty($validated['gst'])) {
-        return back()->withErrors(['gst' => 'GST percentage is required when GST is enabled.']);
-    }
-
-    $branch->update([
-        'gst_enabled' => $request->boolean('gst_enabled'),
-        'gst_number' => $validated['gst_number'] ?? null,
-        'gst' => $validated['gst'] ?? null,
-        'cgst' => $request->boolean('gst_enabled') && $validated['gst']
-                        ? round($validated['gst'] / 2, 2)
-                        : null,
-        'sgst' => $request->boolean('gst_enabled') && $validated['gst']
-                        ? round($validated['gst'] / 2, 2)
-                        : null,
-    ]);
-
-    return redirect()
-        ->route('restaurant.branches.index', [
-            'restaurant' => $restaurant->slug,
-        ])
-        ->with('success', 'GST details updated successfully for branch: '.$branch->name);
-}
 }

@@ -54,7 +54,7 @@ class UserController extends Controller
             $query->whereRaw('1 = 0', [], 'and');
         }
 
-        $users = $query->latest()->paginate(20);
+        $users = $query->latest()->paginate(10);
 
         $restaurantSlug = $request->route('restaurant');
 
@@ -205,6 +205,17 @@ class UserController extends Controller
         $user = User::findOrFail($userId);
         $restaurants = Restaurant::query()->where('status', 1)->get();
         $roles = [];
+         $branches = [];
+
+        // Owner can select any branch of his restaurant
+        if (Auth::user()->role === 'owner') {
+
+            $branches = Branch::query()->where(
+                'restaurant_id',
+                Auth::user()->restaurant_id
+            )->get();
+        }
+
         switch (Auth::user()->role) {
             case 'super_admin':
                 $roles = ['owner'];
@@ -234,7 +245,7 @@ class UserController extends Controller
                 'user',
                 'roles',
                 'restaurants',
-                'restaurant'
+                'restaurant','branches'
             )
         );
     }

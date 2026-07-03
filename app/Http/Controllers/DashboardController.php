@@ -559,4 +559,49 @@ class DashboardController extends Controller
 
         return $pdf->download('Insights_Report_'.now()->format('Y-m-d_His').'.pdf');
     }
+    /**
+ * AJAX - Get Revenue Data for Dashboard Chart & Stats
+ */
+public function getRevenueData(Request $request)
+{
+    $restaurantId = $request->restaurant_id;
+    $branchId = $request->branch_id;
+
+    if ($branchId) {
+        $branchIds = [$branchId];
+    } elseif ($restaurantId) {
+        $branchIds = Branch::where('restaurant_id', $restaurantId)
+            ->pluck('id')
+            ->toArray();
+    } else {
+        $branchIds = Branch::pluck('id')->toArray();
+    }
+
+    $orders = Order::whereIn('branch_id', $branchIds);
+
+    $revenue = [
+        'today' => [
+            'orders' => (clone $orders)->whereDate('created_at', today())->count(),
+            'amount' => (clone $orders)->whereDate('created_at', today())->sum('total'),
+        ],
+        'weekly' => [
+            'orders' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'amount' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total'),
+        ],
+        'monthly' => [
+            'orders' => (clone $orders)->whereMonth('created_at', now()->month)->count(),
+            'amount' => (clone $orders)->whereMonth('created_at', now()->month)->sum('total'),
+        ],
+        'yearly' => [
+            'orders' => (clone $orders)->whereYear('created_at', now()->year)->count(),
+            'amount' => (clone $orders)->whereYear('created_at', now()->year)->sum('total'),
+        ],
+        'total' => [
+            'orders' => (clone $orders)->count(),
+            'amount' => (clone $orders)->sum('total'),
+        ],
+    ];
+
+    return response()->json($revenue);
+}
 }
