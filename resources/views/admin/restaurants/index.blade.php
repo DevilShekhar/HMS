@@ -106,13 +106,13 @@
                                                     </td>                                                    
                                                     <td class="text-center">
                                                         <div class="action-buttons">
-                                                            <a href="{{ route('restaurants.edit',$restaurant->id) }}" class="btn-action edit">
+                                                            <a href="{{ route('restaurants.edit',$restaurant->id) }}" class="btn btn-md btn-warning ">
                                                                 <i class="fas fa-pen"></i>
                                                             </a>
                                                             <form action="{{ route('restaurants.destroy',$restaurant->id) }}" method="POST" class="delete-form">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit" class="btn-action delete">
+                                                                <button type="submit" class="btn btn-md btn-danger">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </form>

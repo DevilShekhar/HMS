@@ -1,64 +1,57 @@
 @extends('layouts.app')
 @section('content')
-    <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Menu Management</span>
-                <h2>Menu Items</h2>
-                <p>Manage restaurant menu items.</p>
+<section class="section premium-dashboard">
+    <div class="premium-floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <span class="header-badge">
+                        Menu Management
+                    </span>
+                    <h1>Menu Items</h1>
+                    <p>Manage restaurant menu items and keep your menu up to date.</p>
+                </div>
             </div>
             @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
-
-            <div class="premium-head-actions">
-
+            <div class="header-right">
                 @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('menu-items.create') }}" class="btn premium-btn">
+                    <a href="{{ route('menu-items.create') }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i>
-                        Add Menu Items
+                        Add Menu Item
                     </a>
                 @elseif (!empty($restaurantSlug) && !empty($branchSlug))
                     <a href="{{ route('branch.menu-items.create', [
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
                     ]) }}"
-                        class="btn premium-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-plus"></i>
-                        Add Menu Items
+                        Add Menu Item
                     </a>
                 @elseif (!empty($restaurantSlug))
                     <a href="{{ route('restaurant.menu-items.create', [
                         'restaurant' => $restaurantSlug,
                     ]) }}"
-                        class="btn premium-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-plus"></i>
-                        Add Menu Items
+                        Add Menu Item
                     </a>
                 @endif
-
             </div>
         </div>
-    </section>
-    <section class="section premium-dashboard pt-0">
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-        <div class="card premium-block">
-            <div class="card-header premium-card-header">
-                <div>
-                    <h4>Menu Items List</h4>
-                    <p class="header-subtext">
-                        All menu items for this restaurant.
-                    </p>
-                </div>
-            </div>
+    </div>
+</section>
+    <section class="section premium-dashboard pt-0">       
+        <div class="card premium-block">            
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle"  id="tableExport">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -120,7 +113,7 @@
                                                     'branch' => $branchSlug,
                                                     'menu_item' => $item->id,
                                                 ]) }}"
-                                                    class="btn btn-sm btn-warning">
+                                                    class="btn btn-md btn-warning">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @elseif(!empty($restaurantSlug))
@@ -128,7 +121,7 @@
                                                     'restaurant' => $restaurantSlug,
                                                     'menu_item' => $item->id,
                                                 ]) }}"
-                                                    class="btn btn-sm btn-warning">
+                                                    class="btn btn-md btn-warning">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @endif
@@ -143,20 +136,20 @@
                                                         'branch' => $branchSlug,
                                                         'menu_item' => $item->id,
                                                     ]) }}"
-                                                    style="display:inline" class="delete-form">
+                                                    style="display:inline" class="delete-form btn-md">
                                                 @elseif(!empty($restaurantSlug))
                                                     <form id="delete-form-{{ $item->id }}" method="POST"
                                                         action="{{ route('restaurant.menu-items.destroy', [
                                                             'restaurant' => $restaurantSlug,
                                                             'menu_item' => $item->id,
                                                         ]) }}"
-                                                        style="display:inline" class="delete-form">
+                                                        style="display:inline" class="delete-form btn-md">
                                             @endif
 
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit" class="btn btn-sm btn-danger">
+                                            <button type="submit" class="btn btn-md btn-danger">
 
                                                 <i class="fas fa-trash"></i>
 
