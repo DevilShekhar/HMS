@@ -1346,6 +1346,9 @@
         font-size:15px;
         transition:.3s;
     }
+    .delete-form {
+    margin: 0;
+}
     .premium-input::placeholder{
         color:#a0aec0;
     }
