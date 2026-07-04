@@ -2,47 +2,49 @@
     @extends('layouts.app')
     @section('content')
         <section class="section premium-dashboard">
-            <div class="premium-page-head">
-                <div class="premium-page-title">
-                    <span class="mini-badge"> Order Management </span>
-                    <h2>Orders</h2>
-                    <p> Manage restaurant orders and track status. </p>
-                </div>
-                @php
-                    $restaurantSlug = request()->route('restaurant');
-                    $branchSlug = request()->route('branch');
-                @endphp
-
-                <div class="premium-head-actions">
-
-                    @can('create-order')
-                        @if ($branchSlug)
-                            <a href="{{ route('branch.orders.create', [
-                                'restaurant' => $restaurantSlug,
-                                'branch' => $branchSlug,
-                            ]) }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Create Order
-                            </a>
-                        @else
-                            <a href="{{ route('restaurant.orders.create', [
-                                'restaurant' => $restaurantSlug,
-                            ]) }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Create Order
-                            </a>
-                        @endif
-                    @endcan
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">Order Management</span>
+                            <h2>Order</h2>
+                            <p>Manage restaurant orders and track status.</p>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        @php
+                            $restaurantSlug = request()->route('restaurant');
+                            $branchSlug = request()->route('branch');
+                        @endphp
+                        <div class="premium-head-actions">
+                            @can('create-order')
+                                @if ($branchSlug)
+                                    <a href="{{ route('branch.orders.create', ['restaurant' => $restaurantSlug,'branch' => $branchSlug,]) }}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Create Order
+                                    </a>
+                                @else
+                                    <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurantSlug,]) }}" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Create Order
+                                    </a>
+                                @endif
+                            @endcan
+                        </div>                
+                    </div>
                 </div>
             </div>
         </section>
+       
         <section class="section premium-dashboard pt-0">
             @if (session('success'))
                 <div class="alert alert-success">
                     {{ session('success') }}
                 </div>
             @endif
-
             <div class="card premium-block">
                 <div class="card-header premium-card-header">
                     <div>
@@ -54,36 +56,41 @@
                 </div>
                 <div class="card-body">
                     @if (in_array(optional(auth()->user())->role, ['super_admin', 'owner', 'branch_manager']))
-                        <div class="d-flex flex-wrap mb-3">
-
+                        <div class="d-flex flex-wrap gap-2 mb-4 order-filters">
                             <a href="{{ request()->url() }}"
-                                class="btn btn-sm {{ !request('filter') ? 'btn-primary' : 'btn-outline-primary' }}">
-                                All Orders ({{ $counts['all'] }})
+                                class="btn {{ !request('filter') ? 'btn-primary' : 'btn-light border' }}">
+                                <i class="fas fa-list-ul me-2"></i>
+                                All Orders
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['all'] }}</span>
                             </a>
-
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'today']) }}"
-                                class="btn btn-sm {{ request('filter') == 'today' ? 'btn-primary' : 'btn-outline-primary' }}">
-                                Today's Orders ({{ $counts['today'] }})
+                                class="btn {{ request('filter') == 'today' ? 'btn-primary' : 'btn-light border' }}">
+                                <i class="fas fa-calendar-day me-2"></i>
+                                Today's
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['today'] }}</span>
                             </a>
-
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'customer']) }}"
-                                class="btn btn-sm {{ request('filter') == 'customer' ? 'btn-success' : 'btn-outline-success' }}">
-                                Customer Orders({{ $counts['customer'] }})
+                                class="btn {{ request('filter') == 'customer' ? 'btn-success text-white' : 'btn-light border' }}">
+                                <i class="fas fa-user me-2"></i>
+                                Customer
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['customer'] }}</span>
                             </a>
-
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter']) }}"
-                                class="btn btn-sm {{ request('filter') == 'waiter' ? 'btn-info' : 'btn-outline-info' }}">
-                                Waiter Orders({{ $counts['waiter'] }})
+                                class="btn {{ request('filter') == 'waiter' ? 'btn-info text-white' : 'btn-light border' }}">
+                                <i class="fas fa-concierge-bell me-2"></i>
+                                Waiter
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['waiter'] }}</span>
                             </a>
-
                             <a href="{{ request()->fullUrlWithQuery(['filter' => 'waiter_head']) }}"
-                                class="btn btn-sm {{ request('filter') == 'waiter_head' ? 'btn-warning' : 'btn-outline-warning' }}">
-                                Waiter Head Orders({{ $counts['waiter_head'] }})
+                                class="btn {{ request('filter') == 'waiter_head' ? 'btn-warning text-dark' : 'btn-light border' }}">
+                                <i class="fas fa-user-tie me-2"></i>
+                                Waiter Head
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['waiter_head'] }}</span>
                             </a>
                         </div>
                     @endif
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="permissionsTable">
+                        <table class="table table-hover align-middle" id="tableExport">
                             <thead>
                                 <tr>
                                     <th>SrNo.</th>
@@ -128,7 +135,6 @@
                                         </td>
                                         <td>
                                             {{ $order->table?->category?->name ?? '-' }}
-
                                         </td>
                                         <td class="text-white">
                                             @if ($order->order_type == 'vip')
@@ -151,7 +157,6 @@
                                                     Prepared
                                                 </span>
                                             @elseif($order->status == 'completed_waiting_cashier')
-
                                                 <span class="badge bg-warning text-dark">
                                                     Waiting Cashier Approval
                                                 </span>
@@ -175,11 +180,8 @@
                                         </td>
                                         <td>
                                             @if($order->payment_method)
-
                                                 {{ strtoupper($order->payment_method) }}
-
                                                 @if($order->payment_method == 'upi')
-
                                                     @if($order->payment_status == 'pending')
                                                         <span class="badge bg-warning">
                                                             Pending Verification
@@ -189,15 +191,11 @@
                                                             Verified
                                                         </span>
                                                     @endif
-
                                                 @elseif(in_array($order->payment_method, ['cash', 'card']))
-
                                                     <span class="badge bg-success">
                                                         Paid
                                                     </span>
-
                                                 @endif
-
                                             @else
                                                 -
                                             @endif
@@ -232,9 +230,7 @@
                                                     aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </button>
-
                                                 <ul class="dropdown-menu dropdown-menu-end">
-
                                                     {{-- View --}}
                                                     <li>
                                                         @if (!empty($restaurantSlug) && !empty($branchSlug))
@@ -571,16 +567,7 @@
         });
 
     </script>
-    @push('scripts')
-        <script>
-            $(function () {
-                $('#permissionsTable').DataTable({
-                    responsive: false,
-                    autoWidth: false
-                });
-            });
-        </script>
-    @endpush
+    
 @else
     @php
         abort(403);

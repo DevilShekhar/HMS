@@ -2426,4 +2426,24 @@ margin-bottom:15px;
     transform: translateY(-4px);
     color: white;
 }
+.order-filters .btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:10px 18px;
+    border-radius:12px;
+    font-weight:600;
+    transition:all .25s ease;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
 
+.order-filters .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.10);
+}
+
+.order-filters .badge{
+    border-radius:20px;
+    padding:4px 8px;
+    font-size:.75rem;
+}
