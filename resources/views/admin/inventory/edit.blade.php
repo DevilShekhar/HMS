@@ -2,24 +2,30 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">
-                    Inventory Management
-                </span>
-                <h2>Edit Inventory Item</h2>
-                <p>
-                    Update inventory item details.
-                </p>
+    <div class="premium-floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div>
+                    <span class="header-badge">
+                        Inventory Management
+                    </span>
+                    <h1>Edit Inventory Item</h1>
+                    <p>Update inventory item details.</p>
+                </div>
             </div>
-            <div class="premium-head-actions">
-                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn ghost-btn">
+
+            <div class="header-right">
+                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}" class="premium-back-btn">
                     <i class="fas fa-arrow-left"></i>
                     Back To Inventory
                 </a>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.inventory.update', ['restaurant' => request()->route('restaurant'),'inventory' => $inventory->id]) }}" method="POST">
             @csrf
@@ -37,7 +43,7 @@
                     <div class="row">
                         @if(auth()->user()->hasRole('owner'))
                             <div class="col-md-6 mb-4">
-                                <label>Branch</label>
+                                <label class="premium-label">Branch <span>*</span></label>
                                 <select name="branch_id" class="form-control premium-input">
                                     @foreach($branches as $branch)
                                         <option value="{{ $branch->id }}"
@@ -55,12 +61,12 @@
                         @else
                         <input type="hidden" name="branch_id" value="{{ $inventory->branch_id }}">
                         <div class="col-md-6 mb-4">
-                            <label>Branch</label>
+                            <label class="premium-label">Branch <span>*</span></label>
                             <input type="text" class="form-control premium-input" value="{{ $inventory->branch->name ?? '' }}" readonly>
                         </div>
                         @endif
                         <div class="col-md-6 mb-4">
-                            <label>Item Name</label>
+                            <label class="premium-label">Item Name <span>*</span></label>
                             <input type="text" name="name" value="{{ old('name', $inventory->name) }}" class="form-control premium-input">
                             @error('name')
                                 <small class="text-danger">
@@ -69,7 +75,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-4">
-                            <label>Unit</label>
+                            <label class="premium-label">Unit <span>*</span></label>
                             <select name="unit" class="form-control premium-input">
                                 <option value="kg" {{ $inventory->unit == 'kg' ? 'selected' : '' }}>Kg</option>
                                 <option value="gram" {{ $inventory->unit == 'gram' ? 'selected' : '' }}>Gram</option>
@@ -85,7 +91,7 @@
                             @enderror
                         </div>
                         <div class="col-md-4 mb-4">
-                            <label>Total Stock</label>
+                            <label class="premium-label">Total Stock <span>*</span></label>
                             <input type="number" step="0.01" name="total_stock" value="{{ old('total_stock', $inventory->total_stock) }}" class="form-control premium-input">
                             @error('total_stock')
                                 <small class="text-danger">
@@ -94,7 +100,7 @@
                             @enderror
                         </div>
                         <div class="col-md-4 mb-4">
-                            <label>Remaining Stock</label>
+                            <label class="premium-label">Remaining Stock <span>*</span></label>
                             <input type="number" step="0.01" name="remaining_stock" value="{{ old('remaining_stock', $inventory->remaining_stock) }}" class="form-control premium-input">
                             @error('remaining_stock')
                                 <small class="text-danger">
@@ -103,7 +109,7 @@
                             @enderror
                         </div>
                         <div class="col-md-4 mb-4">
-                            <label>Minimum Stock</label>
+                            <label class="premium-label">Minimum Stock <span>*</span></label>
                             <input type="number" step="0.01" name="minimum_stock" value="{{ old('minimum_stock', $inventory->minimum_stock) }}"  class="form-control premium-input">
                             @error('minimum_stock')
                                 <small class="text-danger">
@@ -111,14 +117,17 @@
                                 </small>
                             @enderror
                         </div>
+                       
+                    </div>
+                      <div class="premium-card-footer">
+                        
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Update Inventory Item
+                        </button>
                     </div>
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    Update Inventory Item
-                </button>
-            </div>
+          
         </form>
     </section>
 @endsection

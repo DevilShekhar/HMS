@@ -1,19 +1,28 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">
-                    Inventory Management
-                </span>
-                <h2> {{ $inventory->name }} Transactions </h2>
-                <p>Inventory Stock IN / OUT History </p>
-            </div>
-            <div class="premium-head-actions">
-                <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}"
-                    class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i> Back To Inventory
-                </a>
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Inventory Management
+                        </span>
+                        <h1>{{ $inventory->name }} Transactions</h1>
+                        <p>Inventory Stock IN / OUT History</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}"
+                        class="premium-back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Inventory
+                    </a>
+                </div>
             </div>
         </div>
     </section>

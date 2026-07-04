@@ -50,8 +50,8 @@
         </div>
     </section>
     <section class="section premium-dashboard pt-0">
-    <div class="row justify-content-center">
-        <div class="col-xl-8 col-lg-9 col-md-11">
+    <div class="row">
+        <div class=" col-md-12">
             @php
             $restaurantSlug = request()->route('restaurant');
         @endphp

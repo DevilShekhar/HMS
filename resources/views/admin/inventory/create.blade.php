@@ -2,45 +2,47 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">
-                    Inventory Management
-                </span>
-                <h2>Create Inventory Item</h2>
-                <p>
-                    Add new inventory stock item.
-                </p>
+    <div class="premium-floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div>
+                    <span class="header-badge">
+                        Inventory Management
+                    </span>
+                    <h1>Create Inventory Item</h1>
+                    <p>Add new inventory stock item.</p>
+                </div>
             </div>
+            
             @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
 
-            <div class="premium-head-actions">
-
+            <div class="header-right">
                 @if ($branchSlug)
                     <a href="{{ route('branch.inventory.index', [
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
+                    ]) }}" class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Inventory
                     </a>
                 @else
                     <a href="{{ route('restaurant.inventory.index', [
                         'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
+                    ]) }}" class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Inventory
                     </a>
                 @endif
-
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.inventory.store', ['restaurant' => request()->route('restaurant')]) }}"
             method="POST">
@@ -59,7 +61,7 @@
                     <div class="row">
                         @if (auth()->user()->hasRole('owner'))
                             <div class="col-md-6 mb-4">
-                                <label>Branch</label>
+                                <label class="premium-label">Branch <span>*</span></label>
                                 <select name="branch_id" class="form-control premium-input" required>
                                     <option value=""> Select Branch</option>
                                     @foreach ($branches as $branch)
@@ -78,13 +80,13 @@
                         @else
                             <input type="hidden" name="branch_id" value="{{ $branch->id }}">
                             <div class="col-md-6 mb-4">
-                                <label>Branch</label>
+                                <label class="premium-label">Branch  <span>*</span></label>
                                 <input type="text" class="form-control premium-input" value="{{ $branch->name }}"
                                     readonly>
                             </div>
                         @endif
                         <div class="col-md-6 mb-4">
-                            <label>Item Name</label>
+                            <label class="premium-label">Item Name <span>*</span></label>
                             <input type="text" name="name" value="{{ old('name') }}"
                                 class="form-control premium-input" placeholder="Oil, Rice, Atta, Tomato" required>
                             @error('name')
@@ -94,7 +96,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-4">
-                            <label>Unit</label>
+                            <label class="premium-label">Unit <span>*</span></label>
                             <select name="unit" class="form-control premium-input" required>
                                 <option value="">Select Unit</option>
                                 <option value="kg">Kg</option>
@@ -111,7 +113,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-4">
-                            <label>Total Stock</label>
+                            <label class="premium-label">Total Stock <span>*</span></label>
                             <input type="number" step="0.01" name="total_stock" value="{{ old('total_stock') }}"
                                 class="form-control premium-input" required>
                             @error('total_stock')
@@ -121,7 +123,7 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-4">
-                            <label>Minimum Stock</label>
+                            <label class="premium-label">Minimum Stock <span>*</span></label>
                             <input type="number" step="0.01" name="minimum_stock" value="{{ old('minimum_stock') }}"
                                 class="form-control premium-input" required>
                             @error('minimum_stock')
@@ -130,14 +132,18 @@
                                 </small>
                             @enderror
                         </div>
+                       
                     </div>
+                      <div class="premium-card-footer">
+                        
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Create Inventory Item
+                        </button>
+                    </div>
+                    
                 </div>
             </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    Create Inventory Item
-                </button>
-            </div>
+            
         </form>
     </section>
 @endsection
