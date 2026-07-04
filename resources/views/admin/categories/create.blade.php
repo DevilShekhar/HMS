@@ -1,14 +1,21 @@
 @extends('layouts.app')
 @section('content')
-    <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Category Management</span>
-                <h2>Create Category</h2>
-                <p>Add a new category for a branch.</p>
-            </div>
-
-            @php
+<section class="section premium-dashboard">
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Category Management
+                        </span>
+                        <h1>Create Category</h1>
+                        <p>Add a new category for a branch.</p>
+                    </div>
+                </div>
+                @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
@@ -16,7 +23,7 @@
             <div class="premium-head-actions">
 
                 @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('categories.index') }}" class="btn premium-btn ghost-btn">
+                    <a href="{{ route('categories.index') }}" class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Category
                     </a>
@@ -25,7 +32,7 @@
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
                     ]) }}"
-                        class="btn premium-btn ghost-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Category
                     </a>
@@ -33,17 +40,19 @@
                     <a href="{{ route('restaurant.categories.index', [
                         'restaurant' => $restaurantSlug,
                     ]) }}"
-                        class="btn premium-btn ghost-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Category
                     </a>
                 @endif
-
+                </div>
             </div>
         </div>
     </section>
     <section class="section premium-dashboard pt-0">
-        @php
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-9 col-md-11">
+            @php
             $restaurantSlug = request()->route('restaurant');
         @endphp
 
@@ -57,22 +66,19 @@
                 <form action="{{ route('categories.store') }}" method="POST" enctype="multipart/form-data">
         @endif
         @csrf
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card premium-block">
-                    <div class="card-header premium-card-header">
-                        <div>
-                            <h4>Category Information</h4>
-                            <p class="header-subtext">
-                                Enter category details.
-                            </p>
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <div class="card-title-group">                        
+                            <div>
+                                <h3>Category Information</h3>
+                                <p>Enter category details below.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            @if (auth()->user()->role == 'owner')
-                                <div class="col-md-6 mb-4">
-                                    <label>Branch</label>
+                     @if (auth()->user()->role == 'owner')
+                       <div class="premium-card-body">
+                        <div class="premium-form-group">
+                                    <label class="premium-label">Branch <span>*</span></label>
                                     <select name="branch_id" class="form-control premium-input">
                                         <option value=""> Select Branch </option>
                                         @foreach ($branches as $branch)
@@ -85,38 +91,42 @@
                                     @error('branch_id')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
-                                </div>
-                            @endif
-                            <div class="col-md-6 mb-4">
-                                <label>Category Name</label>
+                               
+                           
+                        </div>
+                    </div>
+                     @endif
+                    
+                     <div class="premium-card-body">
+                        <div class="premium-form-group">
+                            
+                               <label class="premium-label">Category Name  <span>*</span></label>
                                 <input type="text" name="name" value="{{ old('name') }}"
-                                    class="form-control premium-input">
+                                    class=" premium-input">
                                 @error('name')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
-                            </div>
-                            <div class="col-md-12 mb-4">
-                                <label>Description</label>
-                                <textarea name="description" rows="4" class="form-control premium-input">{{ old('description') }}</textarea>
+                        </div>
+                    </div>
+                     <div class="premium-card-body">
+                            <div class="premium-form-group">
+                                <label class="premium-label">Description <span>*</span></label>
+                                <textarea name="description" rows="4" class=" premium-input">{{ old('description') }}</textarea>
                                 @error('description')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label>Status</label>
-                                <select name="is_active" class="form-control premium-input">
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="premium-card-footer">
+                        
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Create Category
+                        </button>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary"> Create Category</button>
-                </div>
-            </div>
+            </form>
         </div>
-        </form>
-    </section>
+    </div>
+</section>   
+
 @endsection

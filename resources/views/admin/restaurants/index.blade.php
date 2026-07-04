@@ -1,24 +1,31 @@
 @can('view-restaurant')
     @extends('layouts.app')
     @section('content')
-   
         <section class="section premium-dashboard">
-            <div class="premium-page-head">
-                <div class="premium-page-title">
-                     <span class="page-badge">
-                        <i class="fas fa-store"></i>
-                        Restaurant Management
-                    </span>
-                    <h2>Restaurant List</h2>
-                    <p> Manage all restaurants </p>
-                </div>
-                <div class="premium-head-actions">
-                    <a href="{{ route('restaurants.create') }}" class="btn btn-create">
-                        <i class="fas fa-plus"></i>
-                        Add Restaurant
-                    </a>
-                </div>
-            </div>
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                          <i class="fas fa-store"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">
+                                 Restaurant Management
+                            </span>
+                            <h2>Restaurant List</h2>
+                            <p> Manage all restaurants </p>
+                        </div>
+                    </div>
+                    <div class="premium-head-actions">
+                        <a href="{{ route('restaurants.create') }}" class="btn btn-create">
+                            <i class="fas fa-plus"></i>
+                            Add Restaurant
+                        </a>
+                    </div>
+                </div>    
+            </div>    
+        </section> 
+        <section class="section premium-dashboard">
             <div class="row mb-4">
                 <div class="col-lg-4">
                     <div class="dashboard-card">
