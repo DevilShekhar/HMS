@@ -1,62 +1,60 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Menu Management</span>
-                <h2>Create Menu Item</h2>
-                <p>Add a new menu item.</p>
-            </div>
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
-
-            <div class="premium-head-actions">
-
-                @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('menu-items.index') }}" class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Menu Items
-                    </a>
-                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                            <a href="{{ route('branch.menu-items.index', [
-                        'restaurant' => $restaurantSlug,
-                        'branch' => $branchSlug,
-                    ]) }}" class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Menu Items
-                            </a>
-                @elseif(!empty($restaurantSlug))
-                            <a href="{{ route('restaurant.menu-items.index', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}" class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Menu Items
-                            </a>
-                @endif
-
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Menu Management
+                        </span>
+                        <h1>Menu Items</h1>
+                        <p>Manage restaurant Enter menu item details.</p>
+                    </div>
+                </div>
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
+                <div class="premium-head-actions">
+                    @if (auth()->user()->role === 'super_admin')
+                        <a href="{{ route('menu-items.index') }}" class="premium-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back To Menu Items
+                        </a>
+                    @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                        <a href="{{ route('branch.menu-items.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}" class="premium-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back To Menu Items
+                        </a>
+                    @elseif(!empty($restaurantSlug))
+                        <a href="{{ route('restaurant.menu-items.index', [
+                            'restaurant' => $restaurantSlug,
+                            ]) }}" class="premium-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back To Menu Items
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
-    </section>
+    </section>    
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.menu-items.store', ['restaurant' => request()->route('restaurant')]) }}"
             method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="card premium-block">
-                <div class="card-header premium-card-header">
-                    <div>
-                        <h4>Menu Information</h4>
-                        <p class="header-subtext">
-                            Enter menu item details.
-                        </p>
-                    </div>
-                </div>
-                <div class="card-body">
+            <div class="premium-card">                
+                <div class="premium-card-body">
                     <div class="row">
                         @if (auth()->user()->hasRole('owner'))
-                            <div class="col-md-6 mb-4">
-                                <label>Branch</label>
+                            <div class="col-md-4 mb-4">
+                                <label class="premium-label"> Branch <span>*</span></label>
                                 <select name="branch_id" id="branch_id" class="form-control premium-input">
                                     <option value="">
                                         Select Branch
@@ -73,8 +71,8 @@
                             </div>
                         @else
                             <input type="hidden" name="branch_id" value="{{ $branches->first()->id }}">
-                            <div class="col-md-6 mb-4">
-                                <label>Branch</label>
+                            <div class="col-md-4 mb-4">
+                                <label class="premium-label">Branch <span>*</span></label>
                                 <input type="text" class="form-control premium-input" value="{{ $branches->first()->name }}"
                                     readonly>
                                 @error('branch_id')
@@ -82,8 +80,8 @@
                                 @enderror
                             </div>
                         @endif
-                        <div class="col-md-6 mb-4">
-                            <label>Category</label>
+                        <div class="col-md-4 mb-4">
+                            <label class="premium-label">Category <span>*</span></label>
                             <select name="category_id" id="category_id" class="form-control premium-input">
                                 <option value="">
                                     Select Category
@@ -98,22 +96,22 @@
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <label>Menu Name</label>
+                        <div class="col-md-4 mb-4">
+                            <label class="premium-label">Menu Name <span>*</span></label>
                             <input type="text" name="name" class="form-control premium-input">
                             @error('name')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <label>Price</label>
+                        <div class="col-md-3 mb-4">
+                            <label class="premium-label">Price <span>*</span></label>
                             <input type="number" step="0.01" name="price" class="form-control premium-input">
                             @error('number')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-4">
-                            <label>Food Type</label>
+                        <div class="col-md-3 mb-4">
+                            <label class="premium-label">Food Type <span>*</span></label>
                             <select name="food_type" class="form-control premium-input">
                                 <option value="veg">Veg</option>
                                 <option value="non_veg">Non Veg</option>
@@ -121,38 +119,55 @@
                             @error('food_type')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
-                        </div>
+                        </div>                       
                         <div class="col-md-6 mb-4">
-                            <label>Available</label>
-                            <select name="is_available" class="form-control premium-input">
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
-                            </select>
-                            @error('is_available')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <label>Image</label>
-                            <input type="file" name="image" class="form-control premium-input">
+                            <div class="premium-form-group">
+                                <label class="premium-label">
+                                    <i class="fas fa-image me-2"></i>
+                                    Image <span>*</span>
+                                </label>
+                                <div class="upload-wrapper">
+                                    <div class="upload-input">
+                                        <input type="file" name="image" id="image" class="form-control "  accept="image/png,image/jpeg,image/jpg,image/webp" onchange="previewImage(event)">
+                                        <small>JPG, PNG, JPEG, WEBP (Max 2 MB)</small>
+                                         @error('image')
+                                            <div class="invalid-feedback d-block">
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+                                    <div class="upload-preview">
+                                        <img id="preview" src="{{ asset('images/no-image.png') }}" alt="Preview">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-12 mb-4">
-                            <label>Description</label>
-                            <textarea name="description" rows="4" class="form-control premium-input"></textarea>
+                            <label class="premium-label">Description <span>*</span></label>
+                            <textarea name="description" id="description" rows="4" class="form-control premium-input"></textarea>
                             @error('description')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    Create Menu Item
-                </button>
-            </div>
+                <div class="premium-card-footer">                       
+                    <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                        Create Menu Item
+                    </button>
+                </div>
+            </div>           
         </form>
     </section>
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('preview').src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+        </script>
     @if (auth()->user()->hasRole('owner'))
         <script>
             document.getElementById('branch_id').addEventListener('change', function () {
@@ -173,5 +188,4 @@
             });
         </script>
     @endif
-
 @endsection
