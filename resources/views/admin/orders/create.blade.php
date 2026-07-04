@@ -286,20 +286,21 @@
 
         function updateCardHighlights() {
             document.querySelectorAll('.menu-card').forEach(card => {
-                const id = card.dataset.id;
-                const qty = order[id]?.qty || 0;
-                card.classList.toggle('active', qty > 0);
+            const id = card.dataset.id;
+            const qty = order[id]?.qty || 0;
 
-                const oldBadge = card.querySelector('.menu-card-qty-badge');
-                if (oldBadge) oldBadge.remove();
+            card.classList.toggle('active', qty > 0);
 
-                if (qty > 0) {
-                    const badge = document.createElement('div');
-                    badge.className = 'menu-card-qty-badge';
-                    badge.textContent = qty;
-                    card.appendChild(badge);
-                }
-            });
+            const oldBadge = card.querySelector('.menu-card-qty-badge');
+            if (oldBadge) oldBadge.remove();
+
+            if (qty > 0) {
+                const badge = document.createElement('div');
+                badge.className = 'menu-card-qty-badge';
+                badge.textContent = qty.toLocaleString('en-IN');
+                card.appendChild(badge);
+            }
+        });
         }
 
         function addItemToOrder(id, name, price) {
@@ -325,7 +326,7 @@
             const keys = Object.keys(order);
             const totalQty = keys.reduce((sum, id) => sum + order[id].qty, 0);
 
-            itemCountBadge.textContent = totalQty + ' item' + (totalQty !== 1 ? 's' : '');
+            itemCountBadge.textContent = totalQty.toLocaleString('en-IN') + ' item' + (totalQty !== 1 ? 's' : '');
 
             if (keys.length === 0) {
                 if (emptyMsg) emptyMsg.style.display = 'block';
@@ -354,7 +355,10 @@
 
                                         <button type="button" class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
                                     </div>
-                                    <div class="order-item-total">₹${lineTotal.toFixed(2)}</div>
+                                    <div class="order-item-total">₹${lineTotal.toLocaleString('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2})}
+                                    </div>
                                     <button type="button" class="remove-item-btn" onclick="removeItem(${id})">✕</button>
                                 </div>
                             </div>
@@ -381,12 +385,18 @@
 
         function updateTotals() {
             let subtotal = 0;
+
             for (let id in order) {
                 subtotal += order[id].price * order[id].qty;
             }
 
             const grandTotal = subtotal;
-            document.getElementById('grandTotalAmount').textContent = '₹' + grandTotal.toFixed(2);
+
+            document.getElementById('grandTotalAmount').textContent =
+                '₹' + grandTotal.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
         }
 
         function changeQty(id, delta) {

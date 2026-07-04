@@ -47,6 +47,8 @@
                             <input type="text" name="name" value="{{ old('name') }}" class="premium-input @error('name') input-error @enderror" placeholder="Enter restaurant name">
                             @error('name')
                                     <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
                             @enderror
                         </div>
                     </div>

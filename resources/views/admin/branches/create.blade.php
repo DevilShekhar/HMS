@@ -147,40 +147,6 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
-                                        {{-- GST Enable Checkbox --}}
-                                        <div class="col-lg-3 col-md-6 mb-4">
-                                            <label class="form-label">Enable GST</label>
-                                            <div class="form-check form-switch mt-2">
-                                                <input class="form-check-input" type="checkbox" id="gst_enabled"
-                                                    name="gst_enabled" value="1" {{ old('gst_enabled') ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="gst_enabled">
-                                                    Apply GST
-                                                </label>
-                                            </div>
-                                            @error('gst_enabled')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-
-                                        {{-- GST Section --}}
-                                        <div id="gstSection" style="{{ old('gst_enabled') ? '' : 'display: none;' }}">
-                                            <div class="row">
-                                                <div class="col-lg-3 mb-4">
-                                                    <label>GST %</label>
-                                                    <input type="number" step="0.01" name="gst" id="gst"
-                                                        value="{{ old('gst') }}" class="form-control">
-                                                </div>
-                                                <div class="col-lg-3 mb-4">
-                                                    <label>CGST %</label>
-                                                    <input type="number" id="cgst" class="form-control" readonly>
-                                                </div>
-                                                <div class="col-lg-3 mb-4">
-                                                    <label>SGST %</label>
-                                                    <input type="number" id="sgst" class="form-control" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <div class="col-lg-3 col-md-6 mb-4">
                                             <label>FSSAI License</label>
                                             <input type="text" name="fssai_license" class="form-control premium-input">
@@ -307,44 +273,25 @@
                 </form>
         </section>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const toggle = document.getElementById("gst_enabled");
-                const section = document.getElementById("gstSection");
-                const gstInput = document.getElementById("gst");
-                const cgstInput = document.getElementById("cgst");
-                const sgstInput = document.getElementById("sgst");
+            var existingCombinations;
 
-                function calculateGST() {
-                    const value = parseFloat(gstInput.value);
-                    if (isNaN(value) || value <= 0) {
-                        cgstInput.value = '';
-                        sgstInput.value = '';
-                        return;
-                    }
-                    const half = (value / 2).toFixed(2);
-                    cgstInput.value = half;
-                    sgstInput.value = half;
+            $('#restaurant_id, #owner_id').on('change', function () {
+
+                const restaurantId = $('#restaurant_id').val();
+                const ownerId = $('#owner_id').val();
+
+                $('#ownerError').text('');
+
+                if (!restaurantId || !ownerId) return;
+
+                const exists = existingCombinations.some(item =>
+                    item.restaurant_id == restaurantId &&
+                    item.owner_id == ownerId
+                );
+
+                if (exists) {
+                    $('#ownerError').text('This owner is already assigned to the selected restaurant.');
                 }
-
-                function toggleGSTSection() {
-                    if (toggle.checked) {
-                        section.style.display = "block";
-                    } else {
-                        section.style.display = "none";
-                        gstInput.value = '';
-                        cgstInput.value = '';
-                        sgstInput.value = '';
-                    }
-                }
-
-                // Initial state
-                toggleGSTSection();
-                calculateGST();
-
-                // Event listeners
-                toggle.addEventListener("change", toggleGSTSection);
-                gstInput.addEventListener("input", calculateGST);
-                gstInput.addEventListener("change", calculateGST);
             });
         </script>
     @endsection

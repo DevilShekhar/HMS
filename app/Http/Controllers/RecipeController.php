@@ -9,6 +9,8 @@ use App\Models\Recipe;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+
 
 class RecipeController extends Controller
 {
@@ -68,19 +70,40 @@ class RecipeController extends Controller
 
     public function store(Request $request, $restaurant)
     {
-        // dd($request->all());
         $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
 
+        // $request->validate([
+        //     'branch_id' => 'nullable',
+        //     'menu_item_id' => 'required',
+        //     'inventory_id' => 'required|array|min:1',
+        //     'inventory_id.*' => 'required|exists:inventory_items,id',
+        //     'quantity_required' => 'required|array|min:1',
+        //     'quantity_required.*' => 'required|numeric|min:0.001',
+        //     'recipe_unit' => 'required|array|min:1',
+        //     'recipe_unit.*' => 'required',
+
+        // ]);
         $request->validate([
             'branch_id' => 'nullable',
             'menu_item_id' => 'required',
-            'inventory_id' => 'required|array|min:1',
-            'inventory_id.*' => 'required|exists:inventory_items,id',
+            'inventory_id' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'inventory_id.*' => [
+                'required',
+                'exists:inventory_items,id',
+                Rule::unique('mgnt_recipes', 'inventory_id')->where(function ($query) use ($request) {
+                    return $query->where('menu_item_id', $request->menu_item_id);
+                }),
+            ],
             'quantity_required' => 'required|array|min:1',
             'quantity_required.*' => 'required|numeric|min:0.001',
             'recipe_unit' => 'required|array|min:1',
             'recipe_unit.*' => 'required',
-
+        ], [
+            'inventory_id.*.unique' => 'This inventory item is already added to the selected menu item.',
         ]);
 
         foreach ($request->inventory_id as $key => $inventoryId) {
@@ -123,7 +146,7 @@ class RecipeController extends Controller
         // Super admin
         return redirect()
             ->route('orders.index')
-            ->with('success', 'Order created successfully.');
+            ->with('success', 'Order created success    fully.');
     }
 
     public function edit($restaurant, $recipe, $branch = null)
