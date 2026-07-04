@@ -62,8 +62,8 @@ class TableCategoryController extends Controller
             ],
             'branch_id' => 'required',
         ], [
-    'name.unique' => 'This name already exists in the selected branch.',
-]);
+            'name.unique' => 'This name already exists in the selected branch.',
+        ]);
 
         TableCategory::create([
             'restaurant_id' => app('restaurant')->id,

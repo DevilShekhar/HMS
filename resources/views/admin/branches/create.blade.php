@@ -3,24 +3,27 @@
     @extends('layouts.app')
     @section('content')
         <section class="section premium-dashboard">
-            <div class="premium-page-head">
-                <div class="premium-page-title">
-                    <span class="mini-badge">Branch Management</span>
-                    <h2>Create Branch</h2>
-                    <p>Add a new restaurant branch.</p>
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">
+                                Branch Managermebt
+                            </span>
+                            <h1>Create Branch</h1>
+                            <p>Add a new Branch to the system with basic information.</p>
+                        </div>
+                    </div>
+
+                <div class="header-right">
+                    <a href="{{ route('branches.index') }}" class="premium-back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Branches
+                    </a>
                 </div>
-                <div class="premium-head-actions">
-                    @if (auth()->user()->role == 'super_admin')
-                        <a href="{{ route('branches.index') }}" class="btn premium-btn ghost-btn"> <i class="fas fa-arrow-left"></i>
-                            Back To Branches</a>
-                    @else
-                            <a href="{{ route('restaurant.branches.index', [
-                            'restaurant' => request()->route('restaurant'),
-                        ]) }}" class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Branches
-                            </a>
-                    @endif
                 </div>
             </div>
         </section>
@@ -273,7 +276,7 @@
                 </form>
         </section>
         <script>
-            var existingCombinations;
+            const existingCombinations = @json($existingCombinations);
 
             $('#restaurant_id, #owner_id').on('change', function () {
 

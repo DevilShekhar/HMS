@@ -53,7 +53,7 @@
                                         @error('name') <small class="text-danger">{{ $message }}</small> @enderror
                                     </div>
                                     <div class="eht-field">
-                                        <label>Email Address</label>
+                                        <label>Email</label>
                                         <input type="email" name="email" value="{{ old('email') }}" class="eht-input @error('email') is-invalid @enderror">
                                         @error('email') <small class="text-danger">{{ $message }}</small> @enderror
                                     </div>
@@ -105,7 +105,7 @@
                                     </div>
                                     @endif
 
-                                    @if (auth()->user()->role == 'super_admin' || auth()->user()->role == 'owner')
+                                    @if (auth()->user()->role != 'super_admin' || auth()->user()->role == 'owner')
                                     <div class="eht-field">
                                         <label>Branch <span class="required">*</span></label>
                                         <select name="branch_id" id="branch_id" class="eht-input">

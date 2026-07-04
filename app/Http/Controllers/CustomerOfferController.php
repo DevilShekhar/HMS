@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class CustomerOfferController extends Controller
 {
@@ -69,9 +70,16 @@ class CustomerOfferController extends Controller
     {
         // dd($request->all());
         $request->validate([
-            'title' => 'required',
+            'title' => [
+                'required',
+                Rule::unique('customer_offers')->where(function ($query) use ($request) {
+                    return $query->where('category', $request->category);
+                }),
+            ],
             'description' => 'required',
             'category' => 'required',
+        ], [
+            'title.unique' => 'This title already exists in the selected category.',
         ]);
 
         CustomerOffer::create([

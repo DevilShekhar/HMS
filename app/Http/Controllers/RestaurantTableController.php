@@ -82,8 +82,8 @@ class RestaurantTableController extends Controller
             ],
             'capacity' => 'required|integer|min:1',
         ], [
-           'table_number.unique' => 'This table number already exists in the selected branch.',
-       ]);
+            'table_number.unique' => 'This table number already exists in the selected branch.',
+        ]);
         RestaurantTable::create([
             'cat_id' => $request->cat_id,
             'restaurant_id' => app('restaurant')->id,
@@ -127,8 +127,15 @@ class RestaurantTableController extends Controller
         return view('admin.tables.show', compact('table'));
     }
 
-    public function edit($restaurant, $branch, RestaurantTable $table)
+    public function edit($restaurant, $branch = null, $table = null)
     {
+        if ($table === null) {
+            $table = $branch;
+            $branch = null;
+        }
+
+        $table = RestaurantTable::findOrFail($table);
+
         $user = Auth::user();
         if ($user->role == 'owner') {
             $branches = Branch::query()->where('owner_id', $user->id)->where('is_active', 1)->get();
