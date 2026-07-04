@@ -80,7 +80,7 @@ class CustomerOfferController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'category' => $request->category,
-            'status' => $request->has('status'),
+            'status'        => 1,
         ]);
 
         // Branch Manager
