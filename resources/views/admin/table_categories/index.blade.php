@@ -1,46 +1,56 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Table Management</span>
-                <h2>Table Categories</h2>
-                <p>Manage restaurant table categories.</p>
-            </div>
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Table Categories
+                        </span>
+                        <h1>Manage Table Categories</h1>
+                        <p>View, create, edit, and manage restaurant table categories from one place.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    @php
+                        $restaurantSlug = request()->route('restaurant');
+                        $branchSlug = request()->route('branch');
+                    @endphp
+                    <div class="premium-head-actions">
 
-            <div class="premium-head-actions">
+                        @if (!empty($restaurantSlug) && !empty($branchSlug))
+                            <a href="{{ route('branch.table-categories.create', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}"
+                                class="premium-back-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Table Category
+                            </a>
+                        @elseif(!empty($restaurantSlug))
+                            <a href="{{ route('restaurant.table-categories.create', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}"
+                                class="premium-back-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Table Category
+                            </a>
+                        @else
+                            <a href="{{ route('table-categories.create') }}" class="premium-back-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Table Category
+                            </a>
+                        @endif
 
-                @if (!empty($restaurantSlug) && !empty($branchSlug))
-                    <a href="{{ route('branch.table-categories.create', [
-                        'restaurant' => $restaurantSlug,
-                        'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn premium-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Table Category
-                    </a>
-                @elseif(!empty($restaurantSlug))
-                    <a href="{{ route('restaurant.table-categories.create', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn premium-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Table Category
-                    </a>
-                @else
-                    <a href="{{ route('table-categories.create') }}" class="btn premium-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Table Category
-                    </a>
-                @endif
-
-            </div>
-        </div>
-    </section>
+                    </div>              
+                </div>
+            </div>    
+        </div>    
+    </section>  
     <section class="section premium-dashboard pt-0">
         @if (session('success'))
             <div class="alert alert-success">
@@ -58,7 +68,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle" id="tableExport">
                         <thead>
                             <tr>
                                 <th width="60">#</th>
@@ -108,7 +118,7 @@
                                                 <a href="{{ route('table-categories.edit', [
                                                     'table_category' => $category->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @elseif(!empty($restaurantSlug) && !empty($branchSlug))
@@ -117,7 +127,7 @@
                                                     'branch' => $branchSlug,
                                                     'table_category' => $category->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @elseif(!empty($restaurantSlug))
@@ -125,7 +135,7 @@
                                                     'restaurant' => $restaurantSlug,
                                                     'table_category' => $category->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @endif
@@ -158,7 +168,7 @@
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="submit" class="btn btn-danger btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </button>
 
@@ -178,12 +188,7 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-                @if ($categories->hasPages())
-                    <div class="mt-4">
-                        {{ $categories->links() }}
-                    </div>
-                @endif
+                </div>               
             </div>
         </div>
     </section>

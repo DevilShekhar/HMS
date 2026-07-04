@@ -1,46 +1,58 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Table Management</span>
-                <h2>Create Table Category</h2>
-                <p>Add a new table category for a branch.</p>
-            </div>
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Table Categories
+                        </span>
+                        <h1>Manage Table Categories</h1>
+                        <p>View, create, edit, and manage restaurant table categories from one place.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    @php
+                        $restaurantSlug = request()->route('restaurant');
+                        $branchSlug = request()->route('branch');
+                    @endphp
 
-            <div class="premium-head-actions">
+                    <div class="premium-head-actions">
 
-                @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('table-categories.index') }}" class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Table Categories
-                    </a>
-                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                    <a href="{{ route('branch.table-categories.index', [
-                        'restaurant' => $restaurantSlug,
-                        'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Table Categories
-                    </a>
-                @elseif(!empty($restaurantSlug))
-                    <a href="{{ route('restaurant.table-categories.index', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Table Categories
-                    </a>
-                @endif
+                        @if (auth()->user()->role === 'super_admin')
+                            <a href="{{ route('table-categories.index') }}" class="premium-back-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Table Categories
+                            </a>
+                        @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                            <a href="{{ route('branch.table-categories.index', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}"
+                                class="premium-back-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Table Categories
+                            </a>
+                        @elseif(!empty($restaurantSlug))
+                            <a href="{{ route('restaurant.table-categories.index', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}"
+                                class="premium-back-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Back To Table Categories
+                            </a>
+                        @endif
 
-            </div>
-        </div>
-    </section>
+                    </div>           
+                </div>
+            </div>    
+        </div>    
+    </section>  
+   
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.table-categories.store', ['restaurant' => request()->route('restaurant')]) }}"
             method="POST">
@@ -61,7 +73,7 @@
                                 @if (auth()->user()->role == 'owner')
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">Branch</label>
-                                        <select name="branch_id" class="form-control premium-input">
+                                        <select name="branch_id" class=" premium-input">
                                             <option value="">Select Branch</option>
                                             @foreach ($branches as $branch)
                                                 <option value="{{ $branch->id }}"
@@ -80,7 +92,7 @@
 
                                     <div class="col-md-6 mb-4">
                                         <label class="form-label">Branch</label>
-                                        <input type="text" class="form-control premium-input" value="{{ $branch->name }}"
+                                        <input type="text" class=" premium-input" value="{{ $branch->name }}"
                                             readonly>
                                     </div>
                                 @endif
@@ -89,7 +101,7 @@
                                         Table Category Name
                                     </label>
                                     <input type="text"name="name" value="{{ old('name') }}"
-                                        class="form-control premium-input" placeholder="Enter category name">
+                                        class=" premium-input" placeholder="Enter category name">
                                     @error('name')
                                         <small class="text-danger">
                                             {{ $message }}
@@ -98,13 +110,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            Create Table Category
-                        </button>
-                    </div>
+                        <div class="premium-card-footer">                       
+                            <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                                Create Table Category
+                            </button>
+                        </div>
+                    </div>                    
                 </div>
             </div>
         </form>
