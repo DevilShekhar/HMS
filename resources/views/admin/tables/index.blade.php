@@ -1,59 +1,46 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Table Management</span>
-                <h2>Restaurant Tables</h2>
-                <p>Manage restaurant tables.</p>
-            </div>
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
-
-            <div class="premium-head-actions">
-
-                @if ($branchSlug)
-                    <a href="{{ route('branch.tables.create', [
-                        'restaurant' => $restaurantSlug,
-                        'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Add Table
-                    </a>
-                @else
-                    <a href="{{ route('restaurant.tables.create', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Add Table
-                    </a>
-                @endif
-
-            </div>
-        </div>
-    </section>
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                      <i class="fas fa-th-large"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Table Management
+                        </span>
+                        <h1>Manage Tables</h1>
+                        <p>View, create, edit, and manage all restaurant tables from one place.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    @php
+                        $restaurantSlug = request()->route('restaurant');
+                        $branchSlug = request()->route('branch');
+                    @endphp
+                    <div class="premium-head-actions">
+                        @if ($branchSlug)
+                            <a href="{{ route('branch.tables.create', ['restaurant' => $restaurantSlug,'branch' => $branchSlug,]) }}" class="premium-back-btn"><i class="fas fa-plus"></i> Add Table</a>
+                        @else
+                            <a href="{{ route('restaurant.tables.create', ['restaurant' => $restaurantSlug,]) }}" class="premium-back-btn"><i class="fas fa-plus"></i>Add Table</a>
+                        @endif
+                    </div>                
+                </div>
+            </div>    
+        </div>    
+    </section>    
     <section class="section premium-dashboard pt-0">
         @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
-        <div class="card premium-block">
-            <div class="card-header premium-card-header">
-                <div>
-                    <h4>Table List</h4>
-                    <p class="header-subtext">
-                        View and manage all tables.
-                    </p>
-                </div>
-            </div>
+        <div class="card premium-block">            
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle" id="tableExport">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -105,7 +92,7 @@
                                                     'branch' => $branchSlug,
                                                     'table' => $table->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @elseif(!empty($restaurantSlug))
@@ -113,14 +100,14 @@
                                                     'restaurant' => $restaurantSlug,
                                                     'table' => $table->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @else
                                                 <a href="{{ route('tables.edit', [
                                                     'table' => $table->id,
                                                 ]) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @endif
@@ -153,7 +140,7 @@
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="submit" class="btn btn-danger btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </button>
 
@@ -171,10 +158,7 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-                <div class="mt-3">
-                    {{ $tables->links() }}
-                </div>
+                </div>               
             </div>
         </div>
     </section>

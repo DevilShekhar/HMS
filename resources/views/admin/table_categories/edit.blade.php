@@ -1,13 +1,22 @@
 @extends('layouts.app')
 @section('content')
-    <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Table Management</span>
-                <h2>Edit Table Category</h2>
+<section class="section premium-dashboard">
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Table Categories
+                        </span>
+                       <h2>Edit Table Category</h2>
                 <p>Update table category information.</p>
-            </div>
-            @php
+                    </div>
+                </div>
+                <div class="header-right">
+                    @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
@@ -15,7 +24,7 @@
             <div class="premium-head-actions">
 
                 @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('table-categories.index') }}" class="btn premium-btn ghost-btn">
+                    <a href="{{ route('table-categories.index') }}" class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Table Categories
                     </a>
@@ -24,7 +33,7 @@
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
                     ]) }}"
-                        class="btn premium-btn ghost-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Table Categories
                     </a>
@@ -32,15 +41,18 @@
                     <a href="{{ route('restaurant.table-categories.index', [
                         'restaurant' => $restaurantSlug,
                     ]) }}"
-                        class="btn premium-btn ghost-btn">
+                        class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Table Categories
                     </a>
                 @endif
 
-            </div>
-        </div>
-    </section>
+            </div>        
+                </div>
+            </div>    
+        </div>    
+    </section>  
+    
     <section class="section premium-dashboard pt-0">
         <form
             action="{{ request()->route('branch')
@@ -74,7 +86,7 @@
                                         <label class="form-label">
                                             Branch
                                         </label>
-                                        <select name="branch_id" class="form-control premium-input">
+                                        <select name="branch_id" class=" premium-input">
                                             <option value="">
                                                 Select Branch
                                             </option>
@@ -93,27 +105,27 @@
                                     </div>
                                 @endif
                                 @if(request()->route('branch'))
-    <input type="hidden"
-           name="branch_id"
-           value="{{ $branch->id }}">
+                                <input type="hidden"
+                                    name="branch_id"
+                                    value="{{ $branch->id }}">
 
-    <div class="col-md-6 mb-4">
-        <label class="form-label">
-            Branch
-        </label>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">
+                                        Branch
+                                    </label>
 
-        <input type="text"
-               class="form-control premium-input"
-               value="{{ $branch->name }}"
-               readonly>
-    </div>
-@endif
+                                    <input type="text"
+                                        class="premium-input"
+                                        value="{{ $branch->name }}"
+                                        readonly>
+                                </div>
+                            @endif
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label">
                                         Table Category Name
                                     </label>
                                     <input type="text" name="name" value="{{ old('name', $tableCategory->name) }}"
-                                        class="form-control premium-input" placeholder="Enter category name">
+                                        class=" premium-input" placeholder="Enter category name">
                                     @error('name')
                                         <small class="text-danger">
                                             {{ $message }}
@@ -122,13 +134,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            Update Table Category
-                        </button>
-                    </div>
+                        <div class="premium-card-footer">                       
+                            <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                                 Update Table Category
+                            </button>
+                        </div>
+                    </div>                    
                 </div>
             </div>
         </form>
