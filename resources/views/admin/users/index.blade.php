@@ -2,8 +2,52 @@
     @extends('layouts.app')
 
     @section('content')
+        <section class="section premium-dashboard">
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">
+                               User List
+                            </span>
+                            <p>Manage all users from API server</p>
+                        </div>
+                    </div>
+                    @php
+                        $restaurantSlug = request()->route('restaurant');
+                        $branchSlug = request()->route('branch');
+                    @endphp
+                    <div class="header-right">
+                        @if (auth()->user()->role === 'super_admin')
+                            <a href="{{ route('users.create') }}" class="premium-back-btn">
+                                <i class="fas fa-plus"></i>
+                                Add User
+                            </a>
+                        @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                                    <a href="{{ route('branch.users.create', [
+                                'restaurant' => $restaurantSlug,
+                                'branch' => $branchSlug,
+                            ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Add User
+                                    </a>
+                        @elseif (!empty($restaurantSlug))
+                                    <a href="{{ route('restaurant.users.create', [
+                                'restaurant' => $restaurantSlug,
+                            ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Add User
+                                    </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </section>
         <div class="eht-container">
-            <div class="eht-header">
+            {{-- <div class="eht-header">
                 <div class="eht-page-title">
                     <span class="eht-badge">
                         <i class="fas fa-users" style="margin-right: 4px;"></i> User Management
@@ -13,28 +57,29 @@
                 </div>
 
                 @can('create-user')
-                    @php
-                        $restaurantSlug = request()->route('restaurant');
-                        $branchSlug = request()->route('branch');
-                    @endphp
+                @php
+                $restaurantSlug = request()->route('restaurant');
+                $branchSlug = request()->route('branch');
+                @endphp
 
-                    @if (auth()->user()->role === 'super_admin')
-                        <a href="{{ route('users.create') }}" class="eht-btn eht-btn-primary">
-                            <i class="fas fa-plus"></i> Add User
-                        </a>
-                    @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                        <a href="{{ route('branch.users.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
-                            class="eht-btn eht-btn-primary">
-                            <i class="fas fa-plus"></i> Add User
-                        </a>
-                    @elseif(!empty($restaurantSlug))
-                        <a href="{{ route('restaurant.users.create', ['restaurant' => $restaurantSlug]) }}"
-                            class="eht-btn eht-btn-primary">
-                            <i class="fas fa-plus"></i> Add User
-                        </a>
-                    @endif
+                @if (auth()->user()->role === 'super_admin')
+                <a href="{{ route('users.create') }}" class="eht-btn eht-btn-primary">
+                    <i class="fas fa-plus"></i> Add User
+                </a>
+                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                <a href="{{ route('branch.users.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
+                    class="eht-btn eht-btn-primary">
+                    <i class="fas fa-plus"></i> Add User
+                </a>
+                @elseif(!empty($restaurantSlug))
+                <a href="{{ route('restaurant.users.create', ['restaurant' => $restaurantSlug]) }}"
+                    class="eht-btn eht-btn-primary">
+                    <i class="fas fa-plus"></i> Add User
+                </a>
+                @endif
                 @endcan
-            </div>
+            </div> --}}
+
 
             <div class="eht-main-card">
                 <div class="eht-card-header">
@@ -43,7 +88,8 @@
                         <p class="header-subtext">User records from API</p>
                     </div>
                     <span class="total-badge">
-                        Total: {{ $users->total() }}  {{-- Changed from count() to total() so it shows the full database count, not just the page count --}}
+                        Total: {{ $users->total() }} {{-- Changed from count() to total() so it shows the full database count,
+                        not just the page count --}}
                     </span>
                 </div>
 

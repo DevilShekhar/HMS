@@ -18,12 +18,12 @@
                         </div>
                     </div>
 
-                <div class="header-right">
-                    <a href="{{ route('branches.index') }}" class="premium-back-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Branches
-                    </a>
-                </div>
+                    <div class="header-right">
+                        <a href="{{ route('branches.index') }}" class="premium-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Branches
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -267,10 +267,13 @@
                                     <input type="hidden" name="billing_cycle" id="billing_cycle" value="monthly">
 
                                 </div>
+                                <div class="premium-card-footer">
+                                <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                                    Create Menu Item
+                                </button>
                             </div>
-                            <div class="mt-4">
-                                <button type="submit" class="btn btn-primary">Create Branch </button>
                             </div>
+
                         </div>
                     </div>
                 </form>
