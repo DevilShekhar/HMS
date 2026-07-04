@@ -1,297 +1,277 @@
+@can('view-branch')
 @extends('layouts.app')
+
 @section('content')
-    <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Branch Management</span>
-                <h2>Branch Details</h2>
-                <p>View branch information.</p>
+<section class="section premium-dashboard">
+    <div class="premium-floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <div>
+                    <span class="header-badge">Branch Management</span>
+                    <h1>{{ $branch->name }}</h1>
+                    <p>Branch Details & Information</p>
+                </div>
             </div>
-            <div class="premium-head-actions">
+            <div class="header-right">
                 @if(auth()->user()->role == 'super_admin')
-                    <a href="{{ route('branches.index') }}" class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Branches
+                    <a href="{{ route('branches.index') }}" class="premium-back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Branches
                     </a>
                 @else
-                            <a href="{{ route('restaurant.branches.index', [
-                        'restaurant' => request()->route('restaurant')
-                    ]) }}" class="btn premium-btn ghost-btn">
-                                <i class="fas fa-arrow-left"></i>
-                                Back To Branches
-                            </a>
+                    <a href="{{ route('restaurant.branches.index', ['restaurant' => request()->route('restaurant')]) }}"
+                       class="premium-back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Branches
+                    </a>
                 @endif
             </div>
         </div>
-    </section>
-    <section class="section premium-dashboard pt-0">
-        <div class="card premium-block">
-            <div class="card-header premium-card-header">
-                <div>
-                    <h4>{{ $branch->name }}</h4>
-                    <p class="header-subtext">
-                        Branch Information
-                    </p>
+    </div>
+</section>
+
+<section class="section premium-dashboard pt-0">
+    <div class="row justify-content-center">
+        <div class="col-xl-12">
+
+            <!-- Single Main Card -->
+            <div class="premium-card mt-5">
+
+                <div class="premium-card-header">
+                    <div class="card-title-group">
+                        <div>
+                            <h3>Branch Information</h3>
+                            <p>Complete details of {{ $branch->name }}</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Branch Name</strong></label>
-                        <p>{{ $branch->name ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Branch Code</strong></label>
-                        <p>{{ $branch->code ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Restaurant</strong></label>
-                        <p>{{ optional($branch->restaurant)->name ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Owner</strong></label>
-                        <p>{{ optional($branch->owner)->name ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Branch Manager</strong></label>
-                        <p>{{ optional($branch->manager)->name ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Phone</strong></label>
-                        <p>{{ $branch->phone ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Email</strong></label>
-                        <p>{{ $branch->email ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>GST Number</strong></label>
-                        <p>{{ $branch->gst_number ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>FSSAI License</strong></label>
-                        <p>{{ $branch->fssai_license ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Opening Time</strong></label>
-                        <p>{{ $branch->opening_time ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Closing Time</strong></label>
-                        <p>{{ $branch->closing_time ?? '-' }}</p>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label><strong>City</strong></label>
-                        <p>{{ $branch->city ?? '-' }}</p>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label><strong>State</strong></label>
-                        <p>{{ $branch->state ?? '-' }}</p>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label><strong>Country</strong></label>
-                        <p>{{ $branch->country ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Postal Code</strong></label>
-                        <p>{{ $branch->postal_code ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Status</strong></label>
-                        @if($branch->is_active)
-                            <p>
-                                <span class="badge bg-success">
-                                    Active
-                                </span>
-                            </p>
-                        @else
-                            <p>
-                                <span class="badge bg-danger">
-                                    Inactive
-                                </span>
-                            </p>
+
+                <div class="premium-card-body">
+
+                    <div class="row g-4">
+
+                        <!-- Basic Information -->
+                        <div class="col-lg-7">
+                            <h5 class="mb-3 text-warning">Basic Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Branch Name</label>
+                                        <p class="fw-bold">{{ $branch->name }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Branch Code</label>
+                                        <p>{{ $branch->code ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Restaurant</label>
+                                        <p>{{ optional($branch->restaurant)->name ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Owner</label>
+                                        <p>{{ optional($branch->owner)->name ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Branch Manager</label>
+                                        <p>{{ optional($branch->manager)->name ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Status</label>
+                                        @if($branch->is_active)
+                                            <span class="badge bg-success px-3 py-2">Active</span>
+                                        @else
+                                            <span class="badge bg-danger px-3 py-2">Inactive</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact & Location -->
+                        <div class="col-lg-5">
+                            <h5 class="mb-3 text-warning">Contact & Location</h5>
+                            <div class="premium-form-group">
+                                <label class="premium-label">Phone</label>
+                                <p>{{ $branch->phone ?? '-' }}</p>
+                            </div>
+                            <div class="premium-form-group">
+                                <label class="premium-label">Email</label>
+                                <p>{{ $branch->email ?? '-' }}</p>
+                            </div>
+                            <div class="premium-form-group">
+                                <label class="premium-label">Full Address</label>
+                                <p>{{ $branch->address ?? '-' }}</p>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">City</label>
+                                        <p>{{ $branch->city ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">State</label>
+                                        <p>{{ $branch->state ?? '-' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Country</label>
+                                        <p>{{ $branch->country ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">Postal Code</label>
+                                        <p>{{ $branch->postal_code ?? '-' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tax & Compliance -->
+                        <div class="col-12">
+                            <h5 class="mb-3 text-warning">Tax & Compliance</h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">GST Number</label>
+                                        <p>{{ $branch->gst_number ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">FSSAI License</label>
+                                        <p>{{ $branch->fssai_license ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="premium-form-group">
+                                        <label class="premium-label">GST Breakdown</label>
+                                        <div class="row g-3 text-center">
+                                            <div class="col-4">
+                                                <small class="text-muted">GST (%)</small>
+                                                <p class="fw-bold mb-0">{{ $branch->gst ?? '0' }}</p>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted">CGST (%)</small>
+                                                <p class="fw-bold mb-0">{{ $branch->cgst ?? '0' }}</p>
+                                            </div>
+                                            <div class="col-4">
+                                                <small class="text-muted">SGST (%)</small>
+                                                <p class="fw-bold mb-0">{{ $branch->sgst ?? '0' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subscription -->
+                        <div class="col-12">
+                            <h5 class="mb-3 text-warning">Subscription Information</h5>
+                            @if($branch->activeSubscription)
+                                @php
+                                    $subscription = $branch->activeSubscription;
+                                    $daysLeft = now()->diffInDays($subscription->end_date, false);
+                                @endphp
+                                <div class="row">
+                                    <div class="col-md-3 col-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Plan</label>
+                                            <p class="fw-bold">{{ optional($subscription->plan)->name ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Billing Cycle</label>
+                                            <p>{{ ucwords(str_replace('_', ' ', $subscription->billing_cycle)) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Amount</label>
+                                            <p class="fw-bold">₹{{ number_format($subscription->amount, 2) }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Status</label>
+                                            @if($subscription->status == 'active')
+                                                <span class="badge bg-success">Active</span>
+                                            @else
+                                                <span class="badge bg-danger">{{ ucfirst($subscription->status) }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Start Date</label>
+                                            <p>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M Y') }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="premium-form-group">
+                                            <label class="premium-label">Expiry Date</label>
+                                            @if($daysLeft <= 10 && $daysLeft >= 0)
+                                                <span class="badge bg-danger">{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M Y') }} ({{ $daysLeft }} days left)</span>
+                                            @elseif($daysLeft < 0)
+                                                <span class="badge bg-dark">Expired</span>
+                                            @else
+                                                <span class="badge bg-success">{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M Y') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-warning mb-0 text-center">
+                                    <i class="fas fa-info-circle"></i> No active subscription found for this branch.
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- QR Code -->
+                        @if($branch->registration_qrcode && file_exists(public_path($branch->registration_qrcode)))
+                        <div class="col-12 mt-4">
+                            <h5 class="mb-3 text-warning">Customer Registration QR Code</h5>
+                            <div class="text-center">
+                                <img src="{{ asset($branch->registration_qrcode) }}"
+                                     width="260" height="260"
+                                     class="img-fluid border p-3 bg-white rounded shadow-sm"
+                                     alt="QR Code">
+
+                                <p class="mt-4 text-muted">
+                                    Scan this QR code to register as a customer at <strong>{{ $branch->name }}</strong>
+                                </p>
+
+                                <a href="{{ asset($branch->registration_qrcode) }}" target="_blank"
+                                   class="premium-btn btn-outline mt-3">
+                                    <i class="fas fa-download"></i> Download QR Code
+                                </a>
+                            </div>
+                        </div>
                         @endif
-                    </div>
-                    <div class="col-md-12 mb-4">
-                        <label><strong>Address</strong></label>
-                        <p>{{ $branch->address ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Latitude</strong></label>
-                        <p>{{ $branch->latitude ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Longitude</strong></label>
-                        <p>{{ $branch->longitude ?? '-' }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>GST Details</strong></label>
 
-                        <div class="row g-2 mt-1">
-                            <div class="col-4">
-                                <small class="text-muted">GST (%)</small>
-                                <p class="mb-0 fw-bold">{{ $branch->gst ?? '-' }}</p>
-                            </div>
-                            <div class="col-4">
-                                <small class="text-muted">CGST (%)</small>
-                                <p class="mb-0 fw-bold">{{ $branch->cgst ?? '-' }}</p>
-                            </div>
-                            <div class="col-4">
-                                <small class="text-muted">SGST (%)</small>
-                                <p class="mb-0 fw-bold">{{ $branch->sgst ?? '-' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Created At</strong></label>
-                        <p>{{ $branch->created_at?->format('d M Y h:i A') }}</p>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-4">
-                        <label><strong>Updated At</strong></label>
-                        <p>{{ $branch->updated_at?->format('d M Y h:i A') }}</p>
                     </div>
                 </div>
             </div>
+
         </div>
-        <div class="card premium-block mt-4">
-            <div class="card-header premium-card-header">
-                <div>
-                    <h4>Subscription Information</h4>
-                    <p class="header-subtext">
-                        Current active subscription details.
-                    </p>
-                </div>
-            </div>
-
-            <div class="card-body">
-
-                @if($branch->activeSubscription)
-
-                    @php
-                        $subscription = $branch->activeSubscription;
-
-                        $daysLeft = now()->diffInDays(
-                            $subscription->end_date,
-                            false
-                        );
-                    @endphp
-
-                    <div class="row">
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Plan Name</strong></label>
-                            <p>
-                                {{ optional($subscription->plan)->name ?? '-' }}
-                            </p>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Billing Cycle</strong></label>
-                            <p>
-                                {{ ucwords(str_replace('_', ' ', $subscription->billing_cycle)) }}
-                            </p>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Amount</strong></label>
-                            <p>
-                                ₹{{ number_format($subscription->amount, 2) }}
-                            </p>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Status</strong></label>
-
-                            @if($subscription->status == 'active')
-                                <span class="badge bg-success">
-                                    Active
-                                </span>
-                            @else
-                                <span class="badge bg-danger">
-                                    {{ ucfirst($subscription->status) }}
-                                </span>
-                            @endif
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Start Date</strong></label>
-                            <p>
-                                {{ \Carbon\Carbon::parse($subscription->start_date)->format('d M Y') }}
-                            </p>
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Expiry Date</strong></label>
-
-                            @if($daysLeft <= 10 && $daysLeft >= 0)
-
-                                <p>
-                                    <span class="badge bg-danger">
-                                        {{ \Carbon\Carbon::parse($subscription->end_date)->format('d M Y') }}
-                                        ({{ $daysLeft }} days left)
-                                    </span>
-                                </p>
-
-                            @elseif($daysLeft < 0)
-
-                                <p>
-                                    <span class="badge bg-dark">
-                                        Expired
-                                    </span>
-                                </p>
-
-                            @else
-
-                                <p>
-                                    <span class="badge bg-success">
-                                        {{ \Carbon\Carbon::parse($subscription->end_date)->format('d M Y') }}
-                                    </span>
-                                </p>
-
-                            @endif
-
-                        </div>
-
-                        <div class="col-lg-3 col-md-6 mb-4">
-                            <label><strong>Created At</strong></label>
-                            <p>
-                                {{ $subscription->created_at->format('d M Y h:i A') }}
-                            </p>
-                        </div>
-
-                    </div>
-
-                @else
-
-                    <div class="alert alert-warning mb-0">
-                        No subscription assigned to this branch.
-                    </div>
-
-                @endif
-
-            </div>
-        </div>
-    </section>
-    @if($branch->registration_qrcode && file_exists(public_path($branch->registration_qrcode)))
-        <div class="card shadow-sm border-0">
-            <div class="card-body text-center">
-                <h5 class="fw-bold">Customer Registration QR</h5>
-
-                <img src="{{ asset($branch->registration_qrcode) }}" width="300" height="300" alt="Registration QR Code"
-                    class="img-fluid border p-2 bg-white">
-
-                <p class="text-muted mt-3">
-                    Scan this QR to register as a customer for <strong>{{ $branch->name }}</strong>
-                </p>
-
-                <a href="{{ asset($branch->registration_qrcode) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    Download QR Code
-                </a>
-            </div>
-        </div>
-    @else
-        <div class="alert alert-warning">
-            QR Code not generated yet.
-        </div>
-    @endif
+    </div>
+</section>
 @endsection
+@endcan

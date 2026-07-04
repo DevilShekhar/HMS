@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\SubscriptionPlan;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SubscriptionPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-   public function index()
+    public function index()
     {
         $plans = SubscriptionPlan::all();
+
         return view('admin.subscription_plans.index', compact('plans'));
     }
 
@@ -29,19 +31,25 @@ class SubscriptionPlanController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
+
         $request->validate([
-            'name' => 'required|string|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('subscription_plans', 'name'),
+            ],
             'description' => 'required|string',
             'monthly_price' => 'required|numeric|min:0',
             'quarterly_price' => 'required|numeric|min:0',
             'half_yearly_price' => 'required|numeric|min:0',
             'yearly_price' => 'required|numeric|min:0',
+        ], [
+            'name.unique' => 'A subscription plan with this name already exists.',
         ]);
 
         $data = $request->all();
         $data['status'] = 1;
-
 
         SubscriptionPlan::create($data);
 
@@ -60,7 +68,7 @@ class SubscriptionPlanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-     public function edit(SubscriptionPlan $subscriptionPlan)
+    public function edit(SubscriptionPlan $subscriptionPlan)
     {
         return view('admin.subscription_plans.edit', compact('subscriptionPlan'));
     }
@@ -93,7 +101,7 @@ class SubscriptionPlanController extends Controller
         $subscriptionPlan = SubscriptionPlan::findOrFail($subscriptionPlan);
 
         $subscriptionPlan->update([
-            'status' => 0
+            'status' => 0,
         ]);
 
         return redirect()

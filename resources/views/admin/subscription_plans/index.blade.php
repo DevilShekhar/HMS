@@ -90,11 +90,6 @@
                                         <i class="fas fa-edit"></i> Edit Plan
                                     </a>
 
-                                <!-- Delete Button -->
-                                    <button class="eht-btn eht-btn-danger-outline" onclick="deletePlan({{ $plan->id }})">
-                                        <i class="fas fa-trash-alt"></i> Delete Plan
-                                    </button>
-
                                 <form id="delete-form-{{ $plan->id }}"
                                       action="{{ route('subscription-plans.destroy', $plan) }}"
                                       method="POST" style="display: none;">

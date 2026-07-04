@@ -2,18 +2,29 @@
     @extends('layouts.app')
     @section('content')
         <section class="section premium-dashboard">
-            <div class="premium-page-head">
-                <div class="premium-page-title">
-                    <span class="mini-badge">Branch Management</span>
-                    <h2>Branches</h2>
-                    <p>Manage restaurant branches.</p>
-                </div>
-                <div class="premium-head-actions">
-                    @if (auth()->user()->role == 'super_admin')
-                        <a href="{{ route('branches.create') }}" class="btn premium-btn">
-                            <i class="fas fa-plus"></i> Add Branch
-                        </a>
-                    @endif
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">
+                                Branch Management
+                            </span>
+                            <h1>Branches</h1>
+                            <p>Manage restaurant branches.</p>
+                        </div>
+                    </div>
+
+                    <div class="header-right">
+                        @if (auth()->user()->role == 'super_admin')
+                            <a href="{{ route('branches.create') }}" class="premium-back-btn">
+                                <i class="fas fa-plus"></i>
+                                Add Branch
+                            </a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </section>

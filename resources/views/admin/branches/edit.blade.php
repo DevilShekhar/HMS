@@ -1,29 +1,29 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Branch Management</span>
-                <h2>Edit Branch</h2>
-                <p>Update branch information.</p>
-            </div>
-            <div class="premium-head-actions">
-                @if (auth()->user()->role == 'super_admin')
-                    <a href="{{ route('branches.index') }}" class="btn premium-btn ghost-btn">
+            <div class="premium-floating-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="header-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div>
+                            <span class="header-badge">
+                                Branch Managermebt
+                            </span>
+                            <h1>Edit Branch</h1>
+                            <p>Edit a existing Branch to the system with basic information.</p>
+                        </div>
+                    </div>
+
+                <div class="header-right">
+                    <a href="{{ route('branches.index') }}" class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
-                        Back To Branches
+                        Back to Branches
                     </a>
-                @else
-                    <a href="{{ route('restaurant.branches.index', [
-                        'restaurant' => request()->route('restaurant'),
-                    ]) }}"
-                        class="btn premium-btn ghost-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Branches
-                    </a>
-                @endif
+                </div>
+                </div>
             </div>
-        </div>
     </section>
     <section class="section premium-dashboard pt-0">
         @if (auth()->user()->role == 'super_admin')

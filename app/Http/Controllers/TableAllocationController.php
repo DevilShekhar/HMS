@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TableAllocation;
-use App\Models\RestaurantTable;
 use App\Models\Branch;
+use App\Models\RestaurantTable;
+use App\Models\TableAllocation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +28,7 @@ class TableAllocationController extends Controller
         }
 
         $allocations = $query->latest()->paginate(20);
+
         return view('admin.table-allocations.index', compact('allocations'));
     }
 
@@ -52,7 +53,7 @@ class TableAllocationController extends Controller
 
         $waiters = User::query()->where('restaurant_id', $restaurantId)
             ->where('role', 'waiter')
-            ->when($user->branch_id, fn($q) => $q->where('branch_id', $user->branch_id))
+            ->when($user->branch_id, fn ($q) => $q->where('branch_id', $user->branch_id))
             ->get();
 
         return view('admin.table-allocations.create', compact('branches', 'tables', 'waiters'));
@@ -86,15 +87,31 @@ class TableAllocationController extends Controller
         return $this->redirectBasedOnRole('Table allocation created successfully.');
     }
 
-   public function edit(Request $request, TableAllocation $table_allocation,$allocation)
+    public function edit($restaurant, $branch = null, $table_allocation = null)
     {
-        // $this->authorizeAccess($allocation);
+        if ($table_allocation === null) {
+            $table_allocation = $branch;
+            $branch = null;
+        }
 
-        $branches = Branch::query()->where('owner_id', Auth::id())->orWhere('id', $allocation->branch_id)->get();
+        $allocation = TableAllocation::findOrFail($table_allocation);
+
+        $this->authorizeAccess($allocation);
+
+        $branches = Branch::query()->where('owner_id', Auth::id())
+            ->orWhere('id', $allocation->branch_id)
+            ->get();
+
         $tables = RestaurantTable::query()->where('restaurant_id', app('restaurant')->id)->get();
+
         $waiters = User::query()->where('role', 'waiter')->get();
 
-        return view('admin.table-allocations.edit', compact('allocation', 'branches', 'tables', 'waiters'));
+        return view('admin.table-allocations.edit', compact(
+            'allocation',
+            'branches',
+            'tables',
+            'waiters'
+        ));
     }
 
     public function update(Request $request, TableAllocation $allocation)
@@ -144,7 +161,7 @@ class TableAllocationController extends Controller
         $user = Auth::user();
         if ($user->role === 'owner') {
             return redirect()->route('restaurant.table-allocations.index', [
-                'restaurant' => $user->restaurant?->slug
+                'restaurant' => $user->restaurant?->slug,
             ])->with('success', $message);
         }
         if ($user->branch_id) {
@@ -153,6 +170,7 @@ class TableAllocationController extends Controller
                 'branch' => $user->branch?->slug,
             ])->with('success', $message);
         }
+
         return redirect()->route('table-allocations.index')->with('success', $message);
     }
 }
