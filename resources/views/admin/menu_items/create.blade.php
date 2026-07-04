@@ -44,12 +44,12 @@
                 </div>
             </div>
         </div>
-    </section>    
+    </section>
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.menu-items.store', ['restaurant' => request()->route('restaurant')]) }}"
             method="POST" enctype="multipart/form-data">
             @csrf
-            <div class="premium-card">                
+            <div class="premium-card">
                 <div class="premium-card-body">
                     <div class="row">
                         @if (auth()->user()->hasRole('owner'))
@@ -119,7 +119,7 @@
                             @error('food_type')
                                 <small class="text-danger">{{ $message }}</small>
                             @enderror
-                        </div>                       
+                        </div>
                         <div class="col-md-6 mb-4">
                             <div class="premium-form-group">
                                 <label class="premium-label">
@@ -151,12 +151,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="premium-card-footer">                       
+                <div class="premium-card-footer">
                     <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
                         Create Menu Item
                     </button>
                 </div>
-            </div>           
+            </div>
         </form>
     </section>
     <script>
