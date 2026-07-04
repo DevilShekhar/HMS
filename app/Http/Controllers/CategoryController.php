@@ -84,13 +84,30 @@ class CategoryController extends Controller
             ]);
 
             $branchId = $request->branch_id;
-        } $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
 
-        if (! $branch) {
-            return back()->with('error', 'No branch assigned to this branch manager.');
+        } else {
+
+            $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
+
+            if (! $branch) {
+                return back()->with('error', 'No branch assigned to this branch manager.');
+            }
+
+            $branchId = $branch->id;
         }
 
-        $branchId = $branch->id;
+        // Check duplicate category in the same branch
+        $exists = Category::query()->where('branch_id', $branchId)
+            ->where('name', $request->name)
+            ->exists();
+
+        if ($exists) {
+            return back()
+                ->withErrors([
+                    'name' => 'This category already exists for this branch.',
+                ])
+                ->withInput();
+        }
 
         Category::create([
             'restaurant_id' => $user->restaurant_id,
@@ -101,32 +118,26 @@ class CategoryController extends Controller
             'is_active' => $request->is_active ?? 1,
         ]);
 
-        if (Auth::user()->role === 'super_admin') {
-
+        if ($user->role === 'super_admin') {
             return redirect()
                 ->route('categories.index')
                 ->with('success', 'Category created successfully.');
         }
 
-        // Branch Manager
-        if (Auth::user()->role === 'branch_manager') {
-
+        if ($user->role === 'branch_manager') {
             return redirect()
                 ->route('branch.categories.index', [
-                    'restaurant' => Auth::user()->restaurant?->slug,
-                    'branch' => Auth::user()->branch?->slug,
+                    'restaurant' => $user->restaurant?->slug,
+                    'branch' => $user->branch?->slug,
                 ])
                 ->with('success', 'Category created successfully.');
         }
 
-        // Owner
-        if (Auth::user()->role === 'owner') {
-            return redirect()
-                ->route('restaurant.categories.index', [
-                    'restaurant' => Auth::user()->restaurant?->slug,
-                ])
-                ->with('success', 'Category created successfully.');
-        }
+        return redirect()
+            ->route('restaurant.categories.index', [
+                'restaurant' => $user->restaurant?->slug,
+            ])
+            ->with('success', 'Category created successfully.');
     }
 
     public function edit($restaurant, $branch = null, $category = null)

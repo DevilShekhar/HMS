@@ -13358,7 +13358,7 @@ h1 {
 .order-item-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .order-item-total {
@@ -13371,7 +13371,7 @@ h1 {
 .qty-control {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     background: #f5f5f5;
     border-radius: 4px;
     padding: 2px 6px;
@@ -14934,7 +14934,7 @@ body {
 }
 
 .qty-input {
-    width: 2.5rem;
+    width: 4rem;
     text-align: center;
     background: #f8f9fa;
     border: 1px solid #ddd;

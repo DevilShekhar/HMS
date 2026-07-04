@@ -88,13 +88,11 @@
                                 <option value="">
                                     Select Category
                                 </option>
-                                @if (!auth()->user()->hasRole('owner'))
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}">
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
-                                @endif
                             </select>
                             @error('category_id')
                                 <small class="text-danger">{{ $message }}</small>

@@ -904,7 +904,7 @@
 .eht-input[type="number"] {
     -moz-appearance: textfield;
 }
-            /* ========================================
+/* ========================================
    SUBSCRIPTION PLANS - MINIMAL CSS
    Color: #FA5603
    ======================================== */
@@ -914,7 +914,7 @@
     background: #fff;
     border-radius: 12px;
     border: 1px solid #e8eef4;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
     height: 100%;
     position: relative;
@@ -923,7 +923,7 @@
 
 .eht-plan-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 .eht-plan-card.eht-popular {
@@ -1036,7 +1036,7 @@
 .eht-plan-duration select:focus {
     border-color: #FA5603;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(250,86,3,0.1);
+    box-shadow: 0 0 0 3px rgba(250, 86, 3, 0.1);
 }
 
 /* ----- Footer ----- */
@@ -1051,7 +1051,7 @@
     justify-content: center;
 }
 
-.eht-plan-footer .eht-btn + .eht-btn {
+.eht-plan-footer .eht-btn+.eht-btn {
     margin-top: 0.5rem;
 }
 
@@ -1073,199 +1073,346 @@
 
 /* Tablet */
 @media (max-width: 992px) {
-    .eht-plan-price { font-size: 2rem; }
-    .eht-plan-body { padding: 1.2rem; }
+    .eht-plan-price {
+        font-size: 2rem;
+    }
+
+    .eht-plan-body {
+        padding: 1.2rem;
+    }
 }
 
 /* Mobile Landscape */
 @media (max-width: 768px) {
-    .eht-plan-card { border-radius: 10px; }
-    .eht-plan-body { padding: 1rem; }
-    .eht-plan-name { font-size: 1.1rem; }
-    .eht-plan-price { font-size: 1.6rem; }
-    .eht-plan-currency { font-size: 0.9rem; }
-    .eht-plan-period { font-size: 0.75rem; }
-    .eht-plan-description { font-size: 0.8rem; margin: 0.5rem 0; }
-    .eht-plan-price-wrapper { padding: 0.6rem 0; margin: 0.5rem 0; }
-    .eht-plan-footer { padding: 0 1rem 1rem 1rem; padding-top: 0.8rem; }
-    .eht-plan-footer .eht-btn { font-size: 0.8rem; padding: 0.5rem; }
-    .eht-plan-duration label { font-size: 0.75rem; }
-    .eht-plan-duration select { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
-    .eht-popular-badge { font-size: 0.6rem; padding: 2px 10px; top: 8px; right: 8px; }
-    .eht-plan-branch-badge { font-size: 0.65rem; padding: 0.15rem 0.8rem; }
-    .eht-plan-savings { font-size: 0.6rem; padding: 0.15rem 0.6rem; }
+    .eht-plan-card {
+        border-radius: 10px;
+    }
+
+    .eht-plan-body {
+        padding: 1rem;
+    }
+
+    .eht-plan-name {
+        font-size: 1.1rem;
+    }
+
+    .eht-plan-price {
+        font-size: 1.6rem;
+    }
+
+    .eht-plan-currency {
+        font-size: 0.9rem;
+    }
+
+    .eht-plan-period {
+        font-size: 0.75rem;
+    }
+
+    .eht-plan-description {
+        font-size: 0.8rem;
+        margin: 0.5rem 0;
+    }
+
+    .eht-plan-price-wrapper {
+        padding: 0.6rem 0;
+        margin: 0.5rem 0;
+    }
+
+    .eht-plan-footer {
+        padding: 0 1rem 1rem 1rem;
+        padding-top: 0.8rem;
+    }
+
+    .eht-plan-footer .eht-btn {
+        font-size: 0.8rem;
+        padding: 0.5rem;
+    }
+
+    .eht-plan-duration label {
+        font-size: 0.75rem;
+    }
+
+    .eht-plan-duration select {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .eht-popular-badge {
+        font-size: 0.6rem;
+        padding: 2px 10px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .eht-plan-branch-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.8rem;
+    }
+
+    .eht-plan-savings {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.6rem;
+    }
 }
 
 /* Mobile Portrait */
 @media (max-width: 576px) {
-    .eht-plan-card { border-radius: 8px; }
-    .eht-plan-body { padding: 0.8rem; }
-    .eht-plan-name { font-size: 0.95rem; }
-    .eht-plan-price { font-size: 1.3rem; }
-    .eht-plan-currency { font-size: 0.8rem; }
-    .eht-plan-period { font-size: 0.65rem; }
-    .eht-plan-description { font-size: 0.7rem; margin: 0.4rem 0; line-height: 1.3; }
-    .eht-plan-price-wrapper { padding: 0.4rem 0; margin: 0.4rem 0; }
-    .eht-plan-footer { padding: 0 0.8rem 0.8rem 0.8rem; padding-top: 0.6rem; }
-    .eht-plan-footer .eht-btn { font-size: 0.7rem; padding: 0.4rem; }
-    .eht-plan-duration label { font-size: 0.65rem; }
-    .eht-plan-duration select { padding: 0.3rem 0.6rem; font-size: 0.7rem; border-radius: 6px; }
-    .eht-popular-badge { font-size: 0.5rem; padding: 2px 8px; top: 6px; right: 6px; }
-    .eht-plan-branch-badge { font-size: 0.55rem; padding: 0.1rem 0.6rem; }
-    .eht-plan-savings { font-size: 0.5rem; padding: 0.1rem 0.5rem; margin-top: 0.3rem; }
-    .eht-plan-footer .eht-btn + .eht-btn { margin-top: 0.3rem; }
-    .row.g-4 { --bs-gutter-y: 0.8rem; --bs-gutter-x: 0.8rem; }
+    .eht-plan-card {
+        border-radius: 8px;
+    }
+
+    .eht-plan-body {
+        padding: 0.8rem;
+    }
+
+    .eht-plan-name {
+        font-size: 0.95rem;
+    }
+
+    .eht-plan-price {
+        font-size: 1.3rem;
+    }
+
+    .eht-plan-currency {
+        font-size: 0.8rem;
+    }
+
+    .eht-plan-period {
+        font-size: 0.65rem;
+    }
+
+    .eht-plan-description {
+        font-size: 0.7rem;
+        margin: 0.4rem 0;
+        line-height: 1.3;
+    }
+
+    .eht-plan-price-wrapper {
+        padding: 0.4rem 0;
+        margin: 0.4rem 0;
+    }
+
+    .eht-plan-footer {
+        padding: 0 0.8rem 0.8rem 0.8rem;
+        padding-top: 0.6rem;
+    }
+
+    .eht-plan-footer .eht-btn {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+
+    .eht-plan-duration label {
+        font-size: 0.65rem;
+    }
+
+    .eht-plan-duration select {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        border-radius: 6px;
+    }
+
+    .eht-popular-badge {
+        font-size: 0.5rem;
+        padding: 2px 8px;
+        top: 6px;
+        right: 6px;
+    }
+
+    .eht-plan-branch-badge {
+        font-size: 0.55rem;
+        padding: 0.1rem 0.6rem;
+    }
+
+    .eht-plan-savings {
+        font-size: 0.5rem;
+        padding: 0.1rem 0.5rem;
+        margin-top: 0.3rem;
+    }
+
+    .eht-plan-footer .eht-btn+.eht-btn {
+        margin-top: 0.3rem;
+    }
+
+    .row.g-4 {
+        --bs-gutter-y: 0.8rem;
+        --bs-gutter-x: 0.8rem;
+    }
 }
 
 /* Extra Small */
 @media (max-width: 400px) {
-    .eht-plan-body { padding: 0.6rem; }
-    .eht-plan-name { font-size: 0.85rem; }
-    .eht-plan-price { font-size: 1.1rem; }
-    .eht-plan-footer { padding: 0 0.6rem 0.6rem 0.6rem; padding-top: 0.4rem; }
-    .eht-plan-footer .eht-btn { font-size: 0.6rem; padding: 0.3rem; }
-    .eht-plan-duration select { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
-    .row.g-4 { --bs-gutter-y: 0.6rem; --bs-gutter-x: 0.6rem; }
+    .eht-plan-body {
+        padding: 0.6rem;
+    }
+
+    .eht-plan-name {
+        font-size: 0.85rem;
+    }
+
+    .eht-plan-price {
+        font-size: 1.1rem;
+    }
+
+    .eht-plan-footer {
+        padding: 0 0.6rem 0.6rem 0.6rem;
+        padding-top: 0.4rem;
+    }
+
+    .eht-plan-footer .eht-btn {
+        font-size: 0.6rem;
+        padding: 0.3rem;
+    }
+
+    .eht-plan-duration select {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .row.g-4 {
+        --bs-gutter-y: 0.6rem;
+        --bs-gutter-x: 0.6rem;
+    }
 }
+
 /* shekhar Css */
-.page-badge{
-display:inline-flex;
-align-items:center;
-gap:8px;
-padding:8px 18px;
-background:#fff2e8;
-color:#ff7b00;
-border-radius:50px;
-font-weight:600;
-margin-bottom:15px;
+.page-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: #fff2e8;
+    color: #ff7b00;
+    border-radius: 50px;
+    font-weight: 600;
+    margin-bottom: 15px;
 }
 
 
-.btn-create{
-background:linear-gradient(135deg,#ff6b00,#ff9800);
-color:white;
-padding:12px 28px;
-border-radius:50px;
-font-weight:600;
-box-shadow:0 15px 35px rgba(255,120,0,.35);
-transition:.3s;
+.btn-create {
+    background: linear-gradient(135deg, #ff6b00, #ff9800);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 15px 35px rgba(255, 120, 0, .35);
+    transition: .3s;
 }
 
-.btn-create:hover{
-transform:translateY(-3px);
-color:white;
+.btn-create:hover {
+    transform: translateY(-3px);
+    color: white;
 }
 
-.dashboard-card{
-background:white;
-border-radius:18px;
-padding:28px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-box-shadow:0 15px 35px rgba(0,0,0,.08);
-margin-bottom:25px;
+.dashboard-card {
+    background: white;
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, .08);
+    margin-bottom: 25px;
 }
 
-.dashboard-card .icon{
-font-size:42px;
-color:#ff7800;
+.dashboard-card .icon {
+    font-size: 42px;
+    color: #ff7800;
 }
 
-.dashboard-card.success .icon{
-color:#28a745;
+.dashboard-card.success .icon {
+    color: #28a745;
 }
 
-.dashboard-card.danger .icon{
-color:#dc3545;
+.dashboard-card.danger .icon {
+    color: #dc3545;
 }
 
 
 
-.premium-table tbody tr{
-background:white;
-transition:.3s;
+.premium-table tbody tr {
+    background: white;
+    transition: .3s;
 }
 
-.premium-table tbody tr:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 25px rgba(0,0,0,.08);
+.premium-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
 }
 
-.restaurant-info{
-display:flex;
-align-items:center;
-gap:15px;
+.restaurant-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.restaurant-avatar{
-width:50px;
-height:50px;
-border-radius:50%;
-background:linear-gradient(135deg,#ff6b00,#ff9800);
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-font-weight:bold;
-font-size:20px;
+.restaurant-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b00, #ff9800);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 20px;
 }
 
-.slug-badge{
-background:#c0d7f2;
-color:#2b7cff;
-padding:8px 15px;
-border-radius:30px;
-font-weight:600;
+.slug-badge {
+    background: #c0d7f2;
+    color: #2b7cff;
+    padding: 8px 15px;
+    border-radius: 30px;
+    font-weight: 600;
 }
 
-.status{
-padding:8px 18px;
-border-radius:30px;
-font-size:13px;
-font-weight:600;
-display:inline-flex;
-align-items:center;
-gap:8px;
+.status {
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.status.active{
-background:#e9fff1;
-color:#16a34a;
+.status.active {
+    background: #e9fff1;
+    color: #16a34a;
 }
 
-.status.inactive{
-background:#ffecec;
-color:#ef4444;
+.status.inactive {
+    background: #ffecec;
+    color: #ef4444;
 }
 
-.action-buttons{
-display:flex;
-justify-content:center;
-gap:10px;
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }
 
-.btn-action{
-width:42px;
-height:42px;
-border-radius:12px;
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-transition:.3s;
+.btn-action {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    transition: .3s;
 }
 
-.btn-action.edit{
-background:#2563eb;
+.btn-action.edit {
+    background: #2563eb;
 }
 
-.btn-action.delete{
-background:#ef4444;
+.btn-action.delete {
+    background: #ef4444;
 }
 
-.btn-action:hover{
-transform:translateY(-4px);
-color:white;
+.btn-action:hover {
+    transform: translateY(-4px);
+    color: white;
 }
-

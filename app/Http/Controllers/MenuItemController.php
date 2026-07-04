@@ -9,6 +9,7 @@ use App\Models\MenuItem;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class MenuItemController extends Controller
 {
@@ -112,9 +113,18 @@ class MenuItemController extends Controller
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
-            'name' => 'required|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('menu_items')->where(function ($query) use ($request) {
+                    return $query->where('category_id', $request->category_id);
+                }),
+            ],
             'price' => 'required|numeric',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.unique' => 'This menu item already exists in the selected category.',
         ]);
 
         $restaurant = Restaurant::query()->where(

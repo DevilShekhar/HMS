@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RestaurantController extends Controller
 {
@@ -23,7 +24,7 @@ class RestaurantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => ['required','string','max:255',],
+            'name' => ['required','string','max:255',Rule::unique('restaurants', 'name'),],
             'status' => ['nullable','boolean',],
         ], [
             'name.required' => 'Restaurant name is required.',
