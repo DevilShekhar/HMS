@@ -2,46 +2,56 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Category Management</span>
-                <h2>Categories</h2>
-                <p>Manage restaurant categories.</p>
+    <div class="premium-floating-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <span class="header-badge">
+                        Category Management
+                    </span>
+                    <h1>Categories</h1>
+                    <p>Manage restaurant categories.</p>
+                </div>
             </div>
+            
             @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
-
-            <div class="premium-head-actions">
-
+            
+            <div class="header-right">
+                
                 @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('categories.create') }}" class="btn premium-btn">
+                    <a href="{{ route('categories.create') }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
+               
                 @elseif (!empty($restaurantSlug) && !empty($branchSlug))
                     <a href="{{ route('branch.categories.create', [
                         'restaurant' => $restaurantSlug,
                         'branch' => $branchSlug,
-                    ]) }}"
-                        class="btn premium-btn">
+                    ]) }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
+               
                 @elseif (!empty($restaurantSlug))
                     <a href="{{ route('restaurant.categories.create', [
                         'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="btn premium-btn">
+                    ]) }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
                 @endif
-
             </div>
         </div>
-    </section>
+    </div>
+</section>
+    
     <section class="section premium-dashboard pt-0">
         @if (session('success'))
             <div class="alert alert-success">
@@ -95,13 +105,13 @@
                                     </td>
                                     <td>
                                         @if ($category->is_active)
-                                            <span class="badge bg-success">
-                                                Active
-                                            </span>
+                                            <span class="status active">
+                                                                <i class="fas fa-circle"></i>Active
+                                                            </span>
                                         @else
-                                            <span class="badge bg-danger">
-                                                Inactive
-                                            </span>
+                                            <span class="status inactive">
+                                                                <i class="fas fa-circle"></i>Inactive
+                                                            </span>
                                         @endif
                                     </td>
                                     <td>
@@ -116,7 +126,7 @@
                                             {{-- SUPER ADMIN --}}
                                             @if (auth()->user()->role === 'super_admin')
                                                 <a href="{{ route('categories.edit', $category->id) }}"
-                                                    class="btn btn-warning btn-sm">
+                                                    class="btn btn-warning btn-md">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
 
@@ -130,7 +140,7 @@
                                                         'branch' => $branchSlug,
                                                         'category' => $category->id,
                                                     ]) }}"
-                                                        class="btn btn-warning btn-sm">
+                                                        class="btn btn-warning btn-md">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
 
@@ -149,7 +159,7 @@
                                                             'restaurant' => $restaurantSlug,
                                                             'category' => $category->id,
                                                         ]) }}"
-                                                            class="btn btn-warning btn-sm">
+                                                            class="btn btn-warning btn-md">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
 
@@ -165,7 +175,7 @@
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="submit" class="btn btn-danger btn-md">
                                                 <i class="fas fa-trash"></i>
                                             </button>
 

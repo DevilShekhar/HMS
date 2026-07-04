@@ -88,6 +88,7 @@
                                 <input type="text" class="form-control premium-input" value="{{ $restaurant->name }}"
                                     readonly>
 
+
                             </div>
 
                             {{-- Branch --}}
@@ -110,6 +111,9 @@
                                     @endforeach
 
                                 </select>
+                                @error('branch_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
 
                             </div>
 
@@ -133,6 +137,9 @@
                                     @endforeach
 
                                 </select>
+                                @error('menu_item_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
 
                             </div>
 
@@ -155,6 +162,9 @@
                                     </button>
 
                                 </div>
+                                @error('addIngredient')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
 
                                 <div id="recipeRows">
 
@@ -183,6 +193,9 @@
                                                     @endforeach
 
                                                 </select>
+                                                @error('inventory_id.*')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
 
                                             </div>
 
@@ -194,6 +207,9 @@
 
                                                 <input type="number" step="0.001" name="quantity_required[]"
                                                     class="form-control premium-input" placeholder="30" required>
+                                                @error('quantity_required')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
 
                                             </div>
 
@@ -212,6 +228,9 @@
                                                     <option value="Piece">Piece</option>
 
                                                 </select>
+                                                @error('recipe_unit')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
 
                                             </div>
 
@@ -241,6 +260,7 @@
                                     </div>
 
                                 </div>
+
 
                             </div>
 
