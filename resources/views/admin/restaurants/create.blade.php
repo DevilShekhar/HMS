@@ -1,56 +1,66 @@
 @extends('layouts.app')
 @section('content')
 <section class="section premium-dashboard">
-    <div class="premium-page-head">
-        <div class="premium-page-title">
-            <span class="mini-badge">
-                Restaurant Management
-            </span>
-            <h2>Create Restaurant</h2>
-            <p> Add a new restaurant to the system. </p>
+    <div class="premium-floating-header">
+    <div class="header-content">
+        <div class="header-left">
+            <div class="header-icon">
+                <i class="fas fa-store"></i>
+            </div>
+            <div>
+                <span class="header-badge">
+                    Restaurant Management
+                </span>
+                <h1>Create Restaurant</h1>
+                <p>Add a new restaurant to the system with basic information.</p>
+            </div>
         </div>
-        <div class="premium-head-actions">
-            <a href="{{ route('restaurants.index') }}" class="btn premium-btn ghost-btn">
+        <div class="header-right">
+            <a href="{{ route('restaurants.index') }}" class="premium-back-btn">
                 <i class="fas fa-arrow-left"></i>
-                Back To Restaurants
+                Back to Restaurants
             </a>
         </div>
     </div>
+</div>
 </section>
 <section class="section premium-dashboard pt-0">
-    <form action="{{ route('restaurants.store') }}" method="POST">
-        @csrf
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card premium-block">
-                    <div class="card-header premium-card-header">
-                        <div>
-                            <h4>Restaurant Information</h4>
-                            <p class="header-subtext"> Enter restaurant details. </p>
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-9 col-md-11">
+            <form action="{{ route('restaurants.store') }}" method="POST">
+                @csrf
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <div class="card-title-group">                        
+                            <div>
+                                <h3>Restaurant Information</h3>
+                                <p>Enter restaurant details below.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label>Restaurant Name</label>
-                                <input type="text" name="name" value="{{ old('name') }}"  class="form-control premium-input">
-                                @error('name')
+                    <div class="premium-card-body">
+                        <div class="premium-form-group">
+                            <label class="premium-label">
+                                Restaurant Name
+                                <span>*</span>
+                            </label>
+                            <input type="text" name="name" value="{{ old('name') }}" class="premium-input @error('name') input-error @enderror" placeholder="Enter restaurant name">
+                            @error('name')
                                     <small class="text-danger">{{ $message }}</small>
-                                @enderror
-                            </div>                              
+                            @enderror
                         </div>
                     </div>
+                    <div class="premium-card-footer">
+                        <a href="{{ route('restaurants.index') }}" class="premium-btn btn-outline">
+                            <i class="fas fa-arrow-left"></i>Cancel
+                        </a>
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Create Restaurant
+                        </button>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <a href="{{ route('restaurants.index') }}"  class="btn btn-light">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        Create Restaurant
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
-    </form>
+    </div>
 </section>
 @endsection
