@@ -1,20 +1,27 @@
 @extends('layouts.app')
 @section('content')
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
-            <div class="premium-page-title">
-                <span class="mini-badge">Table Management</span>
-                <h2>Edit Table</h2>
-                <p>Update restaurant table.</p>
-            </div>
-            <div class="premium-head-actions">
-                <a href="{{ route('restaurant.tables.index',['restaurant' => request()->route('restaurant')]) }}" class="btn premium-btn ghost-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Tables
-                </a>
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">Table Management</span>
+                         <h2>Edit Table</h2>
+                            <p>Update restaurant table.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                     <a href="{{ route('restaurant.tables.index',['restaurant' => request()->route('restaurant')]) }}" class="premium-back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back To Tables
+                    </a>
+                </div>
             </div>
         </div>
-    </section>
+    </section>   
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.tables.update',['restaurant' => request()->route('restaurant'),'table' => $table->id]) }}" method="POST">
             @csrf
@@ -33,7 +40,7 @@
                         @if(auth()->user()->role == 'owner')
                         <div class="col-md-6 mb-4">
                             <label>Branch</label>
-                            <select name="branch_id" class="form-control premium-input">
+                            <select name="branch_id" class=" premium-input">
                                 @foreach($branches as $branch)
                                 <option value="{{ $branch->id }}"
                                     {{ $table->branch_id == $branch->id ? 'selected' : '' }}>
@@ -47,12 +54,12 @@
                         <input type="hidden" name="branch_id" value="{{ $branch->id }}">
                         <div class="col-md-6 mb-4">
                             <label>Branch</label>
-                            <input type="text" class="form-control premium-input" value="{{ $branch->name }}" readonly>
+                            <input type="text" class=" premium-input" value="{{ $branch->name }}" readonly>
                         </div>
                         @endif
                         <div class="col-md-6 mb-4">
                             <label>Table Category</label>
-                            <select name="cat_id" class="form-control premium-input">
+                            <select name="cat_id" class=" premium-input">
                                 @foreach($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ $table->cat_id == $category->id ? 'selected' : '' }}>
@@ -63,19 +70,19 @@
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Table Number</label>
-                            <input type="text" name="table_number" class="form-control premium-input" value="{{ $table->table_number }}">
+                            <input type="text" name="table_number" class=" premium-input" value="{{ $table->table_number }}">
                         </div>
                         <div class="col-md-6 mb-4">
                             <label>Capacity</label>
-                            <input type="number" name="capacity" class="form-control premium-input" value="{{ $table->capacity }}">
+                            <input type="number" name="capacity" class=" premium-input" value="{{ $table->capacity }}">
                         </div>
                     </div>
+                    <div class="premium-card-footer">                       
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Update Table
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">
-                    Update Table
-                </button>
             </div>
         </form>
     </section>
