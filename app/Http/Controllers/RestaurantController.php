@@ -56,6 +56,7 @@ class RestaurantController extends Controller
         $restaurant->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
+            'status' => $request->status,
         ]);
 
         return redirect()
