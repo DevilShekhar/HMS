@@ -16,6 +16,10 @@
                         <tr>
                             <th>SrNo</th>
                             <th>Name</th>
+                            @if(auth()->user()->role == 'owner')
+                            <th>Restaurant Name</th>
+                            <th>Branch Name</th>
+                            @endif
                             <th>Mobile</th>
                             <th>Email</th>
                             <th>Date Of Birth</th>
@@ -38,7 +42,15 @@
                                 <td>
                                     {{ $customer->customer_name }}
                                 </td>
+                                @if(auth()->user()->role == 'owner')
+                                <td>
+                                    {{ $customer->restaurant_name ?? '-' }}
+                                </td>
 
+                                <td>
+                                    {{ $customer->branch_name ?? '-' }}
+                                </td>
+                                @endif
                                 <td>
                                     {{ $customer->mobile_number }}
                                 </td>
@@ -133,62 +145,62 @@
         </div>
 
     </div>
-@push('scripts')
-<script>
-    $(function() {
-        $('#permissionsTable').DataTable({
-            responsive: true,
-            autoWidth: false
-        });
+    @push('scripts')
+        <script>
+            $(function () {
+                $('#permissionsTable').DataTable({
+                    responsive: true,
+                    autoWidth: false
+                });
 
-        // Handle category change with Rich Text Editor support
-        $(document).on('change', 'select[name="category"]', function() {
-            const selectId = $(this).attr('id');
-            const customerId = selectId.replace('category', '');
+                // Handle category change with Rich Text Editor support
+                $(document).on('change', 'select[name="category"]', function () {
+                    const selectId = $(this).attr('id');
+                    const customerId = selectId.replace('category', '');
 
-            const container = $('#descriptionContainer' + customerId);
-            const editorId = 'description' + customerId;   // assuming your editor has this id
+                    const container = $('#descriptionContainer' + customerId);
+                    const editorId = 'description' + customerId;   // assuming your editor has this id
 
-            if ($(this).val() === 'other') {
-                container.show(200);
+                    if ($(this).val() === 'other') {
+                        container.show(200);
 
-                const dummyText = `
-                    <p>Dear Customer,</p>
-                    <p>Thank you for being a valued member of our family.</p>
-                    <p>We are pleased to offer you a <strong>special discount</strong> on your next visit.</p>
-                    <p>Please show this message at the counter to avail the offer.</p>
-                    <p><br></p>
-                    <p>Best Regards,<br>
-                    <strong>${{ auth()->user()->restaurant->name ?? 'Our Restaurant' }} Team</strong></p>
-                `;
+                        const dummyText = `
+                            <p>Dear Customer,</p>
+                            <p>Thank you for being a valued member of our family.</p>
+                            <p>We are pleased to offer you a <strong>special discount</strong> on your next visit.</p>
+                            <p>Please show this message at the counter to avail the offer.</p>
+                            <p><br></p>
+                            <p>Best Regards,<br>
+                            <strong>${{ auth()->user()->restaurant->name ?? 'Our Restaurant' }} Team</strong></p>
+                        `;
 
-                // For Summernote (Most Common)
-                if ($.fn.summernote) {
-                    $('#' + editorId).summernote('code', dummyText);
-                }
-                // For TinyMCE
-                else if (tinymce) {
-                    tinymce.get(editorId).setContent(dummyText);
-                }
-                // Fallback for plain textarea
-                else {
-                    $('#' + editorId).val(dummyText.replace(/<[^>]+>/g, ''));
-                }
+                        // For Summernote (Most Common)
+                        if ($.fn.summernote) {
+                            $('#' + editorId).summernote('code', dummyText);
+                        }
+                        // For TinyMCE
+                        else if (tinymce) {
+                            tinymce.get(editorId).setContent(dummyText);
+                        }
+                        // Fallback for plain textarea
+                        else {
+                            $('#' + editorId).val(dummyText.replace(/<[^>]+>/g, ''));
+                        }
 
-            } else {
-                container.hide(200);
+                    } else {
+                        container.hide(200);
 
-                if ($.fn.summernote) {
-                    $('#' + editorId).summernote('code', '');
-                } else if (tinymce) {
-                    tinymce.get(editorId).setContent('');
-                } else {
-                    $('#' + editorId).val('');
-                }
-            }
-        });
-    });
-</script>
-@endpush
+                        if ($.fn.summernote) {
+                            $('#' + editorId).summernote('code', '');
+                        } else if (tinymce) {
+                            tinymce.get(editorId).setContent('');
+                        } else {
+                            $('#' + editorId).val('');
+                        }
+                    }
+                });
+            });
+        </script>
+    @endpush
 
 @endsection

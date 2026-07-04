@@ -88,7 +88,7 @@ class CustomerOfferController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'category' => $request->category,
-            'status'        => 1,
+            'status' => 1,
         ]);
 
         // Branch Manager
@@ -199,45 +199,44 @@ class CustomerOfferController extends Controller
         $user = Auth::user();
 
         $query = Order::query()
+            ->leftJoin('restaurants', 'orders.restaurant_id', '=', 'restaurants.id')
+            ->leftJoin('branches', 'orders.branch_id', '=', 'branches.id')
             ->select(
-                'customer_name',
-                'mobile_number',
-                'email',
-                'birth_date',
-                'anniversary_date',
-                DB::raw('COUNT(id) as total_visits'),
-                DB::raw('MAX(created_at) as last_visit')
+                'orders.customer_name',
+                'orders.mobile_number',
+                'orders.email',
+                'orders.birth_date',
+                'orders.anniversary_date',
+                'restaurants.name as restaurant_name',
+                'branches.name as branch_name',
+                DB::raw('COUNT(orders.id) as total_visits'),
+                DB::raw('MAX(orders.created_at) as last_visit')
             )
-            ->whereNotNull('mobile_number');
+            ->whereNotNull('orders.mobile_number');
 
-        // restaurant wise
+        // Restaurant wise
         if ($user->restaurant_id) {
-            $query->where(
-                'restaurant_id',
-                $user->restaurant_id
-            );
+            $query->where('orders.restaurant_id', $user->restaurant_id);
         }
 
-        // branch wise
+        // Branch wise
         if ($user->branch_id) {
-            $query->where(
-                'branch_id',
-                $user->branch_id
-            );
+            $query->where('orders.branch_id', $user->branch_id);
         }
 
         $customers = $query
             ->groupBy(
-                'customer_name',
-                'mobile_number',
-                'email',
-                'birth_date',
-                'anniversary_date'
+                'orders.customer_name',
+                'orders.mobile_number',
+                'orders.email',
+                'orders.birth_date',
+                'orders.anniversary_date',
+                'restaurants.name',
+                'branches.name'
             )
             ->orderByDesc('last_visit')
             ->get();
 
-        // attach registered customer id if exists
         $customers = $customers->map(function ($customer) {
 
             $registeredUser = User::query()->where('phone', $customer->mobile_number)
@@ -246,26 +245,16 @@ class CustomerOfferController extends Controller
 
             $customer->id = $registeredUser?->id;
 
-            // If registered user has details, prefer them
             if ($registeredUser) {
-
-                $customer->birth_date = $registeredUser->birth_date
-                    ?? $customer->birth_date;
-
-                $customer->anniversary_date = $registeredUser->anniversary_date
-                    ?? $customer->anniversary_date;
-
-                $customer->email = $registeredUser->email
-                    ?? $customer->email;
+                $customer->birth_date = $registeredUser->birth_date ?? $customer->birth_date;
+                $customer->anniversary_date = $registeredUser->anniversary_date ?? $customer->anniversary_date;
+                $customer->email = $registeredUser->email ?? $customer->email;
             }
 
             return $customer;
         });
 
-        return view(
-            'admin.customer-offers.user-list',
-            compact('customers')
-        );
+        return view('admin.customer-offers.user-list', compact('customers'));
     }
 
     public function sendOffer(Request $request)
