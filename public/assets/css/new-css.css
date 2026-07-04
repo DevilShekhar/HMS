@@ -1422,7 +1422,7 @@ div#tableExport_filter {
     color: #fff;
     text-decoration: none;
     transform: translateY(-2px);
-=======
+}
 .page-badge {
     display: inline-flex;
     align-items: center;
@@ -1741,15 +1741,7 @@ margin-bottom:15px;
 }
 
 
-.btn-create {
-    background: linear-gradient(135deg, #ff6b00, #ff9800);
-    color: white;
-    padding: 12px 28px;
-    border-radius: 50px;
-    font-weight: 600;
-    box-shadow: 0 15px 35px rgba(255, 120, 0, .35);
-    transition: .3s;
-}
+
 
 .btn-create:hover {
     transform: translateY(-3px);
@@ -2017,25 +2009,19 @@ margin-bottom:15px;
 .dashboard-card.danger .icon {
     color: #dc3545;
 }
-
-
-
 .premium-table tbody tr {
     background: white;
     transition: .3s;
 }
-
 .premium-table tbody tr:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
 }
-
 .restaurant-info {
     display: flex;
     align-items: center;
     gap: 15px;
 }
-
 .restaurant-avatar {
     width: 50px;
     height: 50px;
@@ -2048,7 +2034,6 @@ margin-bottom:15px;
     font-weight: bold;
     font-size: 20px;
 }
-
 .slug-badge {
     background: #c0d7f2;
     color: #2b7cff;
@@ -2056,7 +2041,6 @@ margin-bottom:15px;
     border-radius: 30px;
     font-weight: 600;
 }
-
 .status {
     padding: 8px 18px;
     border-radius: 30px;
@@ -2066,110 +2050,19 @@ margin-bottom:15px;
     align-items: center;
     gap: 8px;
 }
-
 .status.active {
     background: #e9fff1;
     color: #16a34a;
 }
-
 .status.inactive {
     background: #ffecec;
     color: #ef4444;
 }
-
 .action-buttons {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
-
-.btn-action {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    transition: .3s;
-}
-
-.btn-action.edit {
-    background: #2563eb;
-}
-
-.btn-action.delete {
-    background: #ef4444;
-}
-
-.btn-action:hover {
-    transform: translateY(-4px);
-    color: white;
-}
-=======
-.premium-table tbody tr {
-    background: white;
-    transition: .3s;
-}
-
-.premium-table tbody tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
-}
-
-.restaurant-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.restaurant-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff6b00, #ff9800);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 20px;
-}
-
-.slug-badge {
-    background: #c0d7f2;
-    color: #2b7cff;
-    padding: 8px 15px;
-    border-radius: 30px;
-    font-weight: 600;
-}
-
-.status {
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.status.active {
-    background: #e9fff1;
-    color: #16a34a;
-}
-
-.status.inactive {
-    background: #ffecec;
-    color: #ef4444;
-}
-
-.action-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
 .btn-action {
     width: 42px;
     height: 42px;
