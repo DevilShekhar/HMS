@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="section">
-        <div class="card">
+        <div class="page-card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4>Order Details</h4>
@@ -20,9 +20,9 @@
                 </div>
             </div>
 
-            <div class="card-body">
-                <div class="mb-4">
-                    <h5>Order Status</h5>
+            <div class="card-body ">
+                <div class="card shadow-md border-0 rounded-4 mb-4">
+                    <h5 class="p-3">Order Status</h5>
 
                     @php
                         $statuses = [
@@ -104,55 +104,92 @@
                     </div>
                 </div>
                 <!-- Order Info -->
-                <div class="row mb-2">
-                    <div class="col-md-2">
-                        <strong>Order ID:</strong><br>
-                        {{ $order->id }}
-                    </div>
-                    <div class="col-md-2">
-                        @if ($order->order_type == 'vip')
-                            <strong>VIP Order</strong><br>
-                            <span class="badge badge-warning">
-                                {{ $order->token_no }}
-                            </span>
-                        @else
-                            <strong>Token No</strong><br>
-                            <span class="badge badge-primary">
-                                {{ $order->token_no }}
-                            </span>
-                        @endif
-                    </div>
+               <div class="card border-0 shadow-md rounded-4 mb-4 order-view" >
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <!-- Left -->
+                            <div class="col-lg-4 border-end">
+                                <div class="info-item mb-4">
+                                    <div class="icon bg-primary-over ">
+                                        <i class="fas fa-receipt text-primary-over"></i>
+                                    </div>
+                                    <div>
+                                        <span class="label">Order ID</span>
+                                        <h5>{{ $order->id }}</h5>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon bg-purple-over">
+                                        <i class="fas fa-user text-purple"></i>
+                                    </div>
+                                    <div>
+                                        <span class="label">Customer Name</span>
+                                        <h6>{{ $order->customer->name ?? ($order->customer_name ?? 'Walk-in Customer') }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Center -->
+                            <div class="col-lg-4 border-end">
+                                <div class="info-item mb-4">
+                                    <div class="icon bg-primary-over">
+                                        <i class="fas fa-tag text-primary-over"></i>
+                                    </div>
+                                    <div>
+                                        <span class="label">Token No</span>
+                                        @if($order->order_type=='vip')
+                                            <span class="badge bg-warning text-dark px-3 py-2">
+                                                {{ $order->token_no }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-primary px-3 py-2">
+                                                {{ $order->token_no }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon bg-success-over">
+                                        <i class="fas fa-mobile-alt text-success"></i>
+                                    </div>
+                                    <div>
+                                        <span class="label">Mobile</span>
+                                        <h6>{{ $order->mobile_number ?? 'N/A' }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Right -->
+                            <div class="col-lg-4">
+                                <div class="info-item mb-4">
+                                    <div class="icon bg-warning-over">
+                                        <i class="fas fa-chair text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <span class="label">Table No</span>
+                                        <h5>{{ $order->table_no ?? ($order->table?->name ?? 'Take Away') }}</h5>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="icon bg-danger-over">
+                                        <i class="far fa-calendar-alt text-danger"></i>
+                                    </div>
 
-                    <div class="col-md-2">
-                        <strong>Table No:</strong><br>
-                        {{ $order->table_no ?? ($order->table?->name ?? 'Take Away') }}
+                                    <div>
+                                        <span class="label">Order Date</span>
+                                        <h6>{{ $order->created_at->format('d M Y, h:i A') }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-2">
-                        <strong>Customer Name:</strong><br>
-                        {{ $order->customer->name ?? ($order->customer_name ?? 'Walk-in Customer') }}
-                    </div>
-                    <div class="col-md-2">
-                        <strong>Mobile:</strong><br>
-                        {{ $order->mobile_number ?? 'N/A' }}
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <strong>Order Date:</strong><br>
-                        {{ $order->created_at->format('d M Y, h:i A') }}
-                    </div>
-                </div>
-
                 <hr>
-
-                <!-- Order Items -->
-                <h5 class="mb-3">Order Items</h5>
-
-                <div class="table-responsive">
+               
+                <div class="table-responsive card p-2">
+                     <!-- Order Items -->
+                 <h4 class="fw-bold mb-4 order-views">
+                    <i class="fas fa-concierge-bell text-primary-over me-2"></i>
+                    Order Items
+                </h4>
                     <table class="table table-bordered table-striped">
                         <thead class="table-light">
                             <tr>
@@ -168,7 +205,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $item->menuItem->name ?? '-' }}</td>
-                                    <td class="text-center">{{ $item->quantity }}</td>
+                                    <td class="text-center"><span class="qty-badge">{{ $item->quantity }} </span></td>
                                     <td class="text-end">₹{{ number_format($item->price, 2) }}</td>
                                     <td class="text-end">₹{{ number_format($item->subtotal, 2) }}</td>
                                 </tr>
