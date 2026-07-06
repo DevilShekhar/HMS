@@ -161,7 +161,9 @@
                         <h3>Popular Menu</h3>
                         <div class="de-menu-tools">
                             <div class="de-search-box">
-                                <span class="de-search-icon">🔍</span>
+                               <span class="de-search-icon">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
                                 <input type="text" id="menuSearch" placeholder="Search menu...">
                                 <div id="searchResults" class="de-search-dropdown"></div>
                             </div>
@@ -202,7 +204,7 @@
             <div>
                 <div class="de-basket">
                     <div class="de-basket-header">
-                        <h4>🍽️ Your Order</h4>
+                        <h4><i class="fas fa-utensils"></i> Your Order</h4>
                         <span class="de-basket-count" id="itemCountBadge">0 items</span>
                     </div>
 
@@ -333,7 +335,8 @@
 
                 const keys = Object.keys(order);
                 const totalQty = keys.reduce((sum, id) => sum + order[id].qty, 0);
-                itemCountBadge.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+                itemCountBadge.textContent =
+    `${totalQty.toLocaleString('en-IN')} item${totalQty !== 1 ? 's' : ''}`;
 
                 if (keys.length === 0) {
                     emptyMsg.style.display = 'block';
@@ -357,7 +360,7 @@
                                     <button class="de-qty-btn" onclick="changeQty(${id}, -1)">−</button>
                                     <input type="number" class="de-qty-input" value="${item.qty}" min="1" onchange="setQty(${id}, this.value)">
                                     <button class="de-qty-btn" onclick="changeQty(${id}, 1)">+</button>
-                                    <span class="de-item-total">${formatCurrency(item.price * item.qty)}</span>
+                                    <span class="de-item-total">₹${(item.price * item.qty).toLocaleString('en-IN', { minimumFractionDigits: 2,maximumFractionDigits: 2})}</span>
                                     <button class="de-remove-btn" onclick="removeItem(${id})" title="Remove">✕</button>
                                 </div>
                             </div>
@@ -367,12 +370,18 @@
                 updateTotals();
             }
 
-            function updateTotals() {
-                let total = 0;
-                for (const id in order) {
-                    total += order[id].price * order[id].qty;
-                }
-                document.getElementById('grandTotalAmount').textContent = formatCurrency(total);
+           function updateTotals() {
+            let total = 0;
+
+            for (const id in order) {
+                total += order[id].price * order[id].qty;
+            }
+
+            document.getElementById('grandTotalAmount').textContent =
+                '₹' + total.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
             }
 
             function updateCardHighlights() {
@@ -547,8 +556,8 @@
                 }
 
                 let url = "{{ auth()->user()->branch_id
-            ? route('branch.orders.tables', ['restaurant' => $restaurant->slug, 'branch' => auth()->user()->branch->slug, 'categoryId' => 'CATID'])
-            : route('restaurant.orders.tables', ['restaurant' => $restaurant->slug, 'categoryId' => 'CATID'])
+                    ? route('branch.orders.tables', ['restaurant' => $restaurant->slug, 'branch' => auth()->user()->branch->slug, 'categoryId' => 'CATID'])
+                    : route('restaurant.orders.tables', ['restaurant' => $restaurant->slug, 'categoryId' => 'CATID'])
                     }}";
                 url = url.replace('CATID', categoryId);
 
@@ -562,13 +571,21 @@
                                         Table ${table.table_number} ${table.occupied ? '🔴 Occupied' : '🟢 Available'}
                                     </option>
                                 `;
+
+                            // const disabled = table.occupied ? 'disabled' : '';
+
+                            // options += `
+                            //     <option value="${table.table_number}" ${disabled}>
+                            //         Table ${table.table_number} ${table.occupied ? '🔴 Occupied' : '🟢 Available'}
+                            //     </option>
+                            // `;
                         });
                         tableNo.innerHTML = options;
                     })
                     .catch(() => {
                         tableNo.innerHTML = '<option value="">Error loading tables</option>';
                     });
-            });
+                });
 
             // ============================
             // CUSTOMER HISTORY
