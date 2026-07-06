@@ -2403,8 +2403,9 @@ div#tableExport_filter {
 }
 
 .premium-table tbody tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, .08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    background: rgba(106, 209, 97, 0.015) !important;
 }
 
 .restaurant-info {
@@ -3540,7 +3541,7 @@ body {
 }
 
 .table-hover tbody tr:hover {
-    background: rgba(255, 107, 53, 0.04) !important;
+    background: rgba(255, 227, 216, 0.082) !important;
     transform: scale(1.002);
     box-shadow: var(--de-shadow-hover);
 }
