@@ -1,37 +1,48 @@
 @extends('layouts.app')
 
 @section('content')
-    @php
-        $restaurantSlug = request()->route('restaurant');
-        $branchSlug = request()->route('branch');
-    @endphp
 
     <section class="section premium-dashboard">
-        <div class="premium-page-head">
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Recipe Management
+                        </span>
+                        <h1>Add Recipe Management</h1>
+                        <p>Define ingredients and quantities required to prepare menu items.</p>
+                    </div>
+                </div>
 
-            <div class="premium-page-title">
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
 
-                <span class="mini-badge">
-                    Recipe Management
-                </span>
-                <h2>Create Recipe</h2>
-                <p>
-                    Define ingredients and quantities required to prepare menu items.
-                </p>
+                <div class="header-right">
+                    @if ($branchSlug)
+                                    <a href="{{ route('branch.recipe.index', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back To Recipes
+                                    </a>
+                    @else
+                                    <a href="{{ route('restaurant.recipe.index', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back To Recipes
+                                    </a>
+                    @endif
+                </div>
             </div>
-            <div class="premium-head-actions">
-
-                <a href="{{ url()->previous() }}" class="btn premium-btn ghost-btn">
-
-                    <i class="fas fa-arrow-left"></i>
-                    Back To Recipes
-
-                </a>
-
-            </div>
-
         </div>
-
     </section>
 
     <section class="section premium-dashboard pt-0">
@@ -153,14 +164,11 @@
                                     <h5 class="mb-0">
                                         Recipe Ingredients
                                     </h5>
+                                        <button type="button" class="btn btn-success" id="addIngredient"> <i
+                                                class="fas fa-plus-circle"></i>
+                                            Add Ingredient
 
-                                    <button type="button" id="addIngredient" class="btn btn-success btn-sm">
-
-                                        <i class="fas fa-plus"></i>
-                                        Add Ingredient
-
-                                    </button>
-
+                                        </button>
                                 </div>
                                 @error('addIngredient')
                                     <small class="text-danger">{{ $message }}</small>
@@ -267,18 +275,15 @@
                         </div>
 
                     </div>
+                    <div class="premium-card-footer">
 
+                        <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                            Save Recipe
+                        </button>
+                    </div>
                 </div>
 
-                <div class="mt-4">
 
-                    <button type="submit" class="btn btn-primary">
-
-                        Save Recipe
-
-                    </button>
-
-                </div>
 
             </form>
 

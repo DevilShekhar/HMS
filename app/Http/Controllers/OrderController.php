@@ -146,8 +146,26 @@ class OrderController extends Controller
             $query->whereHas('creator', function ($q) {
                 $q->where('role', 'waiter_head');
             });
-        }
 
+        } elseif ($filter == 'vip') {
+
+            $query->where('order_type', 'vip');
+
+        }
+        $counts['vip'] = Order::query()->where('order_type', 'vip')->count();
+        $fromDate = request('from_date');
+        $toDate = request('to_date');
+
+        if ($fromDate && $toDate) {
+            $query->whereBetween('created_at', [
+                $fromDate.' 00:00:00',
+                $toDate.' 23:59:59',
+            ]);
+        } elseif ($fromDate) {
+            $query->whereDate('created_at', '>=', $fromDate);
+        } elseif ($toDate) {
+            $query->whereDate('created_at', '<=', $toDate);
+        }
         $orders = $query->latest()->get();
 
         return view('admin.orders.index', compact(

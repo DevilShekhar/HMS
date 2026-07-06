@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-
 class RecipeController extends Controller
 {
     public function index($restaurant)
@@ -22,8 +21,8 @@ class RecipeController extends Controller
             'menuItem',
             'branch',
         ])
-            ->selectRaw('MIN(id) as id, menu_item_id, branch_id')
-            ->groupBy('menu_item_id', 'branch_id')
+            ->selectRaw('MIN(id) as id, menu_item_id, branch_id, status')
+            ->groupBy('menu_item_id', 'branch_id', 'status')
             ->get();
 
         return view('admin.mgnt_recipe.index', compact(
@@ -72,17 +71,6 @@ class RecipeController extends Controller
     {
         $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
 
-        // $request->validate([
-        //     'branch_id' => 'nullable',
-        //     'menu_item_id' => 'required',
-        //     'inventory_id' => 'required|array|min:1',
-        //     'inventory_id.*' => 'required|exists:inventory_items,id',
-        //     'quantity_required' => 'required|array|min:1',
-        //     'quantity_required.*' => 'required|numeric|min:0.001',
-        //     'recipe_unit' => 'required|array|min:1',
-        //     'recipe_unit.*' => 'required',
-
-        // ]);
         $request->validate([
             'branch_id' => 'nullable',
             'menu_item_id' => 'required',
@@ -149,18 +137,21 @@ class RecipeController extends Controller
             ->with('success', 'Order created success    fully.');
     }
 
-    public function edit($restaurant, $recipe, $branch = null)
+    public function edit(Request $request)
     {
-        $restaurant = Restaurant::query()->where('slug', $restaurant)
-            ->firstOrFail();
+        $restaurantSlug = $request->route('restaurant');
+        $branchSlug = $request->route('branch'); // null for restaurant route
+        $menuItemId = $request->route('recipe');
 
-        if ($branch) {
+        $restaurant = Restaurant::query()->where('slug', $restaurantSlug)->firstOrFail();
 
-            $branch = Branch::query()->where('slug', $branch)
+        if ($branchSlug) {
+
+            $branch = Branch::where('slug', $branchSlug)
                 ->where('restaurant_id', $restaurant->id)
                 ->firstOrFail();
 
-            $recipes = Recipe::query()->where('menu_item_id', $recipe)
+            $recipes = Recipe::query()->where('menu_item_id', $menuItemId)
                 ->where('branch_id', $branch->id)
                 ->get();
 
@@ -170,55 +161,75 @@ class RecipeController extends Controller
 
         } else {
 
-            $recipes = Recipe::query()->where('menu_item_id', $recipe)
-                ->get();
+            $branch = null;
 
-            $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)
-                ->get();
+            $recipes = Recipe::query()->where('menu_item_id', $menuItemId)->get();
+
+            $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)->get();
         }
 
         if ($recipes->isEmpty()) {
             abort(404);
         }
 
-        $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
-
+        $branches = Branch::where('restaurant_id', $restaurant->id)->get();
         $menuItems = MenuItem::query()->where('restaurant_id', $restaurant->id)->get();
 
-        return view(
-            'admin.mgnt_recipe.edit',
-            compact(
-                'recipes',
-                'restaurant',
-                'branch',
-                'branches',
-                'menuItems',
-                'inventoryItems'
-            )
-        );
+        return view('admin.mgnt_recipe.edit', compact(
+            'recipes',
+            'restaurant',
+            'branch',
+            'branches',
+            'menuItems',
+            'inventoryItems'
+        ));
     }
 
-    public function update(Request $request, $restaurant, $recipe, $branch = null)
+    public function update(Request $request)
     {
-        $restaurant = Restaurant::query()->where('slug', $restaurant)
-            ->firstOrFail();
+        $restaurantSlug = $request->route('restaurant');
+        $branchSlug = $request->route('branch');
+        $menuItemId = $request->route('recipe');
+
+        $restaurant = Restaurant::query()->where('slug', $restaurantSlug)->firstOrFail();
+
+        $branch = null;
+
+        if ($branchSlug) {
+            $branch = Branch::where('slug', $branchSlug)
+                ->where('restaurant_id', $restaurant->id)
+                ->firstOrFail();
+        }
 
         $request->validate([
             'branch_id' => 'required',
             'menu_item_id' => 'required',
-            'inventory_id' => 'required|array',
-            'inventory_id.*' => 'required',
-            'quantity_required' => 'required|array',
+
+            'inventory_id' => 'required|array|min:1',
+            'inventory_id.*' => [
+                'required',
+                'exists:inventory_items,id',
+                'distinct',
+            ],
+
+            'quantity_required' => 'required|array|min:1',
             'quantity_required.*' => 'required|numeric|min:0.001',
-            'recipe_unit' => 'required|array',
+
+            'recipe_unit' => 'required|array|min:1',
             'recipe_unit.*' => 'required',
+        ], [
+            'inventory_id.*.distinct' => 'The same inventory item cannot be added more than once.',
         ]);
 
-        // delete old ingredients
-        Recipe::query()->where('menu_item_id', $recipe)
-            ->delete();
+        // Delete old recipe ingredients
+        $query = Recipe::query()->where('menu_item_id', $request->menu_item_id);
 
-        // create updated ingredients
+        if ($branch) {
+            $query->where('branch_id', $branch->id);
+        }
+
+        $query->delete();
+
         foreach ($request->inventory_id as $key => $inventoryId) {
 
             Recipe::create([
@@ -229,28 +240,21 @@ class RecipeController extends Controller
                 'quantity_required' => $request->quantity_required[$key],
                 'recipe_unit' => $request->recipe_unit[$key],
                 'remarks' => $request->remarks[$key] ?? null,
-                'updated_by' => Auth::id(),
                 'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
             ]);
-
         }
 
         if ($branch) {
-
-            return redirect()
-                ->route('branch.recipe.index', [
-                    'restaurant' => $restaurant->slug,
-                    'branch' => $branch,
-                ])
-                ->with('success', 'Recipe updated successfully');
-
+            return redirect()->route('branch.recipe.index', [
+                'restaurant' => $restaurant->slug,
+                'branch' => $branch->slug,
+            ])->with('success', 'Recipe updated successfully.');
         }
 
-        return redirect()
-            ->route('restaurant.recipe.index', [
-                'restaurant' => $restaurant->slug,
-            ])
-            ->with('success', 'Recipe updated successfully');
+        return redirect()->route('restaurant.recipe.index', [
+            'restaurant' => $restaurant->slug,
+        ])->with('success', 'Recipe updated successfully.');
     }
 
     public function show($restaurant, $branchOrMenuItem, $menuItemId = null)
@@ -301,18 +305,40 @@ class RecipeController extends Controller
         );
     }
 
-    public function destroy($restaurant, $recipe)
+    public function destroy(Request $request)
     {
-        $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
+        $restaurantSlug = $request->route('restaurant');
+        $branchSlug = $request->route('branch');
+        $menuItemId = $request->route('recipe');
 
-        $recipe = Recipe::findOrFail($recipe);
+        $restaurant = Restaurant::query()->where('slug', $restaurantSlug)->firstOrFail();
 
-        $recipe->delete();
+        $query = Recipe::query()->where('menu_item_id', $menuItemId);
 
-        return redirect()
-            ->route('recipe.index', [
+        if ($branchSlug) {
+
+            $branch = Branch::where('slug', $branchSlug)
+                ->where('restaurant_id', $restaurant->id)
+                ->firstOrFail();
+
+            $query->where('branch_id', $branch->id);
+        }
+
+        // Soft delete by changing status
+        $query->update([
+            'status' => 'inactive',
+            'updated_by' => Auth::id(),
+        ]);
+
+        if ($branchSlug) {
+            return redirect()->route('branch.recipe.index', [
                 'restaurant' => $restaurant->slug,
-            ])
-            ->with('success', 'Recipe deleted successfully');
+                'branch' => $branch->slug,
+            ])->with('success', 'Recipe deactivated successfully.');
+        }
+
+        return redirect()->route('restaurant.recipe.index', [
+            'restaurant' => $restaurant->slug,
+        ])->with('success', 'Recipe deactivated successfully.');
     }
 }

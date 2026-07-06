@@ -19,26 +19,28 @@
                             $restaurantSlug = request()->route('restaurant');
                             $branchSlug = request()->route('branch');
                         @endphp
-                        <div class="premium-head-actions">
+                        <div class="header-right">
                             @can('create-order')
                                 @if ($branchSlug)
-                                    <a href="{{ route('branch.orders.create', ['restaurant' => $restaurantSlug,'branch' => $branchSlug,]) }}" class="btn btn-primary">
+                                    <a href="{{ route('branch.orders.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug,]) }}"
+                                        class="btn btn-primary">
                                         <i class="fas fa-plus"></i>
                                         Create Order
                                     </a>
                                 @else
-                                    <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurantSlug,]) }}" class="btn btn-primary">
+                                    <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurantSlug,]) }}"
+                                        class="btn btn-primary">
                                         <i class="fas fa-plus"></i>
                                         Create Order
                                     </a>
                                 @endif
                             @endcan
-                        </div>                
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-       
+
         <section class="section premium-dashboard pt-0">
             @if (session('success'))
                 <div class="alert alert-success">
@@ -87,8 +89,50 @@
                                 Waiter Head
                                 <span class="badge bg-white text-dark ms-2">{{ $counts['waiter_head'] }}</span>
                             </a>
+                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'vip']) }}"
+                                class="btn {{ request('filter') == 'vip' ? 'text-dark' : 'btn-light border' }}"
+                                style="{{ request('filter') == 'vip' ? 'background-color:#ffcc00; border-color:#ffcc00;' : '' }}">
+                                <i class="fas fa-user-tie me-2"></i>
+                                VIP Orders
+                                <span class="badge bg-white text-dark ms-2">{{ $counts['vip'] }}</span>
+                            </a>
                         </div>
                     @endif
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body">
+                            <form method="GET" action="{{ url()->current() }}">
+                                <div class="row align-items-end">
+
+                                    {{-- Preserve current filter (today, waiter, vip, etc.) --}}
+                                    @if(request('filter'))
+                                        <input type="hidden" name="filter" value="{{ request('filter') }}">
+                                    @endif
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">From Date</label>
+                                        <input type="date" name="from_date" class="form-control"
+                                            value="{{ request('from_date') }}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">To Date</label>
+                                        <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i> Filter
+                                        </button>
+
+                                        <a href="{{ url()->current() }}" class="btn btn-secondary">
+                                            <i class="fas fa-redo me-1"></i> Reset
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle" id="tableExport">
                             <thead>
@@ -103,9 +147,6 @@
                                     <th>Status</th>
                                     <th>Payment Method</th>
                                     <th>Total</th>
-                                    @if (auth()->user()->role != 'customer')
-                                        <th>Assign</th>
-                                    @endif
                                     <th width="180">
                                         Action
                                     </th>
@@ -201,9 +242,7 @@
                                             @endif
                                         </td>
                                         <td> ₹{{ number_format($order->total, 2) }} </td>
-                                        @if (auth()->user()->role != 'customer')
-                                            <td>{{ $order->chef?->name ?? 'Not Assigned' }}</td>
-                                        @endif
+
                                         <td>
                                             @php
                                                 if (!empty($restaurantSlug) && !empty($branchSlug)) {
@@ -268,23 +307,22 @@
                                                             @endphp
 
                                                             @if($canEdit)
-                                                                <li>
-                                                                    <a class="dropdown-item"
-                                                                        href="{{ !empty($restaurantSlug) && !empty($branchSlug)
-                                                                            ? route('branch.orders.edit', [
-                                                                                'restaurant' => $restaurantSlug,
-                                                                                'branch' => $branchSlug,
-                                                                                'order' => $order->id,
-                                                                            ])
-                                                                            : route('restaurant.orders.edit', [
-                                                                                'restaurant' => $restaurantSlug,
-                                                                                'order' => $order->id,
-                                                                            ]) }}">
+                                                                                <li>
+                                                                                    <a class="dropdown-item" href="{{ !empty($restaurantSlug) && !empty($branchSlug)
+                                                                ? route('branch.orders.edit', [
+                                                                    'restaurant' => $restaurantSlug,
+                                                                    'branch' => $branchSlug,
+                                                                    'order' => $order->id,
+                                                                ])
+                                                                : route('restaurant.orders.edit', [
+                                                                    'restaurant' => $restaurantSlug,
+                                                                    'order' => $order->id,
+                                                                ]) }}">
 
-                                                                        <i class="fas fa-edit me-2 text-warning"></i>
-                                                                        Edit
-                                                                    </a>
-                                                                </li>
+                                                                                        <i class="fas fa-edit me-2 text-warning"></i>
+                                                                                        Edit
+                                                                                    </a>
+                                                                                </li>
 
                                                             @else
                                                                 <li>
@@ -300,19 +338,19 @@
                                                     {{-- Generate/View Bill --}}
                                                     @if($order->status == 'delivered')
 
-                                                    @can('view-bill')
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ $billRoute }}">
-                                                                @if(!$order->bill_generated_at)
-                                                                    <i class="fas fa-file-invoice me-2 text-warning"></i>
-                                                                    Generate Bill
-                                                                @else
-                                                                    <i class="fas fa-receipt me-2 text-warning"></i>
-                                                                    View Bill
-                                                                @endif
-                                                            </a>
-                                                        </li>
-                                                    @endcan
+                                                        @can('view-bill')
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ $billRoute }}">
+                                                                    @if(!$order->bill_generated_at)
+                                                                        <i class="fas fa-file-invoice me-2 text-warning"></i>
+                                                                        Generate Bill
+                                                                    @else
+                                                                        <i class="fas fa-receipt me-2 text-warning"></i>
+                                                                        View Bill
+                                                                    @endif
+                                                                </a>
+                                                            </li>
+                                                        @endcan
                                                     @endif
 
                                                     {{-- Make Payment --}}
@@ -567,7 +605,7 @@
         });
 
     </script>
-    
+
 @else
     @php
         abort(403);
