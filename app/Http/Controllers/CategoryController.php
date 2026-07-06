@@ -211,39 +211,34 @@ class CategoryController extends Controller
         }
     }
 
-    public function destroy($restaurant, Category $category)
-    {
-        $category->update([
-            'is_active' => 0,
-        ]);
 
-        // SUPER ADMIN
-        if (Auth::user()->role === 'super_admin') {
-
-            return redirect()
-                ->route('categories.index')
-                ->with('success', 'Category deavtivated successfully.');
-        }
-
-        $restaurantSlug = request()->route('restaurant');
-        $branchSlug = request()->route('branch');
-
-        // BRANCH LEVEL
-        if (! empty($restaurantSlug) && ! empty($branchSlug)) {
-
-            return redirect()
-                ->route('branch.categories.index', [
-                    'restaurant' => $restaurantSlug,
-                    'branch' => $branchSlug,
-                ])
-                ->with('success', 'Category deavtivated successfully.');
-        }
-
-        // RESTAURANT LEVEL
-        return redirect()
-            ->route('restaurant.categories.index', [
-                'restaurant' => $restaurantSlug,
-            ])
-            ->with('success', 'Category deavtivated successfully.');
+public function destroy($restaurant, $branch = null, $category = null)
+{
+    if ($category === null) {
+        $category = Category::findOrFail($branch);
+        $branch = null;
+    } else {
+        $category = Category::findOrFail($category);
     }
+
+    $category->update([
+        'is_active' => 0,
+    ]);
+
+    if (Auth::user()->role === 'super_admin') {
+        return redirect()->route('categories.index')
+            ->with('success', 'Category deactivated successfully.');
+    }
+
+    if ($branch) {
+        return redirect()->route('branch.categories.index', [
+            'restaurant' => $restaurant,
+            'branch' => $branch,
+        ])->with('success', 'Category deactivated successfully.');
+    }
+
+    return redirect()->route('restaurant.categories.index', [
+        'restaurant' => $restaurant,
+    ])->with('success', 'Category deactivated successfully.');
+}
 }

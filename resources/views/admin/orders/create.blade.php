@@ -1,477 +1,453 @@
-
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-header">
-                <h4>Create Order</h4>
-            </div>
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-            <form method="POST" action="{{ route('restaurant.orders.store', $restaurant->slug) }}" id="orderForm">
-                @csrf
-                <div class="card-body">
-                    <!-- Customer & Table Details -->
-                    <div class="row">
 
-                        <div class="col-md-3">
+
+    <div class="de-wrapper">
+        <nav class="de-top-nav">
+
+            <a href="#" class="d-flex align-items-center text-decoration-none">
+
+                <div class="de-logo-icon">
+                    🍽️
+                </div>
+
+                <div class="de-brand">
+                    <h2>{{ $restaurant->name }}</h2>
+
+                    <small>
+                        @if(isset($branch) && $branch)
+                            📍 {{ $branch->name }}
+                        @else
+                            Restaurant Panel
+                        @endif
+                    </small>
+                </div>
+
+            </a>
+            <div class="de-nav-links">
+                @if(auth()->user()->branch_id)
+                    <a href="{{ route('branch.orders.index', [
+                        'restaurant' => $restaurant->slug,
+                        'branch' => auth()->user()->branch->slug,
+                    ]) }}" class="de-back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                @else
+                    <a href="{{ route('restaurant.orders.index', [
+                        'restaurant' => $restaurant->slug,
+                    ]) }}" class="de-back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                @endif
+            </div>
+
+        </nav>
+        <!-- ============================
+                 MAIN CONTENT
+                 ============================ -->
+        <div class="de-main-grid">
+            <!-- LEFT: MENU SECTION -->
+            <div>
+                <!-- Customer Form -->
+                <div class="de-sidebar-form">
+                    <div class="de-form-title">👤 Order Details</div>
+                    <form method="POST" action="{{ route('restaurant.orders.store', $restaurant->slug) }}" id="orderForm">
+                        @csrf
+                        <div class="de-form-row">
                             @if (auth()->user()->role == 'customer')
                                 <input type="hidden" name="customer_name" value="{{ auth()->user()->name }}">
+                                <input type="hidden" name="mobile_number" value="{{ auth()->user()->phone }}">
+                                <input type="hidden" name="email" value="{{ auth()->user()->email }}">
                             @else
-                                <label>Customer Name</label>
-
-                                <input type="text" name="customer_name" class="form-control" value="{{ old('customer_name') }}"
-                                    required>
-                            @endif
-                        </div>
-                        <div class="col-md-3">
-                            @if (auth()->user()->role == 'customer')
-                                <input type="hidden" name="mobile_number" class="form-control "
-                                    value="{{ auth()->user()->phone }}" readonly>
-                            @else
-                                <label>Mobile Number</label>
-                                <input type="text" name="mobile_number" class="form-control" required id="mobile_number"
-                                    value="{{ old('mobile_number') }}">
+                                <div class="de-field">
+                                    <label>Customer Name <span class="de-required">*</span></label>
+                                    <input type="text" name="customer_name" placeholder="John Doe"
+                                        value="{{ old('customer_name') }}"
+                                        class="{{ $errors->has('customer_name') ? 'de-field-error' : '' }}" required>
+                                    @error('customer_name')
+                                        <span class="de-error-message">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="de-field">
+                                    <label>Mobile Number <span class="de-required">*</span></label>
+                                    <input type="text" name="mobile_number" id="mobile_number" placeholder="+91 98765 00000"
+                                        value="{{ old('mobile_number') }}"
+                                        class="{{ $errors->has('mobile_number') ? 'de-field-error' : '' }}" required>
                                     @error('mobile_number')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                        <span class="de-error-message">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="de-field">
+                                    <label>Email</label>
+                                    <input type="email" name="email" placeholder="john@example.com" value="{{ old('email') }}"
+                                        class="{{ $errors->has('email') ? 'de-field-error' : '' }}">
+                                    @error('email')
+                                        <span class="de-error-message">{{ $message }}</span>
+                                    @enderror
+                                </div>
                             @endif
-                        </div>
-                        <div class="col-md-3">
-                            @if (auth()->user()->role == 'customer')
-                                <input type="hidden" name="email" class="form-control " value="{{ auth()->user()->email }}"
-                                    readonly>
-                            @else
-                                <label>Email</label>
-                                <input type="text" name="email" class="form-control" value="{{ old('email') }}" required>
-                            @endif
-                        </div>
-                        @if (auth()->user()->role == 'waiter_head')
-                            <div class="col-md-3">
-                                <label>Order Type</label>
-                                <select name="order_type" class="form-control">
-                                    <option value="normal"> Normal </option>
-                                    <option value="vip"> VIP</option>
-                                </select>
-                            </div>
-                        @endif
-                        <div class="col-md-3">
-                            <label>Table Area <span class="text-danger">*</span></label>
 
-                            <select id="table_category" class="form-control @error('table_category') is-invalid @enderror"
-                                name="table_category" required>
-                                <option value="">Select Table Area</option>
-
-                                @foreach ($tableCategories as $category)
-                                    <option value="{{ $category->id }}" {{ old('table_category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-
-                            @error('table_category')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Table Number <span class="text-danger">*</span></label>
-
-                            <select name="table_no" id="table_no"
-                                class="form-control @error('table_no') is-invalid @enderror" required>
-                                <option value="">Select Table</option>
-                            </select>
-
-                            @error('table_no')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label>Date of Birth</label>
-                            <input type="date" name="birth_date" class="form-control" value="{{ old('birth_date') }}">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Anniversary Date</label>
-                            <input type="date" name="anniversary_date" class="form-control"
-                                value="{{ old('anniversary_date') }}">
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <!-- POS Layout - Full Width -->
-                    <div class="row">
-                        <!-- Left: Menu Items -->
-                        <div class="col-md-8">
-                            <!-- Category Filter Dropdown & Search -->
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label class="filter-label">Filter by Category</label>
-                                    <select id="categoryFilter" class="form-control">
-                                        <option value="all">All Categories</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->name }}">{{ $category->name }}</option>
-                                        @endforeach
+                            @if (auth()->user()->role == 'waiter_head')
+                                <div class="de-field">
+                                    <label>Order Type</label>
+                                    <select name="order_type" class="{{ $errors->has('order_type') ? 'de-field-error' : '' }}">
+                                        <option value="normal">Normal</option>
+                                        <option value="vip">⭐ VIP</option>
                                     </select>
+                                    @error('order_type')
+                                        <span class="de-error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
-                                <div class="col-md-8">
-                                    <label class="filter-label">Search</label>
-                                    <div class="search-wrapper">
-                                        <input type="text" id="menuSearch" class="form-control search-input"
-                                            placeholder="Search products by name...">
-                                        <span class="search-icon">🔍</span>
-                                        <div id="searchResults" class="search-results"></div>
-                                    </div>
-                                </div>
+                            @endif
+
+                            <div class="de-field">
+                                <label>Table Area <span class="de-required">*</span></label>
+                                <select id="table_category" name="table_category"
+                                    class="{{ $errors->has('table_category') ? 'de-field-error' : '' }}" required>
+                                    <option value="">Select Area</option>
+                                    @foreach ($tableCategories as $category)
+                                        <option value="{{ $category->id }}" {{ old('table_category') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('table_category')
+                                    <span class="de-error-message">{{ $message }}</span>
+                                @enderror
                             </div>
 
-                            <br>
+                            <div class="de-field">
+                                <label>Table Number <span class="de-required">*</span></label>
+                                <select name="table_no" id="table_no"
+                                    class="{{ $errors->has('table_no') ? 'de-field-error' : '' }}" required>
+                                    <option value="">Select Table</option>
+                                </select>
+                                @error('table_no')
+                                    <span class="de-error-message">{{ $message }}</span>
+                                @enderror
+                            </div>
 
-                            <!-- Menu Items Grid -->
-                            <div class="menu-grid" id="menuItemsContainer">
-                                @foreach ($menuItems as $item)
-                                    <div class="menu-card" data-id="{{ $item->id }}" data-name="{{ $item->name }}"
-                                        data-price="{{ $item->price }}"
-                                        data-category="{{ $item->category->name ?? 'Uncategorized' }}">
-                                        <div class="menu-img">
-                                            @if ($item->image)
-                                                <img src="{{ asset($item->image) }}" alt="{{ $item->name }}"
-                                                    class="menu-img-content">
-                                            @else
-                                                <span class="menu-placeholder">🍽️</span>
-                                            @endif
-                                        </div>
-                                        <div class="menu-name">{{ $item->name }}</div>
-                                        <div class="menu-price">₹{{ number_format($item->price, 2) }}</div>
-                                    </div>
-                                @endforeach
+                            <div class="de-field">
+                                <label>Date of Birth</label>
+                                <input type="date" name="birth_date" value="{{ old('birth_date') }}"
+                                    class="{{ $errors->has('birth_date') ? 'de-field-error' : '' }}">
+                                @error('birth_date')
+                                    <span class="de-error-message">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="de-field">
+                                <label>Anniversary Date</label>
+                                <input type="date" name="anniversary_date" value="{{ old('anniversary_date') }}"
+                                    class="{{ $errors->has('anniversary_date') ? 'de-field-error' : '' }}">
+                                @error('anniversary_date')
+                                    <span class="de-error-message">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- Right: Order Summary -->
-                        <div class="col-md-4">
-                            <div class="order-panel">
-                                <div class="order-header">
-                                    <div class="order-header-content">
-                                        <h6 class="order-title">Current Order</h6>
-                                        <span class="badge badge-secondary" id="itemCountBadge">0 items</span>
-                                    </div>
-                                </div>
+                        <!-- Hidden fields for items -->
+                        <div id="hiddenItemsContainer"></div>
+                        <div style="display:none;">
+                            <button type="submit" id="submitOrderBtn">Save</button>
+                        </div>
+                    </form>
+                </div>
 
-                                <!-- Order Items -->
-                                <div id="orderItemsList" class="order-items-list">
-                                    <div id="emptyCartMsg" class="empty-cart">
-                                        <div class="empty-cart-icon">🛒</div>
-                                        <p>No items added yet</p>
-                                        <small>Click on menu items to add</small>
-                                    </div>
-                                    <div id="orderItemsDynamic"></div>
-                                </div>
-
-                                <!-- Order Details -->
-
-
-                                <!-- Price Summary -->
-                                <div class="price-summary">
-                                    <div class="summary-row total-row">
-                                        <span>Grand Total</span>
-                                        <span id="grandTotalAmount">₹0.00</span>
-                                    </div>
-                                </div>
-
-                                <!-- Place Order Button -->
-                                <div class="place-order-wrapper">
-                                    <button type="button" class="btn btn-primary btn-block place-order-btn"
-                                        id="placeOrderBtn">
-                                        📝 Place Order
-                                    </button>
-                                </div>
+                <!-- Menu Section -->
+                <div class="de-menu-section">
+                    <div class="de-menu-header">
+                        <h3>Popular Menu</h3>
+                        <div class="de-menu-tools">
+                            <div class="de-search-box">
+                                <span class="de-search-icon">🔍</span>
+                                <input type="text" id="menuSearch" placeholder="Search menu...">
+                                <div id="searchResults" class="de-search-dropdown"></div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Category Buttons (Replaces Dropdown) -->
+                    <div class="de-categories-wrapper">
+                        <span class="de-cat-label">Categories:</span>
+                        <button class="de-category-btn de-active-cat" data-cat="all">All</button>
+                        @foreach ($categories as $category)
+                            <button class="de-category-btn" data-cat="{{ $category->name }}">
+                                {{ $category->name }}
+                            </button>
+                        @endforeach
+                    </div>
 
-
-
-
-                    <!-- Hidden fields for menu items -->
-                    <div id="hiddenItemsContainer"></div>
+                    <div class="de-menu-grid" id="menuItemsContainer">
+                        @foreach ($menuItems as $item)
+                            <div class="de-menu-item" data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                data-price="{{ $item->price }}" data-category="{{ $item->category->name ?? 'Uncategorized' }}">
+                                <div class="de-item-img">
+                                    @if ($item->image)
+                                        <img src="{{ asset($item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                                    @else
+                                        🍽️
+                                    @endif
+                                </div>
+                                <div class="de-item-name">{{ $item->name }}</div>
+                                <div class="de-item-price">₹{{ number_format($item->price, 2) }}</div>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success" id="submitOrderBtn" style="display:none;">Save
-                        Order</button>
-                    <a href="{{ route('restaurant.orders.index', $restaurant->slug) }}" class="btn btn-secondary">Back</a>
-                </div>
-
-            </form>
-
-        </div>
-        <div id="customerHistory" class="card mt-3" style="display:none;">
-            <div class="card-header py-2">
-                <h6 class="mb-0">
-                    <i class="fas fa-user-check text-success"></i>
-                    Returning Customer
-                </h6>
             </div>
 
-            <div class="card-body py-2">
-                <div class="row text-center mb-2">
-                    <div class="col-6">
-                        <small class="text-muted d-block">Visits</small>
-                        <strong id="visitCount">0</strong>
+            <!-- RIGHT: BASKET -->
+            <div>
+                <div class="de-basket">
+                    <div class="de-basket-header">
+                        <h4>🍽️ Your Order</h4>
+                        <span class="de-basket-count" id="itemCountBadge">0 items</span>
                     </div>
-                    <div class="col-6">
-                        <small class="text-muted d-block">Last Visit</small>
-                        <strong id="lastVisit">-</strong>
+
+                    <div class="de-basket-list" id="orderItemsList">
+                        <div id="emptyCartMsg" class="de-basket-empty">
+                            <span class="de-empty-icon">📋</span>
+                            <p>No items selected</p>
+                            <small>Click on menu items to add</small>
+                        </div>
+                        <div id="orderItemsDynamic"></div>
+                    </div>
+
+                    <div class="de-basket-footer">
+                        <div class="de-total-row">
+                            <span class="de-total-label">Subtotal</span>
+                            <span class="de-total-amount" id="grandTotalAmount">₹0.00</span>
+                        </div>
+                        <button type="button" class="de-checkout-btn" id="placeOrderBtn">
+                            🛒 Proceed to Checkout
+                        </button>
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead class="table-light">
+                <!-- Customer History -->
+                <div id="customerHistory" class="de-history">
+                    <div class="de-history-header">
+                        <span style="font-size:1.2rem;">🔄</span>
+                        <h5>Returning Customer</h5>
+                    </div>
+                    <div class="de-history-stats">
+                        <div class="de-stat">
+                            <span class="de-stat-label">Total Visits</span>
+                            <span class="de-stat-value" id="visitCount">0</span>
+                        </div>
+                        <div class="de-stat">
+                            <span class="de-stat-label">Last Visit</span>
+                            <span class="de-stat-value" id="lastVisit" style="font-size:1rem;">-</span>
+                        </div>
+                    </div>
+                    <table class="de-history-table">
+                        <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Order Type</th>
-                                <th width="80">Amount</th>
+                                <th>Type</th>
+                                <th class="de-amount">Amount</th>
                             </tr>
                         </thead>
-                        <tbody id="historyRows">
-                            <!-- JS Data -->
-                        </tbody>
+                        <tbody id="historyRows"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-@endsection
-@push('scripts')
-    <script>
-        // Order state
-        let order = {};
-        let selectedPayment = 'cash';
-        const menuItemsData = @json($menuItems);
-        const cgstPercent = 0;
-        const sgstPercent = 0;
 
-        // Category filter dropdown
-        document.addEventListener('DOMContentLoaded', function () {
-            const categoryFilter = document.getElementById('categoryFilter');
-            if (categoryFilter) {
-                categoryFilter.addEventListener('change', function () {
-                    filterByCategory(this.value);
-                });
-            }
-        });
+    @push('scripts')
+        <script>
+            // ============================
+            // STATE
+            // ============================
+            let order = {};
+            const menuItemsData = @json($menuItems);
 
-        function filterByCategory(category) {
-            const allCards = document.querySelectorAll('.menu-card');
-            if (category === 'all') {
-                allCards.forEach(card => card.style.display = '');
-            } else {
-                allCards.forEach(card => {
-                    const cardCat = card.dataset.category;
-                    card.style.display = (cardCat === category) ? '' : 'none';
-                });
-            }
-        }
-
-        function updateCardHighlights() {
-            document.querySelectorAll('.menu-card').forEach(card => {
-            const id = card.dataset.id;
-            const qty = order[id]?.qty || 0;
-
-            card.classList.toggle('active', qty > 0);
-
-            const oldBadge = card.querySelector('.menu-card-qty-badge');
-            if (oldBadge) oldBadge.remove();
-
-            if (qty > 0) {
-                const badge = document.createElement('div');
-                badge.className = 'menu-card-qty-badge';
-                badge.textContent = qty.toLocaleString('en-IN');
-                card.appendChild(badge);
-            }
-        });
-        }
-
-        function addItemToOrder(id, name, price) {
-            if (order[id]) {
-                order[id].qty++;
-            } else {
-                order[id] = {
-                    id,
-                    name,
-                    price: parseFloat(price),
-                    qty: 1
-                };
-            }
-            renderOrderSummary();
-            updateCardHighlights();
-            updateHiddenFields();
-        }
-
-        function renderOrderSummary() {
-            const container = document.getElementById('orderItemsDynamic');
-            const emptyMsg = document.getElementById('emptyCartMsg');
-            const itemCountBadge = document.getElementById('itemCountBadge');
-            const keys = Object.keys(order);
-            const totalQty = keys.reduce((sum, id) => sum + order[id].qty, 0);
-
-            itemCountBadge.textContent = totalQty.toLocaleString('en-IN') + ' item' + (totalQty !== 1 ? 's' : '');
-
-            if (keys.length === 0) {
-                if (emptyMsg) emptyMsg.style.display = 'block';
-                if (container) container.innerHTML = '';
-                updateTotals();
-                return;
+            // ============================
+            // UTILITY
+            // ============================
+            function escapeHtml(str) {
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return String(str).replace(/[&<>"']/g, m => map[m]);
             }
 
-            if (emptyMsg) emptyMsg.style.display = 'none';
-
-            let html = '';
-            for (let id in order) {
-                const item = order[id];
-                const lineTotal = item.price * item.qty;
-                html += `
-                            <div class="order-item">
-                                <div>
-                                    <div class="order-item-name">${escapeHtml(item.name)}</div>
-                                    <div class="order-item-price">₹${item.price.toFixed(2)} each</div>
-                                </div>
-                                <div class="order-item-controls">
-                                    <div class="qty-control">
-                                        <button type="button" class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
-
-                                        <input type="number"  class="qty-input" value="${item.qty}" min="1" onchange="setQty(${id}, this.value)"/>
-
-                                        <button type="button" class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
-                                    </div>
-                                    <div class="order-item-total">₹${lineTotal.toLocaleString('en-IN', {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2})}
-                                    </div>
-                                    <button type="button" class="remove-item-btn" onclick="removeItem(${id})">✕</button>
-                                </div>
-                            </div>
-                        `;
-            }
-            container.innerHTML = html;
-            updateTotals();
-        }
-
-        function updateHiddenFields() {
-            const container = document.getElementById('hiddenItemsContainer');
-            if (!container) return;
-
-            let html = '';
-            for (let id in order) {
-                const item = order[id];
-                html += `
-                            <input type="hidden" name="menu_item_id[]" value="${id}">
-                            <input type="hidden" name="quantity[]" value="${item.qty}">
-                        `;
-            }
-            container.innerHTML = html;
-        }
-
-        function updateTotals() {
-            let subtotal = 0;
-
-            for (let id in order) {
-                subtotal += order[id].price * order[id].qty;
+            function formatCurrency(amount) {
+                return '₹' + parseFloat(amount).toFixed(2);
             }
 
-            const grandTotal = subtotal;
-
-            document.getElementById('grandTotalAmount').textContent =
-                '₹' + grandTotal.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-        }
-
-        function changeQty(id, delta) {
-            if (order[id]) {
-                order[id].qty += delta;
-                if (order[id].qty <= 0) delete order[id];
+            // ============================
+            // ORDER MANAGEMENT
+            // ============================
+            function addItemToOrder(id, name, price) {
+                price = parseFloat(price);
+                if (order[id]) {
+                    order[id].qty++;
+                } else {
+                    order[id] = { id, name, price, qty: 1 };
+                }
                 renderOrderSummary();
                 updateCardHighlights();
                 updateHiddenFields();
             }
-        }
-        function setQty(id, value) {
-                let qty = parseInt(value);
 
+            function changeQty(id, delta) {
+                if (order[id]) {
+                    order[id].qty += delta;
+                    if (order[id].qty <= 0) {
+                        delete order[id];
+                    }
+                    renderOrderSummary();
+                    updateCardHighlights();
+                    updateHiddenFields();
+                }
+            }
+
+            function setQty(id, value) {
+                const qty = parseInt(value);
                 if (isNaN(qty) || qty <= 0) {
                     delete order[id];
                 } else {
                     order[id].qty = qty;
                 }
-
                 renderOrderSummary();
                 updateCardHighlights();
                 updateHiddenFields();
             }
 
-        function removeItem(id) {
-            delete order[id];
-            renderOrderSummary();
-            updateCardHighlights();
-            updateHiddenFields();
-        }
-
-        function selectPaymentMethod(element) {
-            document.querySelectorAll('.pos-pay-btn').forEach(btn => btn.classList.remove('active', 'btn-primary'));
-            document.querySelectorAll('.pos-pay-btn').forEach(btn => btn.classList.add('btn-outline-secondary'));
-            element.classList.remove('btn-outline-secondary');
-            element.classList.add('active', 'btn-primary');
-            selectedPayment = element.dataset.method;
-            document.getElementById('paymentMethodInput').value = selectedPayment;
-        }
-
-        function escapeHtml(str) {
-            return String(str).replace(/[&<>]/g, function (m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        // Menu card click
-        document.addEventListener('click', function (e) {
-            const card = e.target.closest('.menu-card');
-            if (card) {
-                addItemToOrder(card.dataset.id, card.dataset.name, parseFloat(card.dataset.price));
+            function removeItem(id) {
+                delete order[id];
+                renderOrderSummary();
+                updateCardHighlights();
+                updateHiddenFields();
             }
-        });
 
-        // Search functionality
-        const searchInput = document.getElementById('menuSearch');
-        const searchResults = document.getElementById('searchResults');
+            // ============================
+            // RENDER
+            // ============================
+            function renderOrderSummary() {
+                const container = document.getElementById('orderItemsDynamic');
+                const emptyMsg = document.getElementById('emptyCartMsg');
+                const itemCountBadge = document.getElementById('itemCountBadge');
 
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
+                const keys = Object.keys(order);
+                const totalQty = keys.reduce((sum, id) => sum + order[id].qty, 0);
+                itemCountBadge.textContent = `${totalQty} item${totalQty !== 1 ? 's' : ''}`;
+
+                if (keys.length === 0) {
+                    emptyMsg.style.display = 'block';
+                    container.innerHTML = '';
+                    updateTotals();
+                    return;
+                }
+
+                emptyMsg.style.display = 'none';
+
+                let html = '';
+                for (const id in order) {
+                    const item = order[id];
+                    html += `
+                            <div class="de-basket-item">
+                                <div class="de-item-details">
+                                    <div class="de-item-title">${escapeHtml(item.name)}</div>
+                                    <div class="de-item-sub">${formatCurrency(item.price)} each</div>
+                                </div>
+                                <div class="de-item-actions">
+                                    <button class="de-qty-btn" onclick="changeQty(${id}, -1)">−</button>
+                                    <input type="number" class="de-qty-input" value="${item.qty}" min="1" onchange="setQty(${id}, this.value)">
+                                    <button class="de-qty-btn" onclick="changeQty(${id}, 1)">+</button>
+                                    <span class="de-item-total">${formatCurrency(item.price * item.qty)}</span>
+                                    <button class="de-remove-btn" onclick="removeItem(${id})" title="Remove">✕</button>
+                                </div>
+                            </div>
+                        `;
+                }
+                container.innerHTML = html;
+                updateTotals();
+            }
+
+            function updateTotals() {
+                let total = 0;
+                for (const id in order) {
+                    total += order[id].price * order[id].qty;
+                }
+                document.getElementById('grandTotalAmount').textContent = formatCurrency(total);
+            }
+
+            function updateCardHighlights() {
+                document.querySelectorAll('.de-menu-item').forEach(card => {
+                    const id = card.dataset.id;
+                    const qty = order[id]?.qty || 0;
+
+                    card.style.borderColor = qty > 0 ? '#ff6b35' : '';
+                    card.style.background = qty > 0 ? 'rgba(255, 107, 53, 0.03)' : '';
+
+                    const oldBadge = card.querySelector('.de-item-badge');
+                    if (oldBadge) oldBadge.remove();
+
+                    if (qty > 0) {
+                        const badge = document.createElement('div');
+                        badge.className = 'de-item-badge';
+                        badge.textContent = qty;
+                        card.appendChild(badge);
+                    }
+                });
+            }
+
+            function updateHiddenFields() {
+                const container = document.getElementById('hiddenItemsContainer');
+                let html = '';
+                for (const id in order) {
+                    html += `
+                            <input type="hidden" name="menu_item_id[]" value="${id}">
+                            <input type="hidden" name="quantity[]" value="${order[id].qty}">
+                        `;
+                }
+                container.innerHTML = html;
+            }
+
+            // ============================
+            // EVENT: Menu Item Click
+            // ============================
+            document.addEventListener('click', function (e) {
+                const card = e.target.closest('.de-menu-item');
+                if (card) {
+                    addItemToOrder(card.dataset.id, card.dataset.name, card.dataset.price);
+                }
+            });
+
+            // ============================
+            // EVENT: Category Buttons
+            // ============================
+            document.querySelectorAll('.de-category-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.de-category-btn').forEach(b => b.classList.remove('de-active-cat'));
+                    this.classList.add('de-active-cat');
+
+                    const category = this.dataset.cat;
+                    document.querySelectorAll('.de-menu-item').forEach(card => {
+                        if (category === 'all') {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = card.dataset.category === category ? '' : 'none';
+                        }
+                    });
+                });
+            });
+
+            // ============================
+            // SEARCH
+            // ============================
+            const searchInput = document.getElementById('menuSearch');
+            const searchResults = document.getElementById('searchResults');
+
+            searchInput?.addEventListener('input', function () {
                 const query = this.value.toLowerCase().trim();
 
                 if (query.length === 0) {
-                    searchResults.classList.remove('show');
                     searchResults.style.display = 'none';
-                    const categoryFilter = document.getElementById('categoryFilter');
-                    if (categoryFilter) {
-                        filterByCategory(categoryFilter.value);
-                    } else {
-                        document.querySelectorAll('.menu-card').forEach(card => card.style.display = '');
-                    }
+                    document.querySelectorAll('.de-menu-item').forEach(card => card.style.display = '');
                     return;
                 }
 
@@ -479,206 +455,160 @@
                     item.name.toLowerCase().includes(query)
                 );
 
+                document.querySelectorAll('.de-menu-item').forEach(card => card.style.display = 'none');
+
                 if (filtered.length === 0) {
-                    searchResults.innerHTML = '<div class="search-result-item text-muted">No items found</div>';
+                    searchResults.innerHTML = `
+                            <div class="de-result-item" style="justify-content:center;color:var(--de-text-light);">
+                                No items found
+                            </div>
+                        `;
                     searchResults.style.display = 'block';
-                    searchResults.classList.add('show');
-                    document.querySelectorAll('.menu-card').forEach(card => card.style.display = 'none');
                     return;
                 }
 
                 let html = '';
                 filtered.forEach(item => {
                     html += `
-                                <div class="search-result-item" data-id="${item.id}" data-name="${escapeHtml(item.name)}" data-price="${item.price}">
-                                    <div style="display:flex; justify-content:space-between;">
-                                        <strong>${escapeHtml(item.name)}</strong>
-                                        <span style="color:#007bff; font-weight:600;">₹${parseFloat(item.price).toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            `;
+                            <div class="de-result-item"
+                                 data-id="${item.id}"
+                                 data-name="${escapeHtml(item.name)}"
+                                 data-price="${item.price}">
+                                <span>${escapeHtml(item.name)}</span>
+                                <span class="de-result-price">${formatCurrency(item.price)}</span>
+                            </div>
+                        `;
                 });
                 searchResults.innerHTML = html;
                 searchResults.style.display = 'block';
-                searchResults.classList.add('show');
 
-                document.querySelectorAll('.menu-card').forEach(card => card.style.display = 'none');
-
-                document.querySelectorAll('.search-result-item').forEach(result => {
+                document.querySelectorAll('.de-result-item').forEach(result => {
                     result.addEventListener('click', function () {
-                        addItemToOrder(this.dataset.id, this.dataset.name, parseFloat(this.dataset
-                            .price));
+                        addItemToOrder(
+                            this.dataset.id,
+                            this.dataset.name,
+                            this.dataset.price
+                        );
                         searchInput.value = '';
-                        searchResults.classList.remove('show');
                         searchResults.style.display = 'none';
-                        const categoryFilter = document.getElementById('categoryFilter');
-                        if (categoryFilter) {
-                            filterByCategory(categoryFilter.value);
-                        } else {
-                            document.querySelectorAll('.menu-card').forEach(card => card.style
-                                .display = '');
-                        }
+                        document.querySelectorAll('.de-menu-item').forEach(card => card.style.display = '');
                     });
                 });
             });
-        }
 
-        document.addEventListener('click', function (e) {
-            if (searchInput && !searchInput.contains(e.target) && searchResults && !searchResults.contains(e
-                .target)) {
-                searchResults.classList.remove('show');
-                searchResults.style.display = 'none';
-            }
-        });
-
-        // Place Order
-        document.getElementById('placeOrderBtn')?.addEventListener('click', function () {
-            if (Object.keys(order).length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Empty Order',
-                    text: 'Please add at least one item to the order!',
-                    confirmButtonColor: '#007bff'
-                });
-                return;
-            }
-
-            let subtotal = 0;
-            for (let id in order) {
-                subtotal += order[id].price * order[id].qty;
-            }
-
-            const cgstAmount = (subtotal * cgstPercent) / 100;
-            const sgstAmount = (subtotal * sgstPercent) / 100;
-            const grandTotal = subtotal + cgstAmount + sgstAmount;
-
-            let taxHtml = '';
-            if (cgstPercent > 0) taxHtml +=
-                `<p><strong>CGST (${cgstPercent}%):</strong> ₹${cgstAmount.toFixed(2)}</p>`;
-            if (sgstPercent > 0) taxHtml +=
-                `<p><strong>SGST (${sgstPercent}%):</strong> ₹${sgstAmount.toFixed(2)}</p>`;
-
-            Swal.fire({
-                title: 'Confirm Order?',
-                html: `
-                            <div style="text-align:left;">
-                                <p><strong>Subtotal:</strong> ₹${subtotal.toFixed(2)}</p>
-                                ${taxHtml}
-                                <hr>
-                                <p><strong>Grand Total:</strong> ₹${grandTotal.toFixed(2)}</p>
-                                <p><strong>Payment:</strong> ${selectedPayment.toUpperCase()}</p>
-                            </div>
-                        `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#007bff',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Place Order'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('orderForm').submit();
+            document.addEventListener('click', function (e) {
+                const wrapper = searchInput?.closest('.de-search-box');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    if (searchResults) searchResults.style.display = 'none';
                 }
             });
-        });
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
-            updateHiddenFields();
-        });
-
-        // Table category and table number selection
-        document.addEventListener('DOMContentLoaded', function () {
-            const tableCategory = document.getElementById('table_category');
-            const tableNo = document.getElementById('table_no');
-
-            if (tableCategory) {
-                tableCategory.addEventListener('change', function () {
-                    let categoryId = this.value;
-                    if (!categoryId) {
-                        tableNo.innerHTML = '<option value="">Select Table</option>';
-                        return;
-                    }
-                    @if (auth()->user()->branch_id)
-                        let url =
-                            "{{ route('branch.orders.tables', ['restaurant' => $restaurant->slug, 'branch' => auth()->user()->branch->slug, 'categoryId' => 'CATID']) }}";
-                    @else
-                        let url =
-                            "{{ route('restaurant.orders.tables', ['restaurant' => $restaurant->slug, 'categoryId' => 'CATID']) }}";
-                    @endif
-                    url = url.replace('CATID', categoryId);
-
-                    fetch(url)
-                        .then(response => response.json())
-                        .then(data => {
-                            let options = '<option value="">Select Table</option>';
-                            data.forEach(table => {
-
-                                let disabled = table.occupied ? '' : '';
-
-                                let text = table.table_number;
-
-                                if (table.occupied) {
-                                    text += ' (Occupied)';
-                                }
-
-                                options += `
-                                                <option
-                                                    value="${table.table_number}"
-                                                    ${disabled}>
-                                                    ${text}
-                                                </option>
-                                            `;
-                            });
-
-                            tableNo.innerHTML = options;
-                        })
-                        .catch(() => {
-                            tableNo.innerHTML = '<option value="">No Tables Found</option>';
-                        });
-                });
-            }
-        });
-        $('#mobile_number').on('blur', function () {
-
-            let phone = $(this).val();
-
-            if (!phone) {
-                return;
-            }
-
-            $.get("{{ route('customer.history') }}", {
-                phone: phone
-            }, function (response) {
-
-                if (!response.found) {
-                    $('#customerHistory').hide();
+            // ============================
+            // PLACE ORDER
+            // ============================
+            document.getElementById('placeOrderBtn')?.addEventListener('click', function () {
+                if (Object.keys(order).length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Empty Order',
+                        text: 'Please add at least one menu item!',
+                        confirmButtonColor: '#ff6b35',
+                        confirmButtonText: 'Got it'
+                    });
                     return;
                 }
 
-                $('#customerHistory').show();
-
-                $('#visitCount').text(response.total_visits);
-                $('#lastVisit').text(response.last_visit);
-
-                let html = '';
-
-                response.orders.forEach(order => {
-
-                    html += `
-                                <tr>
-                                   <td>${new Date(order.created_at).toLocaleDateString('en-GB')}</td>
-                                    <td>
-                                        <span class="badge badge-${order.order_type === 'vip' ? 'warning' : 'primary'}">
-                                            ${order.order_type}
-                                        </span>
-                                    </td>
-                                    <td>₹${order.total}</td>
-                                </tr>
-                                `;
+                Swal.fire({
+                    title: 'Confirm Order',
+                    text: 'Are you sure you want to place this order?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ff6b35',
+                    cancelButtonColor: '#6b6b80',
+                    confirmButtonText: 'Yes, Place Order',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('orderForm').submit();
+                    }
                 });
-
-                $('#historyRows').html(html);
             });
-        });
-    </script>
-@endpush
+
+            // ============================
+            // TABLES FETCH
+            // ============================
+            document.getElementById('table_category')?.addEventListener('change', function () {
+                const categoryId = this.value;
+                const tableNo = document.getElementById('table_no');
+
+                if (!categoryId) {
+                    tableNo.innerHTML = '<option value="">Select Table</option>';
+                    return;
+                }
+
+                let url = "{{ auth()->user()->branch_id
+            ? route('branch.orders.tables', ['restaurant' => $restaurant->slug, 'branch' => auth()->user()->branch->slug, 'categoryId' => 'CATID'])
+            : route('restaurant.orders.tables', ['restaurant' => $restaurant->slug, 'categoryId' => 'CATID'])
+                    }}";
+                url = url.replace('CATID', categoryId);
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        let options = '<option value="">Select Table</option>';
+                        data.forEach(table => {
+                            options += `
+                                    <option value="${table.table_number}">
+                                        Table ${table.table_number} ${table.occupied ? '🔴 Occupied' : '🟢 Available'}
+                                    </option>
+                                `;
+                        });
+                        tableNo.innerHTML = options;
+                    })
+                    .catch(() => {
+                        tableNo.innerHTML = '<option value="">Error loading tables</option>';
+                    });
+            });
+
+            // ============================
+            // CUSTOMER HISTORY
+            // ============================
+            $('#mobile_number').on('blur', function () {
+                const phone = $(this).val();
+                if (!phone || phone.length < 10) return;
+
+                $.get("{{ route('customer.history') }}", { phone: phone }, function (response) {
+                    if (!response.found) {
+                        $('#customerHistory').hide();
+                        return;
+                    }
+
+                    $('#customerHistory').show();
+                    $('#visitCount').text(response.total_visits);
+                    $('#lastVisit').text(response.last_visit || '-');
+
+                    let html = '';
+                    response.orders.slice(0, 5).forEach(o => {
+                        const date = new Date(o.created_at).toLocaleDateString('en-GB', {
+                            day: '2-digit', month: 'short', year: 'numeric'
+                        });
+                        html += `
+                                <tr>
+                                    <td>${date}</td>
+                                    <td><span style="background:var(--de-bg);padding:2px 14px;border-radius:50px;font-size:0.7rem;">${escapeHtml(o.order_type)}</span></td>
+                                    <td class="de-amount">${formatCurrency(o.total)}</td>
+                                </tr>
+                            `;
+                    });
+                    $('#historyRows').html(html);
+                });
+            });
+
+            // ============================
+            // INIT
+            // ============================
+            renderOrderSummary();
+            updateCardHighlights();
+        </script>
+    @endpush
+@endsection

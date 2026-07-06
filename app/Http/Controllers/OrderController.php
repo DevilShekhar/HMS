@@ -69,8 +69,20 @@ class OrderController extends Controller
                 ->whereDate('created_at', today())
                 ->count(),
 
+            'walkin' => (clone $baseQuery)
+                ->whereNull('customer_id')
+                ->count(),
+
             'customer' => (clone $baseQuery)
                 ->whereNotNull('customer_id')
+                ->count(),
+
+            'vip' => (clone $baseQuery)
+                ->where('order_type', 'vip')
+                ->count(),
+
+            'normal' => (clone $baseQuery)
+                ->where('order_type', 'normal')
                 ->count(),
 
             'waiter' => (clone $baseQuery)
@@ -83,6 +95,22 @@ class OrderController extends Controller
                 ->whereHas('creator', function ($q) {
                     $q->where('role', 'waiter_head');
                 })
+                ->count(),
+
+            'pending' => (clone $baseQuery)
+                ->where('status', 'pending')
+                ->count(),
+
+            'preparing' => (clone $baseQuery)
+                ->where('status', 'preparing')
+                ->count(),
+
+            'completed' => (clone $baseQuery)
+                ->where('status', 'completed')
+                ->count(),
+
+            'delivered' => (clone $baseQuery)
+                ->where('status', 'delivered')
                 ->count(),
         ];
 
@@ -152,7 +180,6 @@ class OrderController extends Controller
             $query->where('order_type', 'vip');
 
         }
-        $counts['vip'] = Order::query()->where('order_type', 'vip')->count();
         $fromDate = request('from_date');
         $toDate = request('to_date');
 
@@ -790,6 +817,10 @@ class OrderController extends Controller
                 ->whereHas('creator', function ($q) {
                     $q->where('role', 'waiter_head');
                 })
+                ->count(),
+
+            'vip' => (clone $baseQuery)
+                ->where('order_type', 'vip')
                 ->count(),
         ];
 
