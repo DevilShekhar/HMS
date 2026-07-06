@@ -2538,3 +2538,95 @@ margin-bottom:15px;
     font-weight:700;
     font-size:15px;
 }
+ .report-card{
+    background:#fff;
+    border-radius:16px;
+    padding:22px;
+    height:100%;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    transition:.3s;
+    position:relative;
+    overflow:hidden;
+}
+
+.report-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 18px 35px rgba(0,0,0,.12);
+}
+
+.report-card-header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:25px;
+}
+
+.report-card-header span{
+    font-size:15px;
+    font-weight:500;
+    color:#374151;
+}
+
+.report-icon{
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+
+.report-card h3{
+    font-size:2rem;
+    font-weight:700;
+    color:#1f2937;
+    margin-bottom:22px;
+}
+
+.report-line{
+    width:70px;
+    height:4px;
+    border-radius:20px;
+}
+
+/* Total Card */
+
+.total-card{
+    background:linear-gradient(135deg,#6D5BFF,#4F46E5);
+    color:#fff;
+}
+
+.total-card span{
+    color:#fff;
+}
+
+.total-card h3{
+    color:#fff;
+}
+
+.total-icon{
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);
+    color:#fff;
+    box-shadow:none;
+}
+.section-icon{
+    width:55px;
+    height:55px;
+    border-radius:14px;
+    background:linear-gradient(135deg,#6D5BFF,#4F46E5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:22px;
+    box-shadow:0 10px 25px rgba(79,70,229,.25);
+}
+
+    .header-subtext{
+        color:#6B7280;
+        font-size:14px;
+    }
