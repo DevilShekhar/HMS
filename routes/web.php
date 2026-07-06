@@ -127,7 +127,7 @@ Route::middleware(['auth'])->group(function () {
             'destroy' => 'permissions.destroy',
         ]);
         Route::get('/dashboard/revenue-data', [DashboardController::class, 'getRevenueData'])
-     ->name('dashboard.revenue.data');
+            ->name('dashboard.revenue.data');
     });
     Route::middleware(['auth'])->group(function () {
         Route::resource('categories', CategoryController::class);
@@ -358,6 +358,12 @@ Route::prefix('{restaurant}')
                 Route::get('/reports/top-selling', [ReportController::class, 'topSelling'])->name('branch.reports.top-selling');
                 Route::get('/reports/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('branch.reports.revenue.pdf');
                 Route::get('/reports/top-selling-item/pdf', [ReportController::class, 'topSellingPdf'])->name('branch.reports.top-selling-item.pdf');
+                Route::get('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInForm'])
+                    ->name('branch.inventory.stock-in');
+                Route::post('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInStore'])
+                    ->name('branch.inventory.stock-in.store');
+                    Route::get('inventory/{inventory}/transactions', [InventoryController::class, 'transactions'])
+                ->name('branch.inventory.transactions');
             });
             Route::resource('users', UserController::class)->names([
                 'index' => 'restaurant.users.index',
@@ -482,10 +488,6 @@ Route::prefix('{restaurant}')
 
             Route::post('orders/{order}/kitchen-status', [OrderController::class, 'updateKitchenStatus'])
                 ->name('restaurant.orders.kitchen-status');
-            Route::get(
-                '{branch}/inventory/{inventory}/edit',
-                [InventoryController::class, 'edit']
-            )->name('branch.inventory.edit');
             Route::post('/logout', function () {
 
                 $user = Auth::user();

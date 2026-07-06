@@ -1,5 +1,9 @@
 @extends('layouts.app')
 @section('content')
+@php
+    $restaurant = request()->route('restaurant');
+    $branch = request()->route('branch');
+@endphp
     <section class="section premium-dashboard">
         <div class="premium-floating-header">
             <div class="header-content">
@@ -17,7 +21,14 @@
                 </div>
 
                 <div class="header-right">
-                    <a href="{{ route('restaurant.inventory.index', ['restaurant' => request()->route('restaurant')]) }}"
+                    <a href="{{ $branch
+                        ? route('branch.inventory.index', [
+                            'restaurant' => $restaurant,
+                            'branch' => $branch,
+                        ])
+                        : route('restaurant.inventory.index', [
+                            'restaurant' => $restaurant,
+                        ]) }}"
                         class="premium-back-btn">
                         <i class="fas fa-arrow-left"></i>
                         Back To Inventory

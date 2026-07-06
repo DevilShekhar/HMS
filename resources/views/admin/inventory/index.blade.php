@@ -27,16 +27,14 @@
                                     <a href="{{ route('branch.inventory.create', [
                                     'restaurant' => $restaurantSlug,
                                     'branch' => $branchSlug,
-                                ]) }}"
-                                 class="premium-back-btn">
+                                ]) }}" class="premium-back-btn">
                                         <i class="fas fa-plus"></i>
                                         Add Inventory Item
                                     </a>
                             @else
                                     <a href="{{ route('restaurant.inventory.create', [
                                     'restaurant' => $restaurantSlug,
-                                ]) }}"
-                                 class="premium-back-btn">
+                                ]) }}" class="premium-back-btn">
                                         <i class="fas fa-plus"></i>
                                         Add Inventory Item
                                     </a>
@@ -58,6 +56,7 @@
                         </div>
                     @endif
                     <div class="table-responsive">
+                        {{-- {{ dd(request()->route()->parameters()) }} --}}
                         <table class="table table-bordered align-middle">
                             <thead>
                                 <tr>
@@ -147,47 +146,52 @@
                                                     @endphp
 
                                                     @if ($branchSlug)
-                                                        {{-- Branch Stock In --}}
-                                                        <li>
-                                                            <a class="dropdown-item py-2"
-                                                                href="{{ route('restaurant.inventory.stock-in', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
-                                                                <i class="fas fa-plus-circle me-2"
-                                                                    style="color: #28a745; width: 16px;"></i> Stock In
-                                                            </a>
-                                                        </li>
+                                                                                    {{-- Branch Stock In --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2"
+                                                                                            href="{{ route('branch.inventory.stock-in', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
+                                                                                            <i class="fas fa-plus-circle me-2"
+                                                                                                style="color: #28a745; width: 16px;"></i> Stock In
+                                                                                        </a>
+                                                                                    </li>
 
-                                                        {{-- Branch Transactions --}}
-                                                        <li>
-                                                            <a class="dropdown-item py-2"
-                                                                href="{{ route('restaurant.inventory.transactions', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
-                                                                <i class="fas fa-history me-2" style="color: #6c757d; width: 16px;"></i>
-                                                                Transactions
-                                                            </a>
-                                                        </li>                                                        {{-- Branch Edit --}}                                                        <li>
-                                                            <a class="dropdown-item py-2"
-                                                                href="{{ route('branch.inventory.edit', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
-                                                                <i class="fas fa-edit me-2" style="color: #FA5603; width: 16px;"></i>
-                                                                Edit Item
-                                                            </a>
-                                                        </li>
+                                                                                    {{-- Branch Transactions --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2"
+                                                                                            href="{{ route('branch.inventory.transactions', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
+                                                                                            <i class="fas fa-history me-2" style="color: #6c757d; width: 16px;"></i>
+                                                                                            Transactions
+                                                                                        </a>
+                                                                                    </li>
+                                                                                    {{-- Branch Edit --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2" href="{{ route('branch.inventory.edit', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'branch' => $branchSlug,
+                                                            'inventory' => $item->id,
+                                                        ]) }}">
+                                                                                            <i class="fas fa-edit me-2" style="color: #FA5603; width: 16px;"></i>
+                                                                                            Edit Item
+                                                                                        </a>
+                                                                                    </li>
 
-                                                        {{-- Divider line inside menu --}}
-                                                        <li>
-                                                            <hr class="dropdown-divider opacity-50">
-                                                        </li>
+                                                                                    {{-- Divider line inside menu --}}
+                                                                                    <li>
+                                                                                        <hr class="dropdown-divider opacity-50">
+                                                                                    </li>
 
-                                                        {{-- Branch Delete --}}
-                                                        <li>
-                                                            <form
-                                                                action="{{ route('branch.inventory.destroy', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}"
-                                                                method="POST" class="delete-form m-0">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="dropdown-item text-danger py-2">
-                                                                    <i class="fas fa-trash me-2" style="width: 16px;"></i> Delete Item
-                                                                </button>
-                                                            </form>
-                                                        </li>
+                                                                                    {{-- Branch Delete --}}
+                                                                                    <li>
+                                                                                        <form
+                                                                                            action="{{ route('branch.inventory.destroy', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}"
+                                                                                            method="POST" class="delete-form m-0">
+                                                                                            @csrf
+                                                                                            @method('DELETE')
+                                                                                            <button type="submit" class="dropdown-item text-danger py-2">
+                                                                                                <i class="fas fa-trash me-2" style="width: 16px;"></i> Delete Item
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    </li>
                                                     @else
                                                         {{-- Restaurant Stock In --}}
                                                         <li>

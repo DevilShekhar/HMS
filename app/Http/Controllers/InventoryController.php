@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\InventoryItem;
 use App\Models\InventoryTransaction;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -206,14 +207,11 @@ class InventoryController extends Controller
         );
     }
 
-    public function stockInForm($restaurant, $inventory)
+    public function stockInForm(Restaurant $restaurant, Branch $branch, InventoryItem $inventory)
     {
-        $inventory = InventoryItem::findOrFail($inventory);
-
-        return view(
-            'admin.inventory.stock_in',
-            compact('inventory')
-        );
+        return view('admin.inventory.stock_in', [
+            'inventory' => $inventory,
+        ]);
     }
 
     public function stockInStore(Request $request, $restaurant, $inventory)
@@ -305,23 +303,16 @@ class InventoryController extends Controller
             );
     }
 
-    public function transactions($restaurant, $inventory)
+    public function transactions(Restaurant $restaurant, Branch $branch, InventoryItem $inventory)
     {
-        $inventory = InventoryItem::findOrFail($inventory);
         $transactions = InventoryTransaction::with('creator')
-            ->where(
-                'inventory_item_id',
-                $inventory->id
-            )
+            ->where('inventory_item_id', $inventory->id)
             ->latest()
             ->paginate(20);
 
         return view(
             'admin.inventory.transactions',
-            compact(
-                'inventory',
-                'transactions'
-            )
+            compact('inventory', 'transactions')
         );
     }
 }
