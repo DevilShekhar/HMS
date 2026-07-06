@@ -16,20 +16,20 @@
                     <p>Manage restaurant categories.</p>
                 </div>
             </div>
-            
+
             @php
                 $restaurantSlug = request()->route('restaurant');
                 $branchSlug = request()->route('branch');
             @endphp
-            
+
             <div class="header-right">
-                
+
                 @if (auth()->user()->role === 'super_admin')
                     <a href="{{ route('categories.create') }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
-               
+
                 @elseif (!empty($restaurantSlug) && !empty($branchSlug))
                     <a href="{{ route('branch.categories.create', [
                         'restaurant' => $restaurantSlug,
@@ -38,7 +38,7 @@
                         <i class="fas fa-plus"></i>
                         Add Category
                     </a>
-               
+
                 @elseif (!empty($restaurantSlug))
                     <a href="{{ route('restaurant.categories.create', [
                         'restaurant' => $restaurantSlug,
@@ -51,7 +51,7 @@
         </div>
     </div>
 </section>
-    
+
     <section class="section premium-dashboard pt-0">
         @if (session('success'))
             <div class="alert alert-success">
@@ -69,7 +69,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle" id="tableExport">
                         <thead>
                             <tr>
                                 <th>#</th>

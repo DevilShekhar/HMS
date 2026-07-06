@@ -10,7 +10,7 @@
 
             <div class="table-responsive">
 
-                <table class="table table-bordered" id="permissionsTable">
+                <table class="table table-bordered" id="tableExport">
 
                     <thead>
                         <tr>
@@ -148,11 +148,7 @@
     @push('scripts')
         <script>
             $(function () {
-                $('#permissionsTable').DataTable({
-                    responsive: true,
-                    autoWidth: false
-                });
-
+                
                 // Handle category change with Rich Text Editor support
                 $(document).on('change', 'select[name="category"]', function () {
                     const selectId = $(this).attr('id');

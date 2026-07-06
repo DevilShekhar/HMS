@@ -47,40 +47,6 @@
             </div>
         </section>
         <div class="eht-container">
-            {{-- <div class="eht-header">
-                <div class="eht-page-title">
-                    <span class="eht-badge">
-                        <i class="fas fa-users" style="margin-right: 4px;"></i> User Management
-                    </span>
-                    <h1>User List</h1>
-                    <p>Manage all users from API server</p>
-                </div>
-
-                @can('create-user')
-                @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-                @endphp
-
-                @if (auth()->user()->role === 'super_admin')
-                <a href="{{ route('users.create') }}" class="eht-btn eht-btn-primary">
-                    <i class="fas fa-plus"></i> Add User
-                </a>
-                @elseif(!empty($restaurantSlug) && !empty($branchSlug))
-                <a href="{{ route('branch.users.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
-                    class="eht-btn eht-btn-primary">
-                    <i class="fas fa-plus"></i> Add User
-                </a>
-                @elseif(!empty($restaurantSlug))
-                <a href="{{ route('restaurant.users.create', ['restaurant' => $restaurantSlug]) }}"
-                    class="eht-btn eht-btn-primary">
-                    <i class="fas fa-plus"></i> Add User
-                </a>
-                @endif
-                @endcan
-            </div> --}}
-
-
             <div class="eht-main-card">
                 <div class="eht-card-header">
                     <div>
@@ -88,14 +54,13 @@
                         <p class="header-subtext">User records from API</p>
                     </div>
                     <span class="total-badge">
-                        Total: {{ $users->total() }} {{-- Changed from count() to total() so it shows the full database count,
-                        not just the page count --}}
+                        Total: {{ $users->total() }}
                     </span>
                 </div>
 
                 <div class="eht-card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover eht-table">
+                        <table class="table table-striped table-hover eht-table" id="tableExport">
                             <thead>
                                 <tr>
                                     <th>#</th>
