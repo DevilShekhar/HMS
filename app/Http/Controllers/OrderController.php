@@ -210,7 +210,9 @@ class OrderController extends Controller
 
         $branchId = $user->branch_id;
 
-        $branch = $branchId ? Branch::query()->find($branchId) : null;
+        $branch = $branchId
+        ? Branch::with('country')->find($branchId)
+        : null;
 
         $categories = Category::query()->where('restaurant_id', $restaurant->id)
             ->where('is_active', 1)
@@ -293,6 +295,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'customer_name' => 'required',
             'mobile_number' => 'required',
@@ -337,9 +340,18 @@ class OrderController extends Controller
                 $restaurant->id,
                 $branchId
             );
+            $branch = Branch::with('country')->find($branchId);
+
+            $timezone = $branch?->country?->timezone ?? config('app.timezone');
+
+            $orderDateTime = now($timezone);
             $order = Order::create([
                 'restaurant_id' => $restaurant->id,
                 'branch_id' => $branchId,
+
+                'order_datetime' => $orderDateTime,
+                'order_timezone' => $timezone,
+
                 'chef_id' => $chef?->id,
                 'created_by' => Auth::user()->role === 'customer'
                     ? null
@@ -562,7 +574,9 @@ class OrderController extends Controller
                     $order->branch_id
                 );
             }
-
+            $branch = Branch::with('country')->find($order->branch_id);
+            $timezone = $branch?->country?->timezone ?? config('app.timezone');
+            $orderDateTime = now($timezone);
             $order->update([
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
@@ -570,6 +584,8 @@ class OrderController extends Controller
                 'order_type' => $newOrderType,
                 'token_no' => $tokenNo,
                 'chef_id' => $chef?->id,
+                'order_datetime' => $orderDateTime,
+                'order_timezone' => $timezone,
             ]);
 
             OrderItem::query()->where(

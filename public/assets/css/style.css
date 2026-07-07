@@ -13565,8 +13565,9 @@ h1 {
 }
 
 .plan-card:has(.plan-radio:checked) {
-    border: 2px solid #22c55e;
-    background: #ecfdf5;
+    border: 2px solid #c89b3c;
+    background: linear-gradient(135deg, #fff7d6, #f8e29a);
+    box-shadow: 0 10px 25px rgba(200, 155, 60, 0.22);
 }
 
 .price-box {
@@ -14913,6 +14914,7 @@ body {
 .text-right {
     text-align: right;
 }
+
 .is-invalid {
     border-color: #dc3545 !important;
 }
@@ -15114,8 +15116,15 @@ body {
 }
 
 @keyframes rms-pulse-badge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
 }
 
 /* ----- stats grid ----- */

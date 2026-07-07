@@ -72,8 +72,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                transition: var(--de-transition);">
+                                    {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                    transition: var(--de-transition);">
                                     @if($currentStep > 1)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -102,8 +102,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                transition: var(--de-transition);">
+                                    {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                    transition: var(--de-transition);">
                                     @if($currentStep > 2)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -132,8 +132,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                transition: var(--de-transition);">
+                                    {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                    transition: var(--de-transition);">
                                     @if($currentStep > 3)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -162,8 +162,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                transition: var(--de-transition);">
+                                    {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                    transition: var(--de-transition);">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <div
@@ -181,7 +181,7 @@
                             style="text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--de-border);">
                             <span
                                 style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 50px;
-                background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
+                    background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
                                 <i class="fas fa-circle"
                                     style="font-size: 0.5rem; animation: pulse-green 1.5s ease-in-out infinite;"></i>
                                 <span style="text-transform: uppercase;">
@@ -275,7 +275,9 @@
 
                                     <div>
                                         <span class="label">Order Date</span>
-                                        <h6>{{ $order->created_at->format('d M Y, h:i A') }}</h6>
+                                        <h6>
+                                            {{ \Carbon\Carbon::parse($order->order_datetime)->format('d M Y, h:i A') }}
+                                        </h6>
                                     </div>
                                 </div>
                             </div>
@@ -306,12 +308,8 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         @if($item->menuItem && $item->menuItem->image)
-                                            <img src="{{ asset($item->menuItem->image) }}"
-                                                alt="{{ $item->menuItem->name }}"
-                                                width="40"
-                                                height="40"
-                                                class="me-2"
-                                                style="border-radius:8px; object-fit:cover;">
+                                            <img src="{{ asset($item->menuItem->image) }}" alt="{{ $item->menuItem->name }}"
+                                                width="40" height="40" class="me-2" style="border-radius:8px; object-fit:cover;">
                                         @endif
 
                                         {{ $item->menuItem->name ?? '-' }}

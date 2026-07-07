@@ -17,7 +17,7 @@ class Branch extends Model
         'address',
         'city',
         'state',
-        'country',
+        'country_id',
         'postal_code',
         'latitude',
         'longitude',
@@ -68,5 +68,9 @@ class Branch extends Model
         return $this->hasOne(BranchSubscription::class)
             ->where('status', 'active');
         // ->latestOfMany();
+    }
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 }

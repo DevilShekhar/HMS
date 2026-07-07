@@ -181,19 +181,24 @@
                         @endforeach
                     </div>
 
-                    <div class="de-menu-grid" id="menuItemsContainer">
+                   <div class="de-menu-grid" id="menuItemsContainer">
                         @foreach ($menuItems as $item)
-                            <div class="de-menu-item" data-id="{{ $item->id }}" data-name="{{ $item->name }}"
-                                data-price="{{ $item->price }}" data-category="{{ $item->category->name ?? 'Uncategorized' }}">
+                            <div class="de-menu-item"
+                                data-id="{{ $item->id }}"
+                                data-name="{{ $item->name }}"
+                                data-price="{{ $item->price }}"
+                                data-currency="{{ $branch->country?->currency_symbol ?? '₹' }}">
                                 <div class="de-item-img">
                                     @if ($item->image)
-                                        <img src="{{ asset($item->image) }}" alt="{{ $item->name }}" loading="lazy">
+                                        <img src="{{ asset($item->image) }}" alt="{{ $item->name }}">
                                     @else
                                         🍽️
                                     @endif
                                 </div>
                                 <div class="de-item-name">{{ $item->name }}</div>
-                                <div class="de-item-price">₹{{ number_format($item->price, 2) }}</div>
+                                <div class="de-item-price">
+                                    {{ $branch->country?->currency_symbol ?? '₹' }}{{ number_format($item->price, 2) }}
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -264,6 +269,8 @@
             // ============================
             // STATE
             // ============================
+                const currencySymbol = @json($branch?->country?->currency_symbol ?? '₹');
+
             let order = {};
             const menuItemsData = @json($menuItems);
 
@@ -275,9 +282,12 @@
                 return String(str).replace(/[&<>"']/g, m => map[m]);
             }
 
+            // function formatCurrency(amount) {
+            //     return '₹' + parseFloat(amount).toFixed(2);
+            // }
             function formatCurrency(amount) {
-                return '₹' + parseFloat(amount).toFixed(2);
-            }
+    return currencySymbol + parseFloat(amount).toFixed(2);
+}
 
             // ============================
             // ORDER MANAGEMENT
@@ -360,7 +370,10 @@
                                     <button class="de-qty-btn" onclick="changeQty(${id}, -1)">−</button>
                                     <input type="number" class="de-qty-input" value="${item.qty}" min="1" onchange="setQty(${id}, this.value)">
                                     <button class="de-qty-btn" onclick="changeQty(${id}, 1)">+</button>
-                                    <span class="de-item-total">₹${(item.price * item.qty).toLocaleString('en-IN', { minimumFractionDigits: 2,maximumFractionDigits: 2})}</span>
+                                    <span class="de-item-total">${currencySymbol}${(item.price * item.qty).toLocaleString('en-IN',{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+})}</span>
                                     <button class="de-remove-btn" onclick="removeItem(${id})" title="Remove">✕</button>
                                 </div>
                             </div>
@@ -378,7 +391,7 @@
             }
 
             document.getElementById('grandTotalAmount').textContent =
-                '₹' + total.toLocaleString('en-IN', {
+                currencySymbol + total.toLocaleString('en-IN', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });

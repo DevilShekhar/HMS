@@ -577,6 +577,14 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('view-country')
+                            <li class="{{ request()->routeIs('countries.*') ? 'active' : '' }}">
+                                <a href="{{ route('countries.index') }}" class="nav-link">
+                                    <i data-feather="globe"></i>
+                                    <span>Manage Countries</span>
+                                </a>
+                            </li>
+                        @endcan
                         {{-- @endif --}}
                         @can('view-branch')
                             @php
