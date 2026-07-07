@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\BranchSubscription;
+use App\Models\Country;
 use App\Models\Restaurant;
 use App\Models\SubscriptionPlan;
 use App\Models\User;
@@ -24,7 +25,7 @@ class BranchController extends Controller
         $query = Branch::with([
             'restaurant',
             'owner',
-            'manager',
+            'manager','country'
         ]);
 
         if ($user->role === 'owner') {
@@ -78,12 +79,13 @@ class BranchController extends Controller
         $plans = SubscriptionPlan::query()->get();
 
         $existingCombinations = Branch::select('restaurant_id', 'owner_id')->get();
+        $countries = Country::query()->where('status', 1)->get();
 
         return view(
             'admin.branches.create',
             compact(
                 'restaurants',
-                'owners', 'plans','existingCombinations'
+                'owners', 'plans', 'existingCombinations', 'countries'
             )
         );
     }
@@ -102,9 +104,9 @@ class BranchController extends Controller
             'phone' => 'required|max:20',
             'email' => 'required|email',
             'address' => 'required',
+            'country_id' => 'required|exists:countries,id',
             'city' => 'required|max:100',
             'state' => 'required|max:100',
-            'country' => 'nullable|max:100',
             'postal_code' => 'nullable|max:20',
             'latitude' => 'nullable',
             'longitude' => 'nullable',
@@ -261,6 +263,7 @@ class BranchController extends Controller
         $plans = SubscriptionPlan::query()->where('status', 1)->get();
 
         $currentSubscription = $branch->activeSubscription;
+        $countries = Country::query()->where('status', 1)->get();
 
         return view(
             'admin.branches.edit',
@@ -268,7 +271,7 @@ class BranchController extends Controller
                 'branch',
                 'restaurants',
                 'owners',
-                'managers', 'plans', 'currentSubscription'
+                'managers', 'plans', 'currentSubscription','countries'
             )
         );
     }
@@ -289,9 +292,9 @@ class BranchController extends Controller
             'phone' => 'nullable|max:20',
             'email' => 'nullable|email',
             'address' => 'nullable',
+            'country_id' => 'required|exists:countries,id',
             'city' => 'nullable|max:100',
             'state' => 'nullable|max:100',
-            'country' => 'nullable|max:100',
             'postal_code' => 'nullable|max:20',
             'latitude' => 'nullable',
             'longitude' => 'nullable',

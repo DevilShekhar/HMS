@@ -24,6 +24,21 @@ class DashboardController extends Controller
         $restaurant = app()->bound('restaurant')
             ? app('restaurant')
             : null;
+            $currentBranch = null;
+
+            if ($restaurant) {
+                if ($user->role === 'branch_manager' && $user->branch_id) {
+                    $currentBranch = Branch::with('country')
+                        ->find($user->branch_id);
+                } else {
+                    $currentBranch = Branch::with('country')
+                        ->where('restaurant_id', $restaurant->id)
+                        ->when($selectedBranch, fn($q) => $q->where('id', $selectedBranch))
+                        ->first();
+                }
+            } elseif ($selectedBranch) {
+                $currentBranch = Branch::with('country')->find($selectedBranch);
+            }
         // Restaurant wise branch filtering
         if ($restaurant) {
             if ($user->role === 'branch_manager') {
@@ -313,7 +328,7 @@ class DashboardController extends Controller
             'totalRestaurants',
             'nearExpirySubscriptions',
             'expiredSubscriptionCount', 'expiredSubscriptions', 'totalBranches', 'inventoryStocks', 'orderStatus', 'preparedOrders', 'pendingVerification', 'verifiedToday', 'todayCollection', 'topRestaurants', 'subscriptions', 'inventoryAlerts',
-            'revenue', 'revenueData', 'orderStatusData', 'restaurants'
+            'revenue', 'revenueData', 'orderStatusData', 'restaurants','currentBranch'
         ));
     }
 

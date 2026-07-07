@@ -130,12 +130,6 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="premium-form-group">
-                                        <label class="premium-label">Country</label>
-                                        <p>{{ $branch->country ?? '-' }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="premium-form-group">
                                         <label class="premium-label">Postal Code</label>
                                         <p>{{ $branch->postal_code ?? '-' }}</p>
                                     </div>

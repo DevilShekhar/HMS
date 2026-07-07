@@ -1,6 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
+
+  {{-- Country & Timezone Info Card --}}
+@if (isset($currentBranch) && $currentBranch)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card premium-block shadow-sm border-0">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <i class="fas fa-globe-asia fa-3x text-primary"></i>
+                    <div>
+                        @php
+                            $country = $currentBranch->country()->first();
+                        @endphp
+
+                        <h5 class="mb-1 text-dark">
+                            {{ $country?->name ?? 'Country Not Assigned' }}
+                            <small class="text-muted">({{ $country?->iso_code ?? '' }})</small>
+                        </h5>
+                        <p class="mb-0 text-muted">
+                            <i class="fas fa-clock"></i>
+                            Timezone: <strong>{{ $country?->timezone ?? 'N/A' }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
     <section class="section">
         <div class="row mb-3">
 
@@ -771,6 +798,8 @@
                 </div>
             </div>
         @endcan
+
+
 
     </section>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>

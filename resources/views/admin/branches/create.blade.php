@@ -48,6 +48,21 @@
                                 <div class="card-body">
 
                                     <div class="row">
+                                        <!-- Country -->
+                                        <div class="col-lg-3 col-md-6 mb-4">
+                                            <label>Country</label>
+                                            <select name="country_id" class="form-control premium-input" required>
+                                                <option value="">Select Country</option>
+                                                @foreach ($countries as $country)
+                                                    <option value="{{ $country->id }}">
+                                                        {{ $country->name }} ({{ $country->iso_code }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('country_id')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
 
                                         <div class="col-lg-3 col-md-6 mb-4">
                                             <label>Restaurant</label>
@@ -126,15 +141,6 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
-
-                                        <div class="col-lg-3 col-md-6 mb-4">
-                                            <label>Country</label>
-                                            <input type="text" name="country" class="form-control premium-input">
-                                            @error('country')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-
                                         <div class="col-lg-3 col-md-6 mb-4">
                                             <label>Postal Code</label>
                                             <input type="text" name="postal_code" class="form-control premium-input">
@@ -268,10 +274,10 @@
 
                                 </div>
                                 <div class="premium-card-footer">
-                                <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
-                                    Create Menu Item
-                                </button>
-                            </div>
+                                    <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
+                                        Create Menu Item
+                                    </button>
+                                </div>
                             </div>
 
                         </div>

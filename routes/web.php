@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\CustomerOfferController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
@@ -144,7 +145,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/chef/check-orders', [OrderController::class, 'checkOrders'])->name('chef.check-orders');
     Route::get('/chef/notifications', [OrderController::class, 'notifications'])->name('chef.notifications');
-
+    Route::resource('countries', CountryController::class);
     Route::delete('/notifications/delete/{id}', function ($id) {
         $notification = Auth::user()->notifications()->find($id);
 
@@ -362,8 +363,8 @@ Route::prefix('{restaurant}')
                     ->name('branch.inventory.stock-in');
                 Route::post('inventory/{inventory}/stock-in', [InventoryController::class, 'stockInStore'])
                     ->name('branch.inventory.stock-in.store');
-                    Route::get('inventory/{inventory}/transactions', [InventoryController::class, 'transactions'])
-                ->name('branch.inventory.transactions');
+                Route::get('inventory/{inventory}/transactions', [InventoryController::class, 'transactions'])
+                    ->name('branch.inventory.transactions');
             });
             Route::resource('users', UserController::class)->names([
                 'index' => 'restaurant.users.index',

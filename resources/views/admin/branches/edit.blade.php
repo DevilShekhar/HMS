@@ -46,6 +46,21 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-3 col-md-6 mb-4">
+                                    <label>Country</label>
+                                    <select name="country_id" class="form-control premium-input" required>
+                                        <option value="">Select Country</option>
+                                        @foreach ($countries as $country)
+                                            <option value="{{ $country->id }}"
+                                                {{ old('country_id', $branch->country_id) == $country->id ? 'selected' : '' }}>
+                                                {{ $country->name }} ({{ $country->iso_code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                            </div>
+                            <div class="col-lg-3 col-md-6 mb-4">
                                 <label>Restaurant</label>
                                 <select name="restaurant_id" class="form-control premium-input">
                                     <option value="">Select Restaurant</option>
@@ -106,11 +121,6 @@
                             <div class="col-lg-3 col-md-6 mb-4">
                                 <label>State</label>
                                 <input type="text" name="state" value="{{ old('state', $branch->state) }}"
-                                    class="form-control premium-input">
-                            </div>
-                            <div class="col-lg-3 col-md-6 mb-4">
-                                <label>Country</label>
-                                <input type="text"ame="country" value="{{ old('country', $branch->country) }}"
                                     class="form-control premium-input">
                             </div>
                             <div class="col-lg-3 col-md-6 mb-4">
