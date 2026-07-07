@@ -14,102 +14,324 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/favicon.ico') }}">
+    <style>
+        body.login-page {
+            margin: 0;
+            height: 100vh;
+            background: url('{{ asset("assets/img/login-bg.webp") }}') center center/cover no-repeat fixed;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+        }
+
+        .login-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            z-index: 5;
+        }
+
+        .login-card {
+            width: 430px;
+            padding: 0px 25px 0px 25px;
+            border-radius: 28px;
+            background: rgba(18, 18, 18, .90);
+            border: 2px solid #f96002;
+            box-shadow:
+                0 0 0 1px rgba(255, 170, 0, .15),
+                0 25px 60px rgba(0, 0, 0, .65);
+            backdrop-filter: blur(12px);
+        }
+
+        .login-logo {
+            width: 110px;
+            margin-bottom: 18px;
+        }
+
+        .logo-area h1 {
+            color: #fff;
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+
+        .sub-title {
+            color: #db5d0a;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .title-divider {
+            margin: 22px auto;
+            width: 220px;
+            height: 1px;
+            background: #3a3a3a;
+            position: relative;
+        }
+
+        .title-divider span {
+            width: 10px;
+            height: 10px;
+            background: #f58a1f;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: -4px;
+            transform: translateX(-50%);
+        }
+
+        .logo-area h3 {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo-area p {
+            color: #a5a5a5;
+            font-size: 18px;
+        }
+
+        .logo-area {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 25px;
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            margin: auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff7a00, #ffb000);
+            font-size: 35px;
+            color: #fff;
+        }
+
+        .logo-area h2 {
+            margin-top: 20px;
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo-area span {
+            color: #ff9800;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .logo-area p {
+            color: #d8d8d8;
+            margin-top: 20px;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 18px;
+        }
+
+        .input-box input:focus {
+            border: 1px solid #ff8a00;
+            background: #272727;
+        }
+
+        .input-box i {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            font-size: 18px;
+            color: #f96002;
+        }
+
+        .eye-icon {
+            right: 18px;
+            left: auto !important;
+            color: #999 !important;
+        }
+
+        .input-box input {
+            width: 100%;
+            height: 56px;
+            padding-left: 52px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: #232323;
+            color: #fff;
+            transition: .3s;
+        }
+
+        .input-box input:focus {
+            border-color: #ff9800;
+            box-shadow: none;
+            background: #282828;
+        }
+
+        .login-btn {
+            width: 100%;
+            height: 60px;
+            border: none;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(116deg, #fe5d02, #fd6406);
+            margin-top: 15px;
+            transition: .3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, .45);
+        }
+
+        .forgot-link {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .forgot-link a {
+            color: #9b9b9b;
+            text-decoration: underline;
+        }
+
+        .forgot-link a:hover {
+            color: #ff8a00;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 128, 0, .35);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #ddd;
+        }
+
+        .register-link a {
+            color: #ff9800;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .text-danger {
+            color: #ff8d8d !important;
+        }
+
+        @media(max-width:576px) {
+            .login-card {
+                width: 95%;
+                padding: 30px;
+            }
+
+            .logo-area h2 {
+                font-size: 30px;
+            }
+        }
+    </style>
 </head>
 
-<body>
+<body class="login-page"
+    style="background: url('{{ asset('assets/img/login-bg.webp') }}') center center / cover no-repeat fixed !important;">
+   <div class="loader"></div>
 
-    <div class="loader"></div>
+    <div class="login-overlay"></div>
 
-    <div id="app">
-        <section class="section">
-            <div class="container mt-5">
-                <div class="row">
-                    <div
-                        class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-                        <div class="card card-primary">
-                            <div class="card-header">
-                                <h4>Customer Login</h4>
-                            </div>
-                            <div class="card-body">
-                                @if (session('error'))
-                                    <div class="alert alert-danger">
-                                        {{ session('error') }}
-                                    </div>
-                                @endif
-                                @if ($errors->any())
-                                    <div class="alert alert-danger">
-                                        @foreach ($errors->all() as $error)
-                                            <div>
-                                                {{ $error }}
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                                <form method="POST"
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <div class="logo-area">
+                <img src="{{ asset('assets/img/ehtlogo.webp') }}" class="login-logo" alt="Logo">
+                <h1>RESTAURANT</h1>
+                <div class="sub-title">MANAGEMENT SYSTEM</div>
+                <div class="title-divider">
+                    <span></span>
+                </div>
+                <h3>Customer Login</h3>
+            </div>
+
+            {{-- Validation & Session Error Alerts --}}
+            @if (session('error'))
+                <div class="alert alert-danger mb-3"
+                    style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 10px; border-radius: 5px;">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="alert alert-danger mb-3"
+                    style="color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; padding: 10px; border-radius: 5px;">
+                    @foreach ($errors->all() as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Form Route Handling Logic Kept Exactly As Provided --}}
+            <form method="POST"
                                     action="{{ route('customer.login.submit', [
                                         'restaurant' => $restaurant->slug,
                                         'branch' => $branch->slug,
                                     ]) }}">
 
-                                    @csrf
-                                    <div class="form-group">
-                                        <label>
-                                            Mobile Number
-                                        </label>
-                                        <input type="text" name="phone"
-                                            class="form-control @error('phone') is-invalid @enderror"
-                                            value="{{ old('phone') }}" placeholder="Enter mobile number" required>
-                                        @error('phone')
-                                            <small class="text-danger">
-                                                {{ $message }}
-                                            </small>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            Password
-                                        </label>
-                                        <input type="password" name="password"
-                                            class="form-control @error('password') is-invalid @enderror"
-                                            placeholder="Enter password" required>
-                                        @error('password')
-                                            <small class="text-danger">
-                                                {{ $message }}
-                                            </small>
-                                        @enderror
-                                    </div>
-                                    <div class="d-flex justify-content-end mb-3 text-primary    ">
-                                        <a href="{{ route('branch.customer.forgot-password', [
-                                            'restaurant' => $restaurant->slug,
-                                            'branch' => $branch->slug,
-                                        ]) }}"
-                                            >
-                                            Forgot Password?
-                                        </a>
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-primary btn-lg btn-block">
-                                            Continue
-                                        </button>
-                                    </div>
-                                </form>
-                                <div class="text-center mt-3">
-                                    New customer?
-                                    <a
-                                        href="{{ route('branch.register', [
-                                            'restaurant' => $restaurant->slug,
-                                            'branch' => $branch->slug,
-                                        ]) }}">
-
-                                        Register here
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                {{-- Mobile Number Input using Premium Classes --}}
+                <div class="input-box">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" name="phone" class="@error('phone') is-invalid @enderror"
+                        placeholder="Enter mobile number" value="{{ old('phone') }}" required>
+                    @error('phone')
+                        <small class="text-danger" style="display: block; margin-top: 5px;">{{ $message }}</small>
+                    @enderror
                 </div>
-            </div>
-        </section>
+
+                {{-- Password Input using Premium Classes --}}
+                <div class="input-box">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" class="@error('password') is-invalid @enderror"
+                        placeholder="Enter password" required>
+                    @error('password')
+                        <small class="text-danger" style="display: block; margin-top: 5px;">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                {{-- Premium Action Button --}}
+                <button type="submit" class="login-btn">Continue</button>
+
+                {{-- Forgot Password Link Alignment --}}
+                <div class="forgot-link">
+                    <a href="{{ route('branch.customer.forgot-password', ['restaurant' => $restaurant->slug, 'branch' => $branch->slug]) }}">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                {{-- Conditional Registration Link Placement --}}
+                @if (request()->routeIs('customer.login'))
+                    <div class="text-center mb-3" style="color: #ffffff; text-align: center; margin-top: 15px;">
+                        New customer?
+                        <a href="{{ route('branch.register', ['restaurant' => request()->route('restaurant'), 'branch' => request()->route('branch')]) }}"
+                            style="color: #ff9800; text-decoration: none; font-weight: bold;">
+                            Register here
+                        </a>
+                    </div>
+                @endif
+
+            </form>
+        </div>
     </div>
     <script src="{{ asset('assets/js/app.min.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.js') }}"></script>
