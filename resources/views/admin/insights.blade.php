@@ -1,42 +1,31 @@
 @extends('layouts.app')
-
 @section('title', 'Insights Platform')
-
 @section('content')
-    <div class="container-fluid py-4">
-
-
-        <div class="dashboard-header">
+    <section class="section premium-dashboard">
+        <div class="premium-floating-header">
             <div class="header-content">
-                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
                     <div>
-                        <div class="badge-status">
-                            <span class="dot"></span>
+                        <span class="header-badge">
                             Live Analytics Engine
-                        </div>
-                        <h1>Metrics &amp; Analytics Dashboard</h1>
+                        </span>
+                        <h1>Metrics & Analytics Dashboard</h1>
                         <p>Select metrics below to filter pipeline aggregates in real-time</p>
                     </div>
-                    <div class="mt-3 mt-md-0">
-                        <div class="badge-status">
-                            Data Stream Active
-                        </div>
-                    </div>
                 </div>
-
-                <div class="header-stats">
-                    <div class="stat-item">
-                        <span>🔄</span>
-                        <span>Last Updated: <strong id="lastUpdated">Just now</strong></span>
-                    </div>
+                <div class="header-right">                       
+                    <button class="premium-back-btn" id="downloadPdfBtn">
+                        <i class="fas fa-plus"></i>
+                        Download PDF
+                    </button>
                 </div>
             </div>
         </div>
-        <!-- Button -->
-        <button class="btn btn-success btn-sm rounded-pill px-3 m-2" id="downloadPdfBtn">
-            <i class="fas fa-file-pdf me-1"></i> Download PDF
-        </button>
-
+    </section>
+    <div class="container-fluid py-4">
         <div class="filter-card">
             <div class="row g-4">
                 <div class="col-md-6">
@@ -167,32 +156,22 @@
 
     </div>
 @endsection
-
 @push('scripts')
     <script>
         $(document).ready(function () {
-
             let currentRestaurantSlug = null;
             let currentBranchId = null;
             let rawDataCache = {};
             const ITEMS_PER_PAGE = 5;
             let currentDateFrom = null;
-            let currentDateTo = null;
-            //             let currentRestaurantSlug = null;
-            // let currentBranchId = null;
-
-            // ==========================================
-            // Set default dates
-            // ==========================================
+            let currentDateTo = null;           
             function setDefaultDates() {
                 const today = new Date();
                 const thirtyDaysAgo = new Date();
                 thirtyDaysAgo.setDate(today.getDate() - 30);
-
                 $('#date_from').val(formatDate(thirtyDaysAgo));
                 $('#date_to').val(formatDate(today));
             }
-
             function formatDate(date) {
                 const d = new Date(date);
                 const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -200,69 +179,42 @@
                 const year = d.getFullYear();
                 return `${year}-${month}-${day}`;
             }
-
-            // ==========================================
-            // Apply Date Filter
-            // ==========================================
             $('#applyDateFilter').click(function () {
                 const fromDate = $('#date_from').val();
                 const toDate = $('#date_to').val();
-
                 if (!fromDate || !toDate) {
                     alert('Please select both From and To dates.');
                     return;
                 }
-
                 if (fromDate > toDate) {
                     alert('From date cannot be greater than To date.');
                     return;
                 }
-
                 currentDateFrom = fromDate;
-                currentDateTo = toDate;
-
-                // Update date range display
+                currentDateTo = toDate;                
                 updateDateRangeDisplay(fromDate, toDate);
-
-                // Refresh data if branch is selected
                 if (currentBranchId) {
                     updateSelectedInsights();
                 }
             });
-
-            // ==========================================
-            // Reset Date Filter
-            // ==========================================
             $('#resetDateFilter').click(function () {
                 setDefaultDates();
                 currentDateFrom = null;
                 currentDateTo = null;
                 $('#dateRangeDisplay').hide();
-
-                // Refresh data if branch is selected
                 if (currentBranchId) {
                     updateSelectedInsights();
                 }
             });
-
-            // ==========================================
-            // Clear Date Range
-            // ==========================================
             $('#clearDateRange').click(function () {
                 setDefaultDates();
                 currentDateFrom = null;
                 currentDateTo = null;
                 $('#dateRangeDisplay').hide();
-
-                // Refresh data if branch is selected
                 if (currentBranchId) {
                     updateSelectedInsights();
                 }
-            });
-
-            // ==========================================
-            // Update Date Range Display
-            // ==========================================
+            });          
             function updateDateRangeDisplay(fromDate, toDate) {
                 const from = new Date(fromDate);
                 const to = new Date(toDate);
@@ -270,20 +222,14 @@
                 $('#dateRangeText').text(`${from.toLocaleDateString('en-US', options)} — ${to.toLocaleDateString('en-US', options)}`);
                 $('#dateRangeDisplay').show();
             }
-
-            // ==========================================
-            // Restaurant Change
-            // ==========================================
             $('#restaurant_id').change(function () {
                 currentRestaurantSlug = $(this).val();
-
                 if (!currentRestaurantSlug) {
                     $('#branch_id').html('<option value="">Awaiting Node Selection</option>').prop('disabled', true);
                     $('#insightsContainer').hide();
                     $('#insightNav').hide();
                     return;
                 }
-
                 $.ajax({
                     url: '/insights/restaurants/' + currentRestaurantSlug + '/branches',
                     method: 'GET',
@@ -302,13 +248,8 @@
                     }
                 });
             });
-
-            // ==========================================
-            // Branch Change
-            // ==========================================
             $('#branch_id').change(function () {
                 currentBranchId = $(this).val();
-
                 if (currentBranchId) {
                     $('#insightNav').show();
                     $('#branchPrompt').hide();
@@ -323,10 +264,6 @@
                     resetContentArea();
                 }
             });
-
-            // ==========================================
-            // Metric Card Toggle
-            // ==========================================
             $(document).on('click', '.metric-card', function () {
                 if (!currentRestaurantSlug || !currentBranchId) {
                     $(this).addClass('active').removeClass('active');
@@ -335,81 +272,64 @@
                 $(this).toggleClass('active');
                 updateSelectedInsights();
             });
-
-            // ==========================================
-            // Reset Content Area
-            // ==========================================
             function resetContentArea() {
                 $('#insightContent .panel-body').html(`
-                                <div class="branch-prompt" id="branchPrompt">
-                                    <span class="prompt-icon">📍</span>
-                                    <h5>Select a Branch to Begin</h5>
-                                    <p>Please choose a restaurant group and subsidiary branch above to start exploring metrics.</p>
-                                </div>
-                                <div class="placeholder-empty" id="placeholder" style="display:none;">
-                                    <span class="empty-icon">📊</span>
-                                    <h5>Assemble Dashboard Elements</h5>
-                                    <p>Select metrics above to organize data logs.</p>
-                                </div>
-                            `);
+                    <div class="branch-prompt" id="branchPrompt">
+                        <span class="prompt-icon">📍</span>
+                        <h5>Select a Branch to Begin</h5>
+                        <p>Please choose a restaurant group and subsidiary branch above to start exploring metrics.</p>
+                    </div>
+                    <div class="placeholder-empty" id="placeholder" style="display:none;">
+                        <span class="empty-icon">📊</span>
+                        <h5>Assemble Dashboard Elements</h5>
+                        <p>Select metrics above to organize data logs.</p>
+                    </div>
+                `);
             }
-
-            // ==========================================
-            // Update Selected Insights with Date Filters
-            // ==========================================
             function updateSelectedInsights() {
                 let selectedTypes = [];
                 $('.metric-card.active').each(function () {
                     selectedTypes.push($(this).data('type'));
                 });
-
                 if (selectedTypes.length === 0) {
                     $('#insightContent .panel-body').html(`
-                                    <div class="placeholder-empty">
-                                        <span class="empty-icon">📊</span>
-                                        <h5>Interactive Telemetry Builder</h5>
-                                        <p>Toggle checkmark nodes above to load multiple contextual tabular frames concurrently.</p>
-                                    </div>
-                                `);
+                        <div class="placeholder-empty">
+                            <span class="empty-icon">📊</span>
+                            <h5>Interactive Telemetry Builder</h5>
+                            <p>Toggle checkmark nodes above to load multiple contextual tabular frames concurrently.</p>
+                        </div>
+                    `);
                     return;
                 }
-
                 let containersHtml = '';
                 selectedTypes.forEach(type => {
                     containersHtml += `<div id="block-${type}" class="insight-block">
-                                    <div class="text-center py-4 text-muted">
-                                        <div class="spinner"></div>
-                                        Fetching data for <strong>${type}</strong>...
-                                    </div>
-                                </div>`;
+                        <div class="text-center py-4 text-muted">
+                            <div class="spinner"></div>
+                                Fetching data for <strong>${type}</strong>...
+                            </div>
+                        </div>`;
                 });
                 $('#insightContent .panel-body').html(containersHtml);
-
-                selectedTypes.forEach(type => {
-                    // Build request data with date filters
+                selectedTypes.forEach(type => {                    
                     let requestData = {
                         branch_id: currentBranchId,
                         type: type
                     };
-
-                    // Add date filters if they exist
                     if (currentDateFrom) {
                         requestData.date_from = currentDateFrom;
                     }
                     if (currentDateTo) {
                         requestData.date_to = currentDateTo;
                     }
-
                     $.ajax({
                         url: `/insights/restaurants/${currentRestaurantSlug}/data`,
                         method: 'GET',
                         data: requestData,
                         success: function (res) {
                             console.log(`📊 ${type} data received:`, res);
-
                             // Store the raw response
                             rawDataCache[type] = res;
-
                             // For menu type, ensure we have the right structure
                             if (type === 'menu') {
                                 if (Array.isArray(res)) {
@@ -432,26 +352,21 @@
                                     }
                                 }
                             }
-
                             renderPaginatedBlock(type, 1);
                         },
                         error: function (xhr, status, error) {
                             console.error(`❌ Error fetching ${type}:`, error);
                             console.error('Response:', xhr.responseText);
                             $(`#block-${type}`).html(`
-                                            <div class="alert alert-danger" role="alert" style="border-radius:var(--radius);border:1px solid #fca5a5;background:#fef2f2;padding:1rem 1.25rem;">
-                                                <strong>!</strong> Failed to fetch data for <strong>${type.toUpperCase()}</strong>
-                                                <br><small>Error: ${error || 'Unknown error'}</small>
-                                            </div>
-                                        `);
+                                <div class="alert alert-danger" role="alert" style="border-radius:var(--radius);border:1px solid #fca5a5;background:#fef2f2;padding:1rem 1.25rem;">
+                                    <strong>!</strong> Failed to fetch data for <strong>${type.toUpperCase()}</strong>
+                                    <br><small>Error: ${error || 'Unknown error'}</small>
+                                </div>
+                            `);
                         }
                     });
                 });
-            }
-
-            // ==========================================
-            // Pagination Handler
-            // ==========================================
+            }            
             $(document).on('click', '.pagination .page-link', function (e) {
                 e.preventDefault();
                 let type = $(this).data('type');
@@ -459,18 +374,12 @@
                 if (targetPage) {
                     renderPaginatedBlock(type, targetPage);
                 }
-            });
-
-            // ==========================================
-            // Render Paginated Block
-            // ==========================================
+            });            
             function renderPaginatedBlock(type, page) {
                 let data = rawDataCache[type];
                 let html = '';
-
                 if (type === 'menu') {
                     console.log('🔄 Rendering menu with data:', data);
-
                     let items = [];
                     if (data && data.menu_items) {
                         items = data.menu_items;
@@ -484,73 +393,66 @@
                             }
                         }
                     }
-
                     console.log(`📋 Found ${items.length} menu items`);
-
                     let totalItems = items.length;
                     let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
                     let startIndex = (page - 1) * ITEMS_PER_PAGE;
                     let paginatedItems = items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
                     html = `
-                                    <div class="block-header">
-                                        <span class="block-icon">🍽️</span>
-                                        <span class="block-title">Menu Structure Records</span>
-                                        <span class="block-badge">${totalItems} items</span>
-                                    </div>
-                                    <div class="table-wrapper">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Item Identity</th>
-                                                    <th>Unit Standard Price</th>
-                                                    <th>Category</th>
-                                                    <th style="text-align:right;">Operational Node State</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>`;
-
-                    if (paginatedItems.length > 0) {
-                        paginatedItems.forEach(item => {
-                            let categoryName = 'N/A';
-                            if (item.category) {
-                                categoryName = item.category.name || 'N/A';
-                            } else if (item.category_name) {
-                                categoryName = item.category_name;
-                            }
-
-                            html += `
-                                            <tr>
-                                                <td><strong>${item.name || 'Unnamed Item'}</strong></td>
-                                                <td class="price">₹${parseFloat(item.price || 0).toLocaleString('en-IN')}</td>
-                                                <td>${categoryName}</td>
-                                                <td style="text-align:right;">
-                                                    <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
-                                                        <span class="dot"></span>
-                                                        ${item.is_active ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </td>
-                                            </tr>`;
-                        });
-                    } else {
-                        html += `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--gray-500);">
+                            <div class="block-header">
+                                <span class="block-icon">🍽️</span>
+                                <span class="block-title">Menu Structure Records</span>
+                                <span class="block-badge">${totalItems} items</span>
+                            </div>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Item Identity</th>
+                                            <th>Unit Standard Price</th>
+                                            <th>Category</th>
+                                            <th style="text-align:right;">Operational Node State</th>
+                                        </tr>
+                                    </thead>
+                                <tbody>`;
+                                if (paginatedItems.length > 0) {
+                                    paginatedItems.forEach(item => {
+                                    let categoryName = 'N/A';
+                                    if (item.category) {
+                                        categoryName = item.category.name || 'N/A';
+                                    } else if (item.category_name) {
+                                        categoryName = item.category_name;
+                                    }
+                                    html += `
+                                        <tr>
+                                            <td><strong>${item.name || 'Unnamed Item'}</strong></td>
+                                            <td class="price">₹${parseFloat(item.price || 0).toLocaleString('en-IN')}</td>
+                                            <td>${categoryName}</td>
+                                            <td style="text-align:right;">
+                                                <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
+                                                <span class="dot"></span>
+                                                    ${item.is_active ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                        </tr>`;
+                                });
+                                } else {
+                                    html += `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--gray-500);">
                                         No menu records found.
                                     </td></tr>`;
-                    }
-                    html += `</tbody></table></div>`;
-
-                    if (totalPages > 1) {
-                        html += buildPagination(type, page, totalPages);
-                    }
-                }
-                else if (type === 'orders') {
-                    let orders = data.orders || [];
-                    let totalItems = orders.length;
-                    let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
-                    let startIndex = (page - 1) * ITEMS_PER_PAGE;
-                    let paginatedOrders = orders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-
-                    html = `
+                                }
+                                html += `</tbody></table></div>`;
+                                if (totalPages > 1) {
+                                    html += buildPagination(type, page, totalPages);
+                                }
+                            }
+                            else if (type === 'orders') {
+                                let orders = data.orders || [];
+                                let totalItems = orders.length;
+                                let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+                                let startIndex = (page - 1) * ITEMS_PER_PAGE;
+                                let paginatedOrders = orders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+                                html = `
                                     <div class="block-header">
                                         <span class="block-icon">📦</span>
                                         <span class="block-title">Live Order Execution Logs</span>
