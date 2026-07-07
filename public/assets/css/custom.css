@@ -41,9 +41,11 @@ body {
   background: linear-gradient(180deg, #f8f9ff 0%, #f3f6ff 100%);
 }
 
+
+/* pading kami keli 30 hoti 5px keli */
 .section.premium-dashboard {
   padding-top: 10px;
-  padding-bottom: 30px;
+  padding-bottom: 5px;
 }
 
 /* NAVBAR */
