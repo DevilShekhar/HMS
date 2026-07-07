@@ -30,7 +30,119 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/bundles/summernote/summernote-bs4.css') }}">
     @yield('style')
+<style>
+    /* ================================
+   EHT Premium Sidebar
+================================ */
 
+.eht-sidebar {
+    background: #fff;
+    box-shadow: 0 0 25px rgba(0,0,0,.08);
+}
+
+.eht-sidebar .sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 6px 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    color: #444;
+    font-weight: 500;
+    transition: all .3s ease;
+}
+
+.eht-sidebar .sidebar-menu li a i {
+    transition: .3s;
+}
+
+/* Hover */
+.eht-sidebar .sidebar-menu li a:hover {
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    color: #fff;
+    transform: translateX(4px);
+}
+
+.eht-sidebar .sidebar-menu li a:hover i {
+    color: #fff;
+}
+
+/* Active */
+.eht-sidebar .sidebar-menu li.active > a,
+.eht-sidebar .sidebar-menu li.active > .nav-link {
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    color: #fff;
+}
+
+.eht-sidebar .sidebar-menu li.active i {
+    color: #fff;
+}
+
+/* Dropdown parent */
+.eht-sidebar .sidebar-menu .dropdown.active > a {
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    color: #fff;
+}
+
+/* Dropdown items */
+.eht-sidebar .dropdown-menu li a {
+    padding-left: 48px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+.eht-sidebar .dropdown-menu li a:hover {
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    color: #fff;
+}
+
+/* Section Header */
+.eht-sidebar .menu-header {
+    color: #999;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 20px 20px 8px;
+}
+
+/* Logo */
+.eht-sidebar .header-logo {
+    max-height: 42px;
+}
+
+.eht-sidebar .logo-name {
+    color: #222;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Scrollbar */
+.eht-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.eht-sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    border-radius: 20px;
+}
+
+.sidebar-menu li a:hover i,
+.sidebar-menu li a:hover svg,
+.sidebar-menu li a:hover .fas,
+.sidebar-menu li.active > a i,
+.sidebar-menu li.active > a svg,
+.sidebar-menu li.active > a .fas {
+    color: #fff;
+}
+.sidebar-menu li a i,
+.sidebar-menu li a svg,
+.sidebar-menu li a .fas,
+.sidebar-menu li a .far,
+.sidebar-menu li a .fab {
+    color: #ff8a00;
+    transition: all .3s ease;
+}
+</style>
 </head>
 
 <body>
@@ -206,7 +318,8 @@
             <!-- NAVBAR END -->
             <!-- SIDEBAR START -->
 
-            <div class="main-sidebar sidebar-style-2">
+            <!-- <div class="main-sidebar sidebar-style-2"> -->
+                <div class="eht-sidebar main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
 
                     @php
