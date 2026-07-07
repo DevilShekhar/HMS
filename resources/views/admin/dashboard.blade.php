@@ -3,131 +3,167 @@
 @section('content')
     <section class="section">
         <div class="row mb-3">
-
             {{-- SuperAdmin Cards --}}
-            @if (isset($revenue) && auth()->user()->role == 'super_admin')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card restaurant-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Total Restaurant</h6>
-                            <h3 class="text-white mb-0">{{ $totalRestaurants }}</h3>
+            @if(isset($revenue) && auth()->user()->role == 'super_admin')
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Total Restaurants</h6>
+                            <h2>{{ $totalRestaurants }}</h2>
+                            <span>Registered Restaurants</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card branches-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Total Branches</h6>
-                            <h3 class="text-white mb-0">{{ $totalBranches }}</h3>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card branch-card">
+                        <div class="header-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Total Branches</h6>
+                            <h2>{{ $totalBranches }}</h2>
+                            <span>Active Branches</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card expiry-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Near Expiring</h6>
-                            <h3 class="text-white mb-0">{{ $nearExpirySubscriptions }}</h3>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card warning-card">
+                        <div class="header-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Near Expiring</h6>
+                            <h2>{{ $nearExpirySubscriptions }}</h2>
+                            <span>Within 7 Days</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card expiry-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Expired Subscription</h6>
-                            <h3 class="text-white mb-0">{{ $expiredSubscriptionCount }}</h3>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card danger-card">
+                        <div class="header-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Expired Plans</h6>
+                            <h2>{{ $expiredSubscriptionCount }}</h2>
+                            <span>Need Renewal</span>
                         </div>
                     </div>
                 </div>
             @endif
-
-
-
-
-
-
             {{-- Revenue Cards --}}
             @can('today-revenue')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card today-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Today Revenue</h6>
-                            <h3 class="text-white mb-1">₹{{ number_format($revenue['today']['amount']) }}</h3>
-                            <p class="text-white mb-0">{{ $revenue['today']['orders'] }} Orders</p>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Today Revenue</h6>
+                            <h3 class="mb-1">₹{{ number_format($revenue['today']['amount']) }}</h3>
+                            <p class=" mb-0">{{ $revenue['today']['orders'] }} Orders</p>
                         </div>
                     </div>
-                </div>
+                </div>                
             @endcan
 
             @can('yesterday-revenue')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card yesterday-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Yesterday Revenue</h6>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Yesterday Revenue</h6>
                             @if (isset($revenue))
-                                <h3 class="text-white mb-1">₹{{ number_format($revenue['yesterday']['amount']) }}</h3>
-                                <p class="text-white mb-0">{{ $revenue['yesterday']['orders'] }} Orders</p>
+                                <h3 class=" mb-1">₹{{ number_format($revenue['yesterday']['amount']) }}</h3>
+                                <p class=" mb-0">{{ $revenue['yesterday']['orders'] }} Orders</p>
                             @endif
                         </div>
                     </div>
-                </div>
+                </div>                
             @endcan
 
             @can('weekly-revenue')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card weekly-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Weekly Revenue</h6>
-                            <h3 class="text-white mb-1">₹{{ number_format($revenue['weekly']['amount']) }}</h3>
-                            <p class="text-white mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6>Weekly Revenue</h6>
+                             <h3 class=" mb-1">₹{{ number_format($revenue['weekly']['amount']) }}</h3>
+                            <p class=" mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
                         </div>
                     </div>
-                </div>
+                </div>                   
             @endcan
 
             @can('monthly-revenue')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card monthly-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Monthly Revenue</h6>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6 class=" mb-2">Monthly Revenue</h6>
                             @if (isset($revenue))
-                                <h3 class="text-white mb-1">₹{{ number_format($revenue['monthly']['amount']) }}</h3>
-                                <p class="text-white mb-0">{{ $revenue['monthly']['orders'] }} Orders</p>
+                                <h3 class=" mb-1">₹{{ number_format($revenue['monthly']['amount']) }}</h3>
+                                <p class=" mb-0">{{ $revenue['monthly']['orders'] }} Orders</p>
                             @endif
                         </div>
                     </div>
-                </div>
+                </div>                
             @endcan
 
             @can('yearly-revenue')
-                <div class="col-md-3 mb-4">
-                    <div class="card gradient-card yearly-card shadow-sm border-0">
-                        <div class="card-body text-center p-4">
-                            <h6 class="text-white mb-2">Yearly Revenue</h6>
+            <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card restaurant-card">
+                        <div class="header-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="card-content">
+                            <h6 class=" mb-2">Yearly Revenue</h6>
                             @if (isset($revenue))
-                                <h3 class="text-white mb-1">₹{{ number_format($revenue['yearly']['amount']) }}</h3>
-                                <p class="text-white mb-0">{{ $revenue['yearly']['orders'] }} Orders</p>
+                                <h3 class="mb-1">₹{{ number_format($revenue['yearly']['amount']) }}</h3>
+                                <p class="mb-0">{{ $revenue['yearly']['orders'] }} Orders</p>
                             @endif
                         </div>
                     </div>
-                </div>
+                </div>                
             @endcan
         </div>
 
         @can('superadmin-view')
         {{-- ===== EXPIRED SUBSCRIPTIONS ===== --}}
-        <div class="row mb-4">
+       <div class="row mb-4">
             <div class="col-12">
                 <div class="rms-dashboard-card">
-                    <div class="rms-card-header">
-                        <h5>
-                            <i class="fas fa-times-circle"></i>
-                            Expired Subscriptions
-                        </h5>
-                        <span class="rms-badge rms-badge--danger">
-                            <i class="fas fa-clock"></i> Urgent
-                        </span>
+                    <div class="expired-header">
+                        <div class="expired-header-left">
+                            <div class="expired-icon">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div>
+                                <h3>Expired Subscriptions</h3>
+                                <p>
+                                    Subscriptions that have expired and require immediate attention.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="expired-header-right">
+                            <span class="urgent-badge">
+                                <i class="fas fa-bolt"></i>
+                                URGENT
+                            </span>
+                            <div class="expired-count-card">
+                                <h2>{{ count($expiredSubscriptions) }}</h2>
+                                <span>Expired Subscription</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="rms-table-wrap">
                         <table class="rms-table">
@@ -150,17 +186,39 @@
                                     <tr>
                                         <td>{{ $subscription->branch?->restaurant?->name ?? 'N/A' }}</td>
                                         <td>{{ $subscription->branch?->name ?? 'N/A' }}</td>
-                                        <td>{{ $subscription->plan?->name ?? $subscription->billing_cycle }}</td>
-                                        <td>{{ $endDate->format('d M Y') }}</td>
+                                        <td><span class="plan-pill"><i class="fas fa-crown"></i> {{ $subscription->plan?->name ?? $subscription->billing_cycle }}</span></td>
                                         <td>
-                                            <span class="fw-bold text-danger">
-                                                {{ (int) $expiredDays }} day{{ (int) $expiredDays > 1 ? 's' : '' }} ago
-                                            </span>
+                                            <div class="date-box">
+                                                <div class="date-icon">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>
+                                                        {{ $endDate->format('d M Y') }}
+                                                    </strong>
+                                                    <small>
+                                                        End Date
+                                                    </small>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
-                                            <span class="rms-badge rms-badge--danger">
-                                                <i class="fas fa-exclamation-circle"></i> Expired
-                                            </span>
+                                            <div class="expired-box">
+                                                <div class="expired-icon-small">
+                                                    <i class="far fa-clock"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>
+                                                    {{ (int) $expiredDays }} day{{ (int) $expiredDays > 1 ? 's' : '' }} ago
+                                                    </strong>
+                                                    <small>
+                                                        Expired Since
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                           <span class="status-expired"><i class="fas fa-exclamation-circle"></i>Expired</span>
                                         </td>
                                     </tr>
                                 @empty
@@ -182,17 +240,64 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="rms-dashboard-card">
-                    <div class="rms-card-header">
-                        <h5>
-                            <i class="fas fa-calendar-alt"></i>
-                            Subscription Overview
-                        </h5>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <span class="rms-badge rms-badge--success"><i class="fas fa-check"></i> Active</span>
-                            <span class="rms-badge rms-badge--warning"><i class="fas fa-clock"></i> Expiring Soon</span>
-                            <span class="rms-badge rms-badge--critical"><i class="fas fa-exclamation-triangle"></i> Critical</span>
-                        </div>
+                     <div class="subscription-header">
+
+                <div class="subscription-title">
+
+                    <div class="header-icon">
+                        <i class="fas fa-calendar-check"></i>
                     </div>
+
+                    <div>
+
+                        <h3>Subscription Overview</h3>
+
+                        <p>
+                            Monitor all restaurant subscriptions and renewal status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="subscription-summary">
+
+                    <div class="summary-pill active">
+
+                        <i class="fas fa-check-circle"></i>
+
+                        <span>Active</span>
+
+                        <strong>{{ $subscriptions->filter(fn($s)=> now()->diffInDays(\Carbon\Carbon::parse($s->end_date),false) > 30)->count() }}</strong>
+
+                    </div>
+
+                    <div class="summary-pill warning">
+
+                        <i class="fas fa-clock"></i>
+
+                        <span>Expiring Soon</span>
+
+                        <strong>{{ $subscriptions->filter(function($s){
+                            $d = now()->diffInDays(\Carbon\Carbon::parse($s->end_date),false);
+                            return $d > 7 && $d <=30;
+                        })->count() }}</strong>
+
+                    </div>
+
+                    <div class="summary-pill danger">
+
+                        <i class="fas fa-exclamation-triangle"></i>
+
+                        <span>Critical</span>
+
+                        <strong>{{ $subscriptions->filter(fn($s)=> now()->diffInDays(\Carbon\Carbon::parse($s->end_date),false)<=7)->count() }}</strong>
+
+                    </div>
+
+                </div>
+
+            </div>
                     <div class="rms-table-wrap">
                         <table class="rms-table">
                             <thead>
@@ -256,15 +361,61 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="rms-dashboard-card">
-                    <div class="rms-card-header">
-                        <h5>
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Inventory Alerts
-                        </h5>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <span class="rms-badge rms-badge--danger"><i class="fas fa-times"></i> Out of Stock</span>
-                            <span class="rms-badge rms-badge--warning"><i class="fas fa-minus"></i> Low Stock</span>
-                            <span class="rms-badge rms-badge--success"><i class="fas fa-check"></i> In Stock</span>
+                    <div class="subscription-header">
+                        <!-- Left Side -->
+                        <div class="subscription-title">
+
+                            <div class="header-icon ">
+                            <i class="fas fa-bell"></i>
+                            </div>
+
+                            <div>
+
+                                <h3>Inventory Alerts</h3>
+
+                                <p>
+                                    Monitor stock availability and manage inventory efficiently.
+                                </p>
+
+                            </div>
+
+                        </div>
+                        <!-- Right Side -->
+                        <div class="subscription-summary">
+
+                            <!-- Out of Stock -->
+                            <div class="summary-pill danger">
+
+                                <i class="fas fa-times-circle"></i>
+
+                                <span>Out of Stock</span>
+
+                                <strong>{{ $outOfStockItems ?? 0 }}</strong>
+
+                            </div>
+
+                            <!-- Low Stock -->
+                            <div class="summary-pill warning">
+
+                                <i class="fas fa-exclamation-circle"></i>
+
+                                <span>Low Stock</span>
+
+                                <strong>{{ $lowStockItems ?? 0 }}</strong>
+
+                            </div>
+
+                            <!-- In Stock -->
+                            <div class="summary-pill active">
+
+                                <i class="fas fa-check-circle"></i>
+
+                                <span>In Stock</span>
+
+                                <strong>{{ $inStockItems ?? 0 }}</strong>
+
+                            </div>
+
                         </div>
                     </div>
                     <div class="rms-table-wrap">
@@ -326,14 +477,28 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="rms-dashboard-card">
-                    <div class="rms-card-header">
-                        <h5>
-                            <i class="fas fa-trophy"></i>
-                            Top Restaurants by Revenue
-                        </h5>
-                        <span class="rms-badge rms-badge--info">
-                            <i class="fas fa-calendar"></i> {{ now()->format('M Y') }}
-                        </span>
+                    <div class="subscription-header">
+                        <!-- Left -->
+                        <div class="subscription-title">
+
+                            <div class="header-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h3>Top Restaurants by Revenue</h3>
+                                <p>
+                                    Track the highest-performing restaurants based on revenue this month.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Right -->
+                        <div class="subscription-summary">
+                            <div class="summary-pill revenue">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Current Month</span>
+                                <strong>{{ now()->format('M Y') }}</strong>
+                            </div>
+                        </div>
                     </div>
                     <div class="rms-table-wrap">
                         <table class="rms-table">
@@ -341,7 +506,7 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Restaurant</th>
-                                    <th>Branches</th>
+                                    <th>Outlets</th>
                                     <th>Orders</th>
                                     <th class="text-end">Revenue</th>
                                 </tr>
@@ -356,11 +521,15 @@
                                             </span>
                                         </td>
                                         <td><strong>{{ $restaurant->name ?? 'N/A' }}</strong></td>
-                                        <td>{{ $restaurant->total_branches }}</td>
-                                        <td>{{ number_format($restaurant->total_orders) }}</td>
-                                        <td class="text-end fw-bold text-success">
-                                            <i class="fas fa-rupee-sign"></i> {{ number_format($restaurant->total_revenue, 2) }}
+                                        <td>
+                                            <span class="status-expired"><i class="fas fa-code-branch"></i>{{ $restaurant->total_branches }}</span></td>
+                                        <td>
+                                            <span class="plan-pill"> <i class="fas fa-shopping-cart"></i> {{ number_format($restaurant->total_orders) }}</span>
                                         </td>
+                                        <td class="text-end fw-bold">
+                                            <span class="rms-badge rms-badge--sucess" >
+                                            <i class="fas fa-rupee-sign"></i> {{ number_format($restaurant->total_revenue, 2) }} </span>
+                                        </td>                                      
                                     </tr>
                                 @empty
                                     <tr>
@@ -489,119 +658,240 @@
             </div>
         @endcan
         @can('view-payment')
-            <div class="row">
+            <div class="row g-4">
                 {{-- Pending Verification --}}
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-warning text-white shadow border-0 h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-3">
-                                <i class="fas fa-clock fa-2x"></i>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <p class="text-muted text-uppercase small fw-semibold mb-1">
+                                        Pending Verification
+                                    </p>
+                                    <h2 class="fw-bold text-warning mb-1">
+                                        {{ $pendingVerification }}
+                                    </h2>
+                                    <small class="text-muted">
+                                        Payments Awaiting Approval
+                                    </small>
+                                </div>
+
+                                <div class="bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:65px;height:65px;">
+                                    <i class="fas fa-clock fa-lg text-white"></i>
+                                </div>
                             </div>
-                            <h6 class="mb-2">Pending Verification</h6>
-                            <h2 class="fw-bold">{{ $pendingVerification }}</h2>
-                            <small>Payments Awaiting Approval</small>
+
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar bg-warning w-100"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
                 {{-- Verified Today --}}
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-success text-white shadow border-0 h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-3">
-                                <i class="fas fa-check-circle fa-2x"></i>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <p class="text-muted text-uppercase small fw-semibold mb-1">
+                                        Verified Today
+                                    </p>
+                                    <h2 class="fw-bold text-success mb-1">
+                                        {{ $verifiedToday }}
+                                    </h2>
+                                    <small class="text-muted">
+                                        Payments Approved Today
+                                    </small>
+                                </div>
+
+                                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:65px;height:65px;">
+                                    <i class="fas fa-check-circle fa-lg text-white"></i>
+                                </div>
                             </div>
-                            <h6 class="mb-2">Verified Today</h6>
-                            <h2 class="fw-bold">{{ $verifiedToday }}</h2>
-                            <small>Payments Approved Today</small>
+
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar bg-success w-100"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
                 {{-- Today's Collection --}}
-                <div class="col-md-4 mb-4">
-                    <div class="card bg-primary text-white shadow border-0 h-100">
-                        <div class="card-body text-center p-4">
-                            <div class="mb-3">
-                                <i class="fas fa-wallet fa-2x"></i>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <p class="text-muted text-uppercase small fw-semibold mb-1">
+                                        Today's Collection
+                                    </p>
+                                    <h2 class="fw-bold text-primary mb-1">
+                                        ₹{{ number_format($todayCollection) }}
+                                    </h2>
+                                    <small class="text-muted">
+                                        Verified Payment Amount
+                                    </small>
+                                </div>
+
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:65px;height:65px;">
+                                    <i class="fas fa-wallet fa-lg text-white"></i>
+                                </div>
                             </div>
-                            <h6 class="mb-2">Today's Collection</h6>
-                            <h2 class="fw-bold">₹{{ number_format($todayCollection) }}</h2>
-                            <small>Verified Payment Amount</small>
+
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar bg-primary w-100"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         @endcan
 
         @can('order-status')
-            <div class="row g-4 mt-3 mb-4">
+            <div class="row g-4 mt-4 order-status">
 
                 {{-- Pending Orders --}}
-                <div class="col-12 col-md-4">
-                    <div class="status-card status-card--pending">
-                        <div class="status-card__icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
-                                viewBox="0 0 16 16">
-                                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z" />
-                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                            </svg>
-                        </div>
-                        <div class="status-card__content">
-                            <span class="status-card__label">Pending Orders</span>
-                            <h2 class="status-card__value">{{ $orderStatus['pending'] }}</h2>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="text-muted text-uppercase small fw-semibold">
+                                        Pending Orders
+                                    </span>
+
+                                    <h2 class="fw-bold text-warning mt-2 mb-1">
+                                        {{ $orderStatus['pending'] }}
+                                    </h2>
+
+                                    <small class="text-muted">
+                                        Waiting for confirmation
+                                    </small>
+                                </div>
+
+                                <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                                    <i class="fas fa-clock text-white fa-lg"></i>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Current Status</small>
+                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                    Pending
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Preparing Orders --}}
-                <div class="col-12 col-md-4">
-                    <div class="status-card status-card--preparing">
-                        <div class="status-card__icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
-                                viewBox="0 0 16 16">
-                                <path
-                                    d="M8 11.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5" />
-                                <path
-                                    d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0zM1 1.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v13a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5z" />
-                            </svg>
-                        </div>
-                        <div class="status-card__content">
-                            <span class="status-card__label">Preparing Orders</span>
-                            <h2 class="status-card__value">{{ $orderStatus['preparing'] }}</h2>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="text-muted text-uppercase small fw-semibold">
+                                        Preparing Orders
+                                    </span>
+
+                                    <h2 class="fw-bold text-info mt-2 mb-1">
+                                        {{ $orderStatus['preparing'] }}
+                                    </h2>
+
+                                    <small class="text-muted">
+                                        Kitchen in progress
+                                    </small>
+                                </div>
+
+                                <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                                    <i class="fas fa-utensils text-white fa-lg"></i>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Current Status</small>
+                                <span class="badge bg-info-subtle text-info px-3 py-2">
+                                    Preparing
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Completed Orders --}}
-                <div class="col-12 col-md-4">
-                    <div class="status-card status-card--completed">
-                        <div class="status-card__icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
-                                viewBox="0 0 16 16">
-                                <path
-                                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
-                            </svg>
-                        </div>
-                        <div class="status-card__content">
-                            <span class="status-card__label">Completed Orders</span>
-                            <h2 class="status-card__value">{{ $orderStatus['completed'] }}</h2>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="text-muted text-uppercase small fw-semibold">
+                                        Completed Orders
+                                    </span>
+
+                                    <h2 class="fw-bold text-success mt-2 mb-1">
+                                        {{ $orderStatus['completed'] }}
+                                    </h2>
+
+                                    <small class="text-muted">
+                                        Ready for delivery
+                                    </small>
+                                </div>
+
+                                <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                                    <i class="fas fa-check-circle text-white fa-lg"></i>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Current Status</small>
+                                <span class="badge bg-success-subtle text-success px-3 py-2">
+                                    Completed
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-4 mt-3">
-                    <div class="status-card status-card--completed">
-                        <div class="status-card__icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
-                                viewBox="0 0 16 16">
-                                <path
-                                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
-                            </svg>
-                        </div>
-                        <div class="status-card__content">
-                            <span class="status-card__label">Delivered Orders</span>
-                            <h2 class="status-card__value">{{ $orderStatus['delivered'] }}</h2>
+
+                {{-- Delivered Orders --}}
+                <div class="col-xl-3 col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="text-muted text-uppercase small fw-semibold">
+                                        Delivered Orders
+                                    </span>
+
+                                    <h2 class="fw-bold text-primary mt-2 mb-1">
+                                        {{ $orderStatus['delivered'] }}
+                                    </h2>
+
+                                    <small class="text-muted">
+                                        Successfully delivered
+                                    </small>
+                                </div>
+
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                                    <i class="fas fa-truck text-primary fa-lg"></i>
+                                </div>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Current Status</small>
+                                <span class="badge bg-primary-subtle text-info px-3 py-2">
+                                    Delivered
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -613,100 +903,111 @@
             $restaurantSlug = request()->route('restaurant');
             $branchSlug = request()->route('branch');
         @endphp
-        @can('prepared-index-dashboard')
-            <div class="card shadow mt-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Prepared and Pendings Orders</h5>
-                    <div class="premium-head-actions">
+            @can('prepared-index-dashboard')        
+                <div class="card shadow mt-4">
+                    <div class="subscription-header">
+                        <div class="subscription-title">
+                            <div class="header-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h3>Prepared and Pendings Orders</h3>
+                                <p>
+                                    Monitor all restaurant subscriptions and renewal status.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="subscription-summary">                  
+                            @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                            <a href="{{ route('branch.orders.index', [
+                                        'restaurant' => $restaurantSlug,
+                                        'branch' => $branchSlug,
+                                    ]) }}" class="btn btn-primary">
+                                                View All
+                                            </a>
+                                @elseif (!empty($restaurantSlug))
+                                            <a href="{{ route('restaurant.orders.index', [
+                                        'restaurant' => $restaurantSlug,
+                                    ]) }}" class="btn btn-primary">
+                                                View All
+                                            </a>
+                                @endif                    
+                        </div>
+                    </div>               
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Token</th>
+                                        <th>Customer</th>
+                                        <th>Table</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
 
+                                <tbody>
+                                    @forelse($preparedOrders as $order)
+                                        <tr>
+                                            <td>{{ $order->token_no }}</td>
+                                            <td>{{ $order->customer_name }}</td>
+                                            <td>{{ $order->table_no ?? '-' }}</td>
+                                            <td>₹{{ number_format($order->total, 2) }}</td>
+                                            <td>
+                                                {{ $order->status }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
 
-                        @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                    @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                        <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
+                                                            class="btn btn-md btn-info">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    @elseif(!empty($restaurantSlug))
+                                                        <a href="{{ route('restaurant.orders.show', ['restaurant' => $restaurantSlug, 'order' => $order->id]) }}"
+                                                            class="btn btn-md btn-info">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    @else
 
-                                    <a href="{{ route('branch.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                                'branch' => $branchSlug,
-                            ]) }}" class="btn btn-primary">
-                                        View All
-                                    </a>
+                                                    @endif
 
-                        @elseif (!empty($restaurantSlug))
-
-                                    <a href="{{ route('restaurant.orders.index', [
-                                'restaurant' => $restaurantSlug,
-                            ]) }}" class="btn btn-primary">
-                                        View All
-                                    </a>
-
-                        @endif
-
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">No prepared orders found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Token</th>
-                                    <th>Customer</th>
-                                    <th>Table</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                @forelse($preparedOrders as $order)
-                                    <tr>
-                                        <td>{{ $order->token_no }}</td>
-                                        <td>{{ $order->customer_name }}</td>
-                                        <td>{{ $order->table_no ?? '-' }}</td>
-                                        <td>₹{{ number_format($order->total, 2) }}</td>
-                                        <td>
-                                            {{ $order->status }}
-                                        </td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-
-                                                @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                    <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @elseif(!empty($restaurantSlug))
-                                                    <a href="{{ route('restaurant.orders.show', ['restaurant' => $restaurantSlug, 'order' => $order->id]) }}"
-                                                        class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                @else
-
-                                                @endif
-
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center">No prepared orders found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        @endcan
+            @endcan
 
         @can('inventory-dashboard')
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="card shadow">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                Inventory Stock Summary
-                            </h5>
+                        <div class="subscription-header">
+                        <div class="subscription-title">
+                            <div class="header-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h3>Inventory Stock Summary</h3>
+                                <p>
+                                    Monitor all restaurant subscriptions and renewal status.
+                                </p>
+                            </div>
                         </div>
+                        
+                    </div> 
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover" id="StockTable">
