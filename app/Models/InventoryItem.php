@@ -14,10 +14,11 @@ class InventoryItem extends Model
         'total_stock',
         'remaining_stock',
         'minimum_stock',
-        'is_active',
+        'is_active', 'inventory_datetime','inventory_timezone',
         'created_by',
-        'updated_by'
+        'updated_by',
     ];
+
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
@@ -30,16 +31,16 @@ class InventoryItem extends Model
 
     public function creator()
     {
-        return $this->belongsTo(User::class,'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updater()
     {
-        return $this->belongsTo(User::class,'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function transactions()
     {
-        return $this->hasMany(InventoryTransaction::class,'inventory_item_id');
+        return $this->hasMany(InventoryTransaction::class, 'inventory_item_id');
     }
 }

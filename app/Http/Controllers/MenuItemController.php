@@ -187,7 +187,6 @@ class MenuItemController extends Controller
             'branch_id' => $branchId,
             'category_id' => $request->category_id,
             'created_by' => Auth::id(),
-
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,

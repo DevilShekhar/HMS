@@ -13,12 +13,22 @@ use Illuminate\Validation\Rule;
 class InventoryController extends Controller
 {
     public function index()
-    {
-        $restaurant = app('restaurant');
-        $items = InventoryItem::with(['branch', 'creator', 'updater'])->where('restaurant_id', $restaurant->id)->latest()->paginate(20);
+{
+    $restaurant = app('restaurant');
+    $user = Auth::user();
 
-        return view('admin.inventory.index', compact('items'));
+    $query = InventoryItem::with(['branch', 'creator', 'updater'])
+        ->where('restaurant_id', $restaurant->id);
+
+    // Branch Manager - only own branch inventory
+    if ($user->branch_id) {
+        $query->where('branch_id', $user->branch_id);
     }
+
+    $items = $query->latest()->paginate(20);
+
+    return view('admin.inventory.index', compact('items'));
+}
 
     public function create($restaurant, $branch = null)
     {
@@ -69,9 +79,16 @@ class InventoryController extends Controller
             'total_stock' => 'required|numeric|min:0',
             'minimum_stock' => 'required|numeric|min:0',
         ]);
+        $branch = Branch::with('country')->find($branchId);
+        $timezone = $branch?->country?->timezone ?? config('app.timezone');
+        $inventoryDateTime = now($timezone);
         InventoryItem::create([
             'restaurant_id' => app('restaurant')->id,
             'branch_id' => $branchId,
+
+            'inventory_datetime' => $inventoryDateTime,
+            'inventory_timezone' => $timezone,
+
             'name' => $request->name,
             'unit' => $request->unit,
             'total_stock' => $request->total_stock,

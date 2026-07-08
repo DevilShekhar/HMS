@@ -81,7 +81,24 @@ class ReportController extends Controller
                 ];
             })->values();
 
-        return view('admin.reports.revenue', compact('reports', 'branches'));
+        $currencySymbol = '₹'; // Default
+
+        $user = Auth::user();
+
+        if ($user->branch_id) {
+
+            $branch = Branch::with('country')->find($user->branch_id);
+
+            $currencySymbol = $branch?->country?->currency_symbol ?? '₹';
+
+        } elseif ($request->filled('branch_id')) {
+
+            $branch = Branch::with('country')->find($request->branch_id);
+
+            $currencySymbol = $branch?->country?->currency_symbol ?? '₹';
+        }
+
+        return view('admin.reports.revenue', compact('reports', 'branches', 'currencySymbol'));
     }
 
     public function topSelling(Request $request)
