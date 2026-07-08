@@ -2,7 +2,7 @@
 
 @section('content')
 
-  {{-- Country & Timezone Info Card --}}
+{{-- Country & Timezone Info Card --}}
 @if (isset($currentBranch) && $currentBranch)
     <div class="row mb-4">
         <div class="col-12">
@@ -22,7 +22,7 @@
                             <i class="fas fa-clock"></i>
                             Timezone: <strong>{{ $country?->timezone ?? 'N/A' }}</strong>
                         </p>
-                    </div>
+                    </div> 
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                             <p class=" mb-0">{{ $revenue['today']['orders'] }} Orders</p>
                         </div>
                     </div>
-                </div>                
+                </div>
             @endcan
 
             @can('yesterday-revenue')
@@ -111,7 +111,7 @@
                             @endif
                         </div>
                     </div>
-                </div>                
+                </div>
             @endcan
 
             @can('weekly-revenue')
@@ -126,7 +126,7 @@
                             <p class=" mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
                         </div>
                     </div>
-                </div>                   
+                </div>
             @endcan
 
             @can('monthly-revenue')
@@ -143,7 +143,7 @@
                             @endif
                         </div>
                     </div>
-                </div>                
+                </div>
             @endcan
 
             @can('yearly-revenue')
@@ -160,7 +160,7 @@
                             @endif
                         </div>
                     </div>
-                </div>                
+                </div>
             @endcan
         </div>
 
@@ -556,7 +556,7 @@
                                         <td class="text-end fw-bold">
                                             <span class="rms-badge rms-badge--sucess" >
                                             <i class="fas fa-rupee-sign"></i> {{ number_format($restaurant->total_revenue, 2) }} </span>
-                                        </td>                                      
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -930,7 +930,7 @@
             $restaurantSlug = request()->route('restaurant');
             $branchSlug = request()->route('branch');
         @endphp
-            @can('prepared-index-dashboard')        
+            @can('prepared-index-dashboard')
                 <div class="card shadow mt-4">
                     <div class="subscription-header">
                         <div class="subscription-title">
@@ -944,7 +944,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="subscription-summary">                  
+                        <div class="subscription-summary">
                             @if (!empty($restaurantSlug) && !empty($branchSlug))
                                             <a href="{{ route('branch.orders.index', [
                                         'restaurant' => $restaurantSlug,
@@ -958,9 +958,9 @@
                                     ]) }}" class="btn btn-primary">
                                                 View All
                                             </a>
-                                @endif                    
+                                @endif
                         </div>
-                    </div>               
+                    </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
@@ -1033,8 +1033,8 @@
                                 </p>
                             </div>
                         </div>
-                        
-                    </div> 
+
+                    </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-hover" id="StockTable">

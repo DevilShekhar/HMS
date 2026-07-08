@@ -50,10 +50,10 @@
                         <a href="{{ route('restaurant.reports.revenue.pdf', ['restaurant' => request()->route('restaurant')]) }}"
                             class="premium-back-btn" id="downloadPdf">
                             <i class="fas fa-file-pdf"></i> Download PDF
-                        </a>            
+                        </a>
                     </div>
-                </div>    
-            </div>    
+                </div>
+            </div>
         </section>
         <section class="section premium-dashboard pt-0">
             <div class="section-body">
@@ -67,7 +67,7 @@
                             </div>
                             <span>Today</span>
                         </div>
-                        <h3>₹{{ number_format($cardToday) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardToday) }}</h3>
                         <div class="report-line bg-primary"></div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                             </div>
                             <span>Yesterday</span>
                         </div>
-                        <h3>₹{{ number_format($cardYesterday) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardYesterday) }}</h3>
                         <div class="report-line bg-secondary"></div>
                     </div>
                 </div>
@@ -93,7 +93,7 @@
                             </div>
                             <span>Weekly</span>
                         </div>
-                        <h3>₹{{ number_format($cardWeekly) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardWeekly) }}</h3>
                         <div class="report-line bg-info"></div>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                             </div>
                             <span>Monthly</span>
                         </div>
-                        <h3>₹{{ number_format($cardMonthly) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardMonthly) }}</h3>
                         <div class="report-line bg-warning"></div>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                             <span>Yearly</span>
                         </div>
 
-                        <h3>₹{{ number_format($cardYearly) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardYearly) }}</h3>
 
                         <div class="report-line bg-success"></div>
                     </div>
@@ -136,7 +136,7 @@
                             <span>Total Revenue</span>
                         </div>
 
-                        <h3>₹{{ number_format($cardTotal) }}</h3>
+                        <h3>{{ $currencySymbol }}{{ number_format($cardTotal) }}</h3>
 
                         <div class="report-line bg-white"></div>
                     </div>
@@ -152,7 +152,7 @@
                                     <div class="section-icon me-3">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
-                                    <div>                                       
+                                    <div>
                                         <h4 class="mb-1 mt-2 fw-bold">
                                             Revenue Records
                                         </h4>
@@ -184,13 +184,13 @@
                                                     <td>
                                                         <strong>{{ $report['branch_name'] }}</strong>
                                                     </td>
-                                                    <td>₹{{ number_format($report['today']) }}</td>
-                                                    <td>₹{{ number_format($report['yesterday']) }}</td>
-                                                    <td>₹{{ number_format($report['weekly']) }}</td>
-                                                    <td>₹{{ number_format($report['monthly']) }}</td>
-                                                    <td>₹{{ number_format($report['yearly']) }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format($report['today']) }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format($report['yesterday']) }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format($report['weekly']) }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format($report['monthly']) }}</td>
+                                                    <td>{{ $currencySymbol }}{{ number_format($report['yearly']) }}</td>
                                                     <td>
-                                                        <strong class="qty-badge  text-success">₹{{ number_format($report['total']) }}</strong>
+                                                        <strong class="qty-badge  text-success">{{ $currencySymbol }}{{ number_format($report['total']) }}</strong>
                                                     </td>
                                                 </tr>
                                             @empty
@@ -210,7 +210,7 @@
 
             </div>
         </section>
-       
+
         <script>
             document.addEventListener('DOMContentLoaded', function () {
 

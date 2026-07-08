@@ -17,10 +17,16 @@ class RecipeController extends Controller
     {
         $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
 
+        $user = Auth::user();
+
         $recipes = Recipe::with([
             'menuItem',
             'branch',
         ])
+            ->where('restaurant_id', $restaurant->id)
+            ->when($user->branch_id, function ($query) use ($user) {
+                $query->where('branch_id', $user->branch_id);
+            })
             ->selectRaw('MIN(id) as id, menu_item_id, branch_id, status')
             ->groupBy('menu_item_id', 'branch_id', 'status')
             ->get();
