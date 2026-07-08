@@ -121,17 +121,17 @@ class BranchController extends Controller
             'gst' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $exists = Branch::query()->where('restaurant_id', $validated['restaurant_id'])
-            ->where('owner_id', $validated['owner_id'])
-            ->exists();
+        // $exists = Branch::query()->where('restaurant_id', $validated['restaurant_id'])
+        //     ->where('owner_id', $validated['owner_id'])
+        //     ->exists();
 
-        if ($exists) {
-            return back()
-                ->withErrors([
-                    'owner_id' => 'This owner is already assigned to the selected restaurant.',
-                ])
-                ->withInput();
-        }
+        // if ($exists) {
+        //     return back()
+        //         ->withErrors([
+        //             'owner_id' => 'This owner is already assigned to the selected restaurant.',
+        //         ])
+        //         ->withInput();
+        // }
 
         $validated['is_active'] = 1;
         $validated['slug'] = Str::slug($validated['name']);

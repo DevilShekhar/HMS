@@ -18,7 +18,7 @@ class MenuItem extends Model
         'food_type',
         'image',
         'is_available',
-        'is_active'
+        'is_active', 
     ];
 
     public function restaurant()
@@ -38,11 +38,11 @@ class MenuItem extends Model
 
     public function owner()
     {
-        return $this->belongsTo(User::class,'owner_id');
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function creator()
     {
-        return $this->belongsTo(User::class,'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
