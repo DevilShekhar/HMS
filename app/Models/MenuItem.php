@@ -18,12 +18,18 @@ class MenuItem extends Model
         'food_type',
         'image',
         'is_available',
-        'is_active', 
+        'is_active',
+        'menu_items_datetime',
+        'menu_items_timezone'
     ];
 
     public function restaurant()
     {
         return $this->belongsTo(Restaurant::class);
+    }
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public function branch()
