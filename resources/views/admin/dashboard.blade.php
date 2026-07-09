@@ -2,32 +2,91 @@
 
 @section('content')
 
-{{-- Country & Timezone Info Card --}}
-@if (isset($currentBranch) && $currentBranch)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card premium-block shadow-sm border-0">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <i class="fas fa-globe-asia fa-3x text-primary"></i>
-                    <div>
-                        @php
-                            $country = $currentBranch->country()->first();
-                        @endphp
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body py-3">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
 
-                        <h5 class="mb-1 text-dark">
-                            {{ $country?->name ?? 'Country Not Assigned' }}
-                            <small class="text-muted">({{ $country?->iso_code ?? '' }})</small>
-                        </h5>
-                        <p class="mb-0 text-muted">
-                            <i class="fas fa-clock"></i>
-                            Timezone: <strong>{{ $country?->timezone ?? 'N/A' }}</strong>
-                        </p>
-                    </div> 
+                    {{-- Left: Country & Timezone --}}
+                    @if(isset($currentBranch) && $currentBranch)
+                        @php $country = $currentBranch->country; @endphp
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:44px;height:44px;">
+                                <i class="fas fa-store text-white" style="font-size:1.1rem;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-semibold" style="font-size:0.9rem;">
+                                    {{ $country?->name ?? 'Country Not Assigned' }}
+                                    @if($country)
+                                        <span class="badge bg-light text-dark border ms-1" style="font-size:0.65rem; font-weight:400; padding:2px 8px;">
+                                            {{ $country->iso_code }}
+                                        </span>
+                                    @endif
+                                </h6>
+                                <small class="text-muted" style="font-size:0.75rem;">
+                                    <i class="far fa-clock me-1"></i>
+                                    {{ $country?->timezone ?? 'N/A' }}
+                                </small>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Right: Filters + Quick Order --}}
+                    <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 ms-lg-auto">
+
+                        {{-- Restaurant Filter --}}
+                        @if(auth()->user()->role == 'super_admin')
+                            <select id="restaurantFilter" class="form-select form-select-sm"
+                                    style="min-width:130px; width:100%; font-size:0.8rem; padding:4px 28px 4px 10px; height:32px; border-radius:6px; background-color:#f8f9fa; border-color:#dee2e6;">
+                                <option value="">All Restaurants</option>
+                                @foreach($restaurants as $restaurant)
+                                    <option value="{{ $restaurant->id }}">{{ $restaurant->name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <select id="restaurantFilter" class="form-select form-select-sm"
+                                    style="min-width:130px; width:100%; font-size:0.8rem; padding:4px 28px 4px 10px; height:32px; border-radius:6px; background-color:#f8f9fa; border-color:#dee2e6;"
+                                    disabled>
+                                <option value="{{ app('restaurant')->id }}">{{ app('restaurant')->name }}</option>
+                            </select>
+                        @endif
+
+                        {{-- Branch Filter --}}
+                        @if(auth()->user()->role != 'branch_manager')
+                            <select id="branchFilter" class="form-select form-select-sm"
+                                    style="min-width:130px; width:100%; font-size:0.8rem; padding:4px 28px 4px 10px; height:32px; border-radius:6px; background-color:#f8f9fa; border-color:#dee2e6;">
+                                <option value="">All Branches</option>
+                            </select>
+                        @else
+                            <select id="branchFilter" class="form-select form-select-sm"
+                                    style="min-width:130px; width:100%; font-size:0.8rem; padding:4px 28px 4px 10px; height:32px; border-radius:6px; background-color:#f8f9fa; border-color:#dee2e6;"
+                                    disabled>
+                                <option value="{{ auth()->user()->branch_id }}">
+                                    {{ optional(auth()->user()->branch)->name }}
+                                </option>
+                            </select>
+                        @endif
+
+                        {{-- Quick Order Button --}}
+                        @can('create-order')
+                            <a href="{{ auth()->user()->branch_id
+                                ? route('branch.orders.create', ['restaurant' => currentRestaurantSlug(), 'branch' => currentBranchSlug()])
+                                : route('restaurant.orders.create', ['restaurant' => currentRestaurantSlug()]) }}"
+                               class="quick-order-btn"
+                               style="display:inline-flex; align-items:center; gap:6px; padding:4px 18px; height:32px; background: linear-gradient(135deg, #ff8a00, #ff5f00); color:#ffffff; font-weight:600; font-size:0.8rem; border-radius:6px; text-decoration:none; white-space:nowrap; border:none; box-shadow: 0 2px 8px rgba(255, 138, 0, 0.3); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; position:relative; overflow:hidden;">
+                                <i class="fas fa-bolt" style="font-size:0.75rem; transition:transform 0.3s ease;"></i>
+                                Quick Order
+                                <span style="position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.2); transform:translate(-50%, -50%); transition:width 0.6s ease, height 0.6s ease;"></span>
+                            </a>
+                        @endcan
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-@endif
+</div>
     <section class="section">
         <div class="row mb-3">
             {{-- SuperAdmin Cards --}}
@@ -81,87 +140,93 @@
                     </div>
                 </div>
             @endif
-            {{-- Revenue Cards --}}
             @can('today-revenue')
+                @if(auth()->user()->role != 'branch_manager')
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="dashboard-card branch-card">
+                            <div class="header-icon">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <div class="card-content">
+                                <h6>Total Branches</h6>
+                                <h2>{{ $totalBranches }}</h2>
+                                <span>Active Branches</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="dashboard-card restaurant-card">
-                        <div class="header-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
+                        <div class="header-icon"><i class="fas fa-coins"></i></div>
                         <div class="card-content">
                             <h6>Today Revenue</h6>
-                            <h3 class="mb-1">₹{{ number_format($revenue['today']['amount']) }}</h3>
-                            <p class=" mb-0">{{ $revenue['today']['orders'] }} Orders</p>
+                            <h3 class="mb-1" id="todayRevenue">{{ $currencySymbol ?? '₹' }}{{ number_format($revenue['today']['amount']) }}</h3>
+                            <p class="mb-0">{{ $revenue['today']['orders'] }} Orders</p>
                         </div>
                     </div>
                 </div>
-            @endcan
+                @endcan
 
-            @can('yesterday-revenue')
+                @can('yesterday-revenue')
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="dashboard-card restaurant-card">
-                        <div class="header-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
+                        <div class="header-icon"><i class="fas fa-coins"></i></div>
                         <div class="card-content">
                             <h6>Yesterday Revenue</h6>
-                            @if (isset($revenue))
-                                <h3 class=" mb-1">₹{{ number_format($revenue['yesterday']['amount']) }}</h3>
-                                <p class=" mb-0">{{ $revenue['yesterday']['orders'] }} Orders</p>
-                            @endif
+                            <h3 class="mb-1" id="yesterdayRevenue">{{ $currencySymbol ?? '₹' }}{{ number_format($revenue['yesterday']['amount']) }}</h3>
+                            <p class="mb-0">{{ $revenue['yesterday']['orders'] }} Orders</p>
                         </div>
                     </div>
                 </div>
-            @endcan
+                @endcan
+                @can('weekly-revenue')
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="dashboard-card restaurant-card">
+                            <div class="header-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="card-content">
+                                <h6>Weekly Revenue</h6>
+                                <h3 class="mb-1" id="weeklyRevenueDisplay">{{ $currencySymbol ?? '₹' }}{{ number_format($revenue['weekly']['amount']) }}</h3>
+                                <p class="mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
+                            </div>
+                        </div>
+                    </div>
+                @endcan
 
-            @can('weekly-revenue')
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card restaurant-card">
-                        <div class="header-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="card-content">
-                            <h6>Weekly Revenue</h6>
-                             <h3 class=" mb-1">₹{{ number_format($revenue['weekly']['amount']) }}</h3>
-                            <p class=" mb-0">{{ $revenue['weekly']['orders'] }} Orders</p>
+                @can('monthly-revenue')
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="dashboard-card restaurant-card">
+                            <div class="header-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="card-content">
+                                <h6 class="mb-2">Monthly Revenue</h6>
+                                @if (isset($revenue))
+                                    <h3 class="mb-1" id="monthlyRevenueDisplay">{{ $currencySymbol ?? '₹' }}{{ number_format($revenue['monthly']['amount']) }}</h3>
+                                    <p class="mb-0">{{ $revenue['monthly']['orders'] }} Orders</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endcan
+                @endcan
 
-            @can('monthly-revenue')
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card restaurant-card">
-                        <div class="header-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="card-content">
-                            <h6 class=" mb-2">Monthly Revenue</h6>
-                            @if (isset($revenue))
-                                <h3 class=" mb-1">₹{{ number_format($revenue['monthly']['amount']) }}</h3>
-                                <p class=" mb-0">{{ $revenue['monthly']['orders'] }} Orders</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endcan
-
-            @can('yearly-revenue')
-            <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card restaurant-card">
-                        <div class="header-icon">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <div class="card-content">
-                            <h6 class=" mb-2">Yearly Revenue</h6>
-                            @if (isset($revenue))
-                                <h3 class="mb-1">₹{{ number_format($revenue['yearly']['amount']) }}</h3>
-                                <p class="mb-0">{{ $revenue['yearly']['orders'] }} Orders</p>
-                            @endif
+                @can('yearly-revenue')
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="dashboard-card restaurant-card">
+                            <div class="header-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="card-content">
+                                <h6 class="mb-2">Yearly Revenue</h6>
+                                @if (isset($revenue))
+                                    <h3 class="mb-1" id="yearlyRevenueDisplay">{{ $currencySymbol ?? '₹' }}{{ number_format($revenue['yearly']['amount']) }}</h3>
+                                    <p class="mb-0">{{ $revenue['yearly']['orders'] }} Orders</p>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endcan
+                @endcan
         </div>
 
         @can('superadmin-view')
@@ -553,9 +618,15 @@
                                         <td>
                                             <span class="plan-pill"> <i class="fas fa-shopping-cart"></i> {{ number_format($restaurant->total_orders) }}</span>
                                         </td>
-                                        <td class="text-end fw-bold">
-                                            <span class="rms-badge rms-badge--sucess" >
-                                            <i class="fas fa-rupee-sign"></i> {{ number_format($restaurant->total_revenue, 2) }} </span>
+                                        <td class="text-end">
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-warning rounded-circle viewRevenue"
+                                                data-slug="{{ $restaurant->slug }}"
+                                                title="View Revenue Details"
+                                                style="width:32px; height:32px; padding:0;">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
@@ -572,6 +643,7 @@
                 </div>
             </div>
         </div>
+
 
         {{-- ===== REVENUE CHART ===== --}}
         <div class="row mb-4">
@@ -634,7 +706,7 @@
                                     <div class="rms-stat-row">
                                         <span class="rms-stat-label"><i class="fas fa-money-bill"></i> Total Revenue</span>
                                         <span class="rms-stat-value text-success" id="totalRevenue">
-                                            ₹{{ number_format($revenue['total']['amount']) }}
+                                            {{ number_format($revenue['total']['amount']) }}
                                         </span>
                                     </div>
                                     <div class="rms-stat-row">
@@ -931,34 +1003,34 @@
             $branchSlug = request()->route('branch');
         @endphp
             @can('prepared-index-dashboard')
-                <div class="card shadow mt-4">
+                <div class="card shadow mt-4" id="preparedOrdersSection">
                     <div class="subscription-header">
                         <div class="subscription-title">
                             <div class="header-icon">
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div>
-                                <h3>Prepared and Pendings Orders</h3>
-                                <p>
-                                    Monitor all restaurant subscriptions and renewal status.
-                                </p>
+                                <h3>Prepared and Pending Orders</h3>
+                                <p>Monitor recent prepared and pending orders.</p>
                             </div>
                         </div>
-                        <div class="subscription-summary">
+                        <div class="subscription-summary" id="preparedOrdersSummary">
+                            @php
+                                $restaurantSlug = request()->route('restaurant');
+                                $branchSlug = request()->route('branch');
+                            @endphp
+
                             @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                            <a href="{{ route('branch.orders.index', [
-                                        'restaurant' => $restaurantSlug,
-                                        'branch' => $branchSlug,
-                                    ]) }}" class="btn btn-primary">
-                                                View All
-                                            </a>
-                                @elseif (!empty($restaurantSlug))
-                                            <a href="{{ route('restaurant.orders.index', [
-                                        'restaurant' => $restaurantSlug,
-                                    ]) }}" class="btn btn-primary">
-                                                View All
-                                            </a>
-                                @endif
+                                <a href="{{ route('branch.orders.index', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug]) }}"
+                                class="btn btn-primary" id="viewAllBtn">
+                                    View All
+                                </a>
+                            @elseif (!empty($restaurantSlug))
+                                <a href="{{ route('restaurant.orders.index', ['restaurant' => $restaurantSlug]) }}"
+                                class="btn btn-primary" id="viewAllBtn">
+                                    View All
+                                </a>
+                            @endif
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -974,40 +1046,33 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-
-                                <tbody>
+                                <tbody id="preparedOrdersTableBody">
                                     @forelse($preparedOrders as $order)
                                         <tr>
                                             <td>{{ $order->token_no }}</td>
                                             <td>{{ $order->customer_name }}</td>
                                             <td>{{ $order->table_no ?? '-' }}</td>
-                                            <td>₹{{ number_format($order->total, 2) }}</td>
-                                            <td>
-                                                {{ $order->status }}
-                                            </td>
+                                            <td>{{ $currencySymbol ?? '₹' }}{{ number_format($order->total, 2) }}</td>
+                                            <td>{{ $order->status }}</td>
                                             <td>
                                                 <div class="d-flex gap-2">
-
                                                     @if (!empty($restaurantSlug) && !empty($branchSlug))
                                                         <a href="{{ route('branch.orders.show', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'order' => $order->id]) }}"
-                                                            class="btn btn-md btn-info">
+                                                        class="btn btn-md btn-info">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                     @elseif(!empty($restaurantSlug))
                                                         <a href="{{ route('restaurant.orders.show', ['restaurant' => $restaurantSlug, 'order' => $order->id]) }}"
-                                                            class="btn btn-md btn-info">
+                                                        class="btn btn-md btn-info">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                    @else
-
                                                     @endif
-
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center">No prepared orders found.</td>
+                                            <td colspan="6" class="text-center">Choose a restaurant and branch-let the numbers do the talking.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -1015,7 +1080,7 @@
                         </div>
                     </div>
                 </div>
-            @endcan
+                @endcan
 
         @can('inventory-dashboard')
             <div class="row mt-4">
@@ -1103,6 +1168,46 @@
 
 
     </section>
+    <div class="modal fade" id="revenueModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Restaurant Revenue Details
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <table class="table table-bordered">
+
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Branch</th>
+                            <th>Orders</th>
+                            <th class="text-end">
+                                Revenue
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="revenueBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
 
     {{-- Your dashboard script --}}
@@ -1290,61 +1395,138 @@
     </script>
 
     <script>
+    let currentRestaurant = document.getElementById('restaurantFilter')?.value || '';
+    let currentBranch = '';
+    let currencySymbol = '{{ $currencySymbol ?? "₹" }}';
 
-        let currentRestaurant = '';
-        let currentBranch = '';
+    document.addEventListener('DOMContentLoaded', function () {
 
-        document.getElementById('restaurantFilter').addEventListener('change', function () {
+        // if (currentRestaurant) {
+        //     loadBranches();
+        //     refreshAllData();
+        // }
 
+        // Restaurant Filter
+        const restaurantFilter = document.getElementById('restaurantFilter');
+        if (restaurantFilter) {
+            restaurantFilter.addEventListener('change', function () {
                 currentRestaurant = this.value;
-            currentBranch = '';
+                currentBranch = '';
+                loadBranches();
+                refreshAllData();
+            });
+        }
 
-                    loadBranches();
-            refreshAllData();
-
-        });
-
-        document.getElementById('branchFilter').addEventListener('change', function () {
-
+        // Branch Filter
+        const branchFilter = document.getElementById('branchFilter');
+        if (branchFilter) {
+            branchFilter.addEventListener('change', function () {
                 currentBranch = this.value;
-            refreshAllData();
+                refreshAllData();
+            });
+        }
+    });
 
-        });
+    function loadBranches() {
+        const branchSelect = document.getElementById('branchFilter');
+        if (!branchSelect || !currentRestaurant) return;
 
-        function loadBranches() {
+        branchSelect.innerHTML = '<option value="">All Branches</option>';
 
-          const branchSelect = document.getElementById('branchFilter');
-
-             branchSelect.innerHTML = '<option value="">All Branches</option>';
-
-            if ( !currentRestaurant) {
-                return;
-             }
-
-            fetch('/dashboard/branches/' + currentRestaurant)
-                .then(response => response.json())
+        fetch('/dashboard/branches/' + currentRestaurant)
+            .then(r => r.json())
             .then(data => {
-
-                 data.forEach(function (branch) {
-
-                        branchSelect.innerHTML +=
-                        `<option value="${branch.id}">${branch.name}</option>`;
-
-                    });
-
+                data.forEach(branch => {
+                    branchSelect.innerHTML += `<option value="${branch.id}">${branch.name}</option>`;
                 });
-
+            });
     }
 
     function refreshAllData() {
+
+    // For Super Admin: nothing selected
+    if (!currentRestaurant && !currentBranch) {
+
+        // Revenue Cards
+        [
+            'todayRevenue',
+            'yesterdayRevenue',
+            'weeklyRevenueDisplay',
+            'monthlyRevenueDisplay',
+            'yearlyRevenueDisplay',
+            'totalRevenue'
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = currencySymbol + '0';
+            }
+        });
+
+        // Orders Count
+        const totalOrders = document.getElementById('totalOrders');
+        if (totalOrders) {
+            totalOrders.innerHTML = '0';
+        }
+
+        // Revenue Chart
+        if (typeof revenueChart !== 'undefined') {
+            revenueChart.updateSeries([{
+                data: [0, 0, 0, 0, 0]
+            }]);
+        }
+
+        // Donut Chart
+        if (typeof donutChart !== 'undefined') {
+            donutChart.updateSeries([0, 0, 0, 0]);
+        }
+
+        // Prepared Orders Table
+        updatePreparedOrdersTable([]);
+
+        return;
+    }
 
     fetch(`/dashboard/data?restaurant_id=${currentRestaurant}&branch_id=${currentBranch}`)
         .then(response => response.json())
         .then(data => {
 
-            console.log("Dashboard Data:", data);
+            currencySymbol = data.currencySymbol || currencySymbol;
 
-            // Revenue Chart
+            if (data.preparedOrders !== undefined) {
+                updatePreparedOrdersTable(data.preparedOrders);
+            }
+
+            const todayAmount = Number(data.revenue.today.amount);
+
+            document.getElementById('todayRevenue').innerHTML =
+                todayAmount > 0
+                    ? currencySymbol + todayAmount.toLocaleString()
+                    : '0';
+
+                        const yesterdayAmount = Number(data.revenue.yesterday.amount);
+            document.getElementById('yesterdayRevenue').innerHTML =
+                yesterdayAmount > 0 ? currencySymbol + yesterdayAmount.toLocaleString() : '0';
+
+                        const weeklyAmount = Number(data.revenue.weekly.amount);
+            document.getElementById('weeklyRevenueDisplay').innerHTML =
+                weeklyAmount > 0 ? currencySymbol + weeklyAmount.toLocaleString() : '0';
+
+                        const monthlyAmount = Number(data.revenue.monthly.amount);
+            document.getElementById('monthlyRevenueDisplay').innerHTML =
+                monthlyAmount > 0 ? currencySymbol + monthlyAmount.toLocaleString() : '0';
+
+                        const yearlyAmount = Number(data.revenue.yearly.amount);
+            document.getElementById('yearlyRevenueDisplay').innerHTML =
+                yearlyAmount > 0 ? currencySymbol + yearlyAmount.toLocaleString() : '0';
+
+
+                        const totalAmount = Number(data.revenue.total.amount);
+            document.getElementById('totalRevenue').innerHTML =
+                totalAmount > 0 ? currencySymbol + totalAmount.toLocaleString() : '0';
+
+            document.getElementById('totalOrders').innerHTML =
+                Number(data.revenue.total.orders).toLocaleString();
+
             revenueChart.updateSeries([{
                 data: [
                     Number(data.revenue.today.amount),
@@ -1355,35 +1537,99 @@
                 ]
             }]);
 
-            // Donut Chart
             donutChart.updateSeries([
-                data.orderStatus.pending,
-                data.orderStatus.preparing,
-                data.orderStatus.completed,
+                data.orderStatus.pending ?? 0,
+                data.orderStatus.preparing ?? 0,
+                data.orderStatus.completed ?? 0,
                 data.orderStatus.delivered ?? 0
             ]);
-
-            // Revenue Cards
-            document.getElementById('totalOrders').innerHTML =
-                data.revenue.total.orders;
-
-            document.getElementById('totalRevenue').innerHTML =
-                '₹' + Number(data.revenue.total.amount).toLocaleString();
-
-            document.getElementById('weeklyRevenue').innerHTML =
-                '₹' + Number(data.revenue.weekly.amount).toLocaleString();
-
-            document.getElementById('monthlyRevenue').innerHTML =
-                '₹' + Number(data.revenue.monthly.amount).toLocaleString();
-
-            document.getElementById('yearlyRevenue').innerHTML =
-                '₹' + Number(data.revenue.yearly.amount).toLocaleString();
-
         })
-        .catch(function(error) {
-            console.error(error);
-        });
+        .catch(console.error);
 }
+    function updatePreparedOrdersTable(orders) {
+    const tbody = document.getElementById('preparedOrdersTableBody');
+    if (!tbody) return;
 
-    </script>
+    let html = '';
+
+    if (!orders || orders.length === 0) {
+        html = `<tr><td colspan="6" class="text-center">Choose a restaurant and branch-let the numbers do the talking.</td></tr>`;
+    } else {
+        const restaurantSlug = '{{ $restaurantSlug ?? "" }}';
+        const branchSlug = '{{ $branchSlug ?? "" }}';
+
+        orders.forEach(order => {
+            let actionHtml = '';
+
+            if (restaurantSlug && branchSlug) {
+                actionHtml = `
+                    <a href="/${restaurantSlug}/${branchSlug}/orders/${order.id}"
+                       class="btn btn-md btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>`;
+            } else if (restaurantSlug) {
+                actionHtml = `
+                    <a href="/${restaurantSlug}/orders/${order.id}"
+                       class="btn btn-md btn-info">
+                        <i class="fas fa-eye"></i>
+                    </a>`;
+            }
+
+            html += `
+                <tr>
+                    <td>${order.token_no || ''}</td>
+                    <td>${order.customer_name || ''}</td>
+                    <td>${order.table_no ?? '-'}</td>
+                    <td>${currencySymbol}${Number(order.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                    <td>${order.status || ''}</td>
+                    <td>
+                        <div class="d-flex gap-2">${actionHtml}</div>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    tbody.innerHTML = html;
+}
+</script>
+<script>
+document.querySelectorAll('.viewRevenue').forEach(button => {
+
+    button.addEventListener('click', function () {
+
+        const slug = this.dataset.slug;
+
+        console.log(slug); // Should print: spice-kitchen
+
+        fetch(`/restaurants/${slug}/revenue-details`)
+            .then(response => response.json())
+            .then(res => {
+
+                let html = '';
+
+                res.forEach(item => {
+
+                    html += `
+                        <tr>
+                            <td>${item.country ?? '-'}</td>
+                            <td>${item.branch}</td>
+                            <td>${item.orders}</td>
+                            <td class="text-end">
+                                ${item.currency} ${Number(item.revenue).toLocaleString()}
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('revenueBody').innerHTML = html;
+
+                new bootstrap.Modal(document.getElementById('revenueModal')).show();
+
+            })
+            .catch(err => console.error(err));
+
+    });
+
+});
+</script>
 @endsection

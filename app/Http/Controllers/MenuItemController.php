@@ -52,38 +52,39 @@ class MenuItemController extends Controller
      */
     public function create()
     {
-        $restaurant = Restaurant::query()->where(
+        $restaurant = Restaurant::where(
             'slug',
             request()->route('restaurant')
         )->firstOrFail();
 
-        if (Auth::user()->hasRole('owner')) {
+        $user = Auth::user();
 
-            $branches = Branch::query()->where(
-                'restaurant_id',
-                $restaurant->id
-            )->get();
+        if ($user->role === 'owner') {
 
-            $categories = Category::query()->where(
-                'restaurant_id',
-                $restaurant->id
-            )->where('is_active', 1)->get();
-        } else {
+            $branches = Branch::where('restaurant_id', $restaurant->id)
+                ->where('is_active', 1)
+                ->get();
 
-            $branch = Branch::query()->where(
-                'branch_manager_id',
-                Auth::id()
-            )->firstOrFail();
+            $categories = Category::where('restaurant_id', $restaurant->id)
+                ->where('is_active', 1)
+                ->get();
+
+        } elseif ($user->role === 'branch_manager') {
+
+            $branch = Branch::findOrFail($user->branch_id);
 
             $branches = collect([$branch]);
 
-            $categories = Category::query()->where(
-                'restaurant_id',
-                $restaurant->id
-            )
+            $categories = Category::where('restaurant_id', $restaurant->id)
                 ->where('branch_id', $branch->id)
                 ->where('is_active', 1)
                 ->get();
+
+        } else {
+
+            $branches = collect();
+
+            $categories = collect();
         }
 
         return view(
@@ -132,23 +133,29 @@ class MenuItemController extends Controller
             request()->route('restaurant')
         )->firstOrFail();
 
-        if (Auth::user()->hasRole('owner')) {
+        $user = Auth::user();
+
+        if ($user->role === 'owner') {
+
+            $request->validate([
+                'branch_id' => 'required|exists:branches,id',
+            ]);
 
             $branchId = $request->branch_id;
-        } else {
 
-            $branch = Branch::query()->where(
-                'branch_manager_id',
-                Auth::id()
-            )->first();
+        } elseif ($user->role === 'branch_manager') {
 
-            if (! $branch) {
+            if (! $user->branch_id) {
                 return back()->withErrors([
                     'branch' => 'Branch not assigned.',
                 ]);
             }
 
-            $branchId = $branch->id;
+            $branchId = $user->branch_id;
+
+        } else {
+
+            $branchId = null;
         }
 
         $image = null;
@@ -232,47 +239,55 @@ class MenuItemController extends Controller
             $branch = null;
         }
 
+        $user = Auth::user();
+
         $menuItem = MenuItem::findOrFail($menu_item);
 
-        $restaurantModel = Restaurant::query()->where(
+        $restaurantModel = Restaurant::where(
             'slug',
             $restaurant
         )->firstOrFail();
 
-        if (Auth::user()->hasRole('owner')) {
+        if ($user->role === 'owner') {
 
-            $branches = Branch::query()->where(
+            $branches = Branch::where(
                 'restaurant_id',
                 $restaurantModel->id
             )->get();
 
-            $categories = Category::query()->where(
+            $categories = Category::where(
                 'restaurant_id',
                 $restaurantModel->id
             )
                 ->where('is_active', 1)
                 ->get();
-        } elseif (Auth::user()->hasRole('branch_manager')) {
 
-            $branchModel = Branch::query()->where(
-                'branch_manager_id',
-                Auth::id()
-            )
-                ->firstOrFail();
+        } elseif ($user->role === 'branch_manager') {
 
+            if (! $user->branch_id) {
+                abort(403, 'No branch assigned.');
+            }
+
+            $branchModel = Branch::findOrFail($user->branch_id);
+
+            // Prevent editing another branch's menu item
             if ($menuItem->branch_id != $branchModel->id) {
                 abort(403);
             }
 
             $branches = collect([$branchModel]);
 
-            $categories = Category::query()->where(
+            $categories = Category::where(
                 'restaurant_id',
                 $restaurantModel->id
             )
                 ->where('branch_id', $branchModel->id)
                 ->where('is_active', 1)
                 ->get();
+
+        } else {
+
+            abort(403);
         }
 
         return view(
@@ -304,10 +319,7 @@ class MenuItemController extends Controller
             $branchId = $request->branch_id;
         } else {
 
-            $branch = Branch::query()->where(
-                'branch_manager_id',
-                Auth::id()
-            )->firstOrFail();
+            $branch = Branch::findOrFail(Auth::user()->branch_id);
 
             if ($menuItem->branch_id != $branch->id) {
                 abort(403);
@@ -368,7 +380,7 @@ class MenuItemController extends Controller
 
             return redirect()
                 ->route('branch.menu-items.index', [
-                    'restaurant' => $restaurant,
+                    'restaurant' => Auth::user()->restaurant->slug,
                     'branch' => Auth::user()->branch->slug,
                 ])
                 ->with(

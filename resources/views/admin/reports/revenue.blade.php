@@ -34,7 +34,7 @@
                                 <form method="GET"
                                     action="{{ route('restaurant.reports.revenue', ['restaurant' => request()->route('restaurant')]) }}">
                                     <label class="form-label text-muted small font-weight-bold mb-1">Filter By Branch</label>
-                                    <select name="branch_id" id="branchFilter" {{-- ← Add this --}} class="form-control shadow-sm"
+                                    <select name="branch_id" id="branchFilter" class="form-control shadow-sm"
                                         onchange="this.form.submit()" style="border-radius: 8px;">
                                         <option value="">All Branches</option>
                                         @foreach($branches as $branch)
@@ -58,91 +58,91 @@
         <section class="section premium-dashboard pt-0">
             <div class="section-body">
                 <div class="row g-4 mb-4">
-                <!-- Today -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-icon bg-primary">
-                                <i class="fas fa-calendar-day"></i>
+                    <!-- Today -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-icon bg-primary">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <span>Today</span>
                             </div>
-                            <span>Today</span>
+                            <h3>{{ $cardToday > 0 ? $currencySymbol . number_format($cardToday) : '0' }}</h3>
+                            <div class="report-line bg-primary"></div>
                         </div>
-                        <h3>{{ $currencySymbol }}{{ number_format($cardToday) }}</h3>
-                        <div class="report-line bg-primary"></div>
                     </div>
-                </div>
-                <!-- Yesterday -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-icon bg-secondary">
-                                <i class="fas fa-clock"></i>
+                    <!-- Yesterday -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-icon bg-secondary">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <span>Yesterday</span>
                             </div>
-                            <span>Yesterday</span>
+                            <h3>{{ $cardYesterday > 0 ? $currencySymbol . number_format($cardYesterday) : '0' }}</h3>
+                            <div class="report-line bg-secondary"></div>
                         </div>
-                        <h3>{{ $currencySymbol }}{{ number_format($cardYesterday) }}</h3>
-                        <div class="report-line bg-secondary"></div>
                     </div>
-                </div>
-                <!-- Weekly -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-icon bg-info">
-                                <i class="fas fa-chart-bar"></i>
+                    <!-- Weekly -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-icon bg-info">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span>Weekly</span>
                             </div>
-                            <span>Weekly</span>
+                            <h3>{{ $cardWeekly > 0 ? $currencySymbol . number_format($cardWeekly) : '0' }}</h3>
+                            <div class="report-line bg-info"></div>
                         </div>
-                        <h3>{{ $currencySymbol }}{{ number_format($cardWeekly) }}</h3>
-                        <div class="report-line bg-info"></div>
                     </div>
-                </div>
-                <!-- Monthly -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-icon bg-warning">
-                                <i class="fas fa-calendar-alt"></i>
+                    <!-- Monthly -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-icon bg-warning">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <span>Monthly</span>
                             </div>
-                            <span>Monthly</span>
+                            <h3>{{ $cardMonthly > 0 ? $currencySymbol . number_format($cardMonthly) : '0' }}</h3>
+                            <div class="report-line bg-warning"></div>
                         </div>
-                        <h3>{{ $currencySymbol }}{{ number_format($cardMonthly) }}</h3>
-                        <div class="report-line bg-warning"></div>
                     </div>
-                </div>
-                <!-- Yearly -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card">
-                        <div class="report-card-header">
-                            <div class="report-icon bg-success">
-                                <i class="fas fa-trophy"></i>
+                    <!-- Yearly -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card">
+                            <div class="report-card-header">
+                                <div class="report-icon bg-success">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <span>Yearly</span>
                             </div>
-                            <span>Yearly</span>
+
+                            <h3>{{ $cardYearly > 0 ? $currencySymbol . number_format($cardYearly) : '0' }}</h3>
+
+                            <div class="report-line bg-success"></div>
                         </div>
-
-                        <h3>{{ $currencySymbol }}{{ number_format($cardYearly) }}</h3>
-
-                        <div class="report-line bg-success"></div>
                     </div>
-                </div>
 
-                <!-- Total -->
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
-                    <div class="report-card total-card">
-                        <div class="report-card-header">
-                            <div class="report-icon total-icon">
-                                <i class="fas fa-wallet"></i>
+                    <!-- Total -->
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                        <div class="report-card total-card">
+                            <div class="report-card-header">
+                                <div class="report-icon total-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <span>Total Revenue</span>
                             </div>
-                            <span>Total Revenue</span>
+
+                            <h3>{{ $cardTotal > 0 ? $currencySymbol . number_format($cardTotal) : '0' }}</h3>
+
+                            <div class="report-line bg-white"></div>
                         </div>
-
-                        <h3>{{ $currencySymbol }}{{ number_format($cardTotal) }}</h3>
-
-                        <div class="report-line bg-white"></div>
                     </div>
-                </div>
 
-            </div>
+                </div>
 
                 <div class="row">
                     <div class="col-12">
@@ -190,7 +190,8 @@
                                                     <td>{{ $currencySymbol }}{{ number_format($report['monthly']) }}</td>
                                                     <td>{{ $currencySymbol }}{{ number_format($report['yearly']) }}</td>
                                                     <td>
-                                                        <strong class="qty-badge  text-success">{{ $currencySymbol }}{{ number_format($report['total']) }}</strong>
+                                                        <strong
+                                                            class="qty-badge  text-success">{{ $currencySymbol }}{{ number_format($report['total']) }}</strong>
                                                     </td>
                                                 </tr>
                                             @empty

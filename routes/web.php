@@ -40,6 +40,15 @@ Route::get('/dashboard/branches/{restaurantId}', function ($restaurantId) {
 
     return response()->json($branches);
 })->name('dashboard.branches');
+Route::get('/dashboard/branches/{restaurant}', function ($restaurant) {
+    return App\Models\Branch::query()->where('restaurant_id', $restaurant)
+        ->select('id', 'name')
+        ->get();
+});
+Route::get(
+    '/restaurants/{restaurant}/revenue-details',
+    [DashboardController::class,'restaurantRevenueDetails']
+)->name('restaurants.revenue.details');
 
 Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
     ->name('dashboard.data');
