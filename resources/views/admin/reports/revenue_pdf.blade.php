@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
+           font-family: DejaVu Sans, sans-serif;
             background-color: #0f1115;
             min-height: 100vh;
             display: flex;
@@ -171,10 +171,10 @@
                     @foreach($reports as $report)
                         <tr>
                             <td>{{ $report['branch_name'] }}</td>
-                            <td>INR {{ number_format($report['today'], 2) }}</td>
-                            <td>INR {{ number_format($report['monthly'], 2) }}</td>
-                            <td>INR {{ number_format($report['yearly'], 2) }}</td>
-                            <td>INR {{ number_format($report['total'], 2) }}</td>
+                            <td>{{ $currencySymbol ?? '₹' }}{{ number_format($report['today'], 2) }}</td>
+                            <td>{{ $currencySymbol ?? '₹' }}{{ number_format($report['monthly'], 2) }}</td>
+                            <td>{{ $currencySymbol ?? '₹' }}{{ number_format($report['yearly'], 2) }}</td>
+                            <td>{{ $currencySymbol ?? '₹' }}{{ number_format($report['total'], 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

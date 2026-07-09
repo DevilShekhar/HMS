@@ -24,21 +24,21 @@ class DashboardController extends Controller
         $restaurant = app()->bound('restaurant')
             ? app('restaurant')
             : null;
-            $currentBranch = null;
+        $currentBranch = null;
 
-            if ($restaurant) {
-                if ($user->role === 'branch_manager' && $user->branch_id) {
-                    $currentBranch = Branch::with('country')
-                        ->find($user->branch_id);
-                } else {
-                    $currentBranch = Branch::with('country')
-                        ->where('restaurant_id', $restaurant->id)
-                        ->when($selectedBranch, fn($q) => $q->where('id', $selectedBranch))
-                        ->first();
-                }
-            } elseif ($selectedBranch) {
-                $currentBranch = Branch::with('country')->find($selectedBranch);
+        if ($restaurant) {
+            if ($user->role === 'branch_manager' && $user->branch_id) {
+                $currentBranch = Branch::with('country')
+                    ->find($user->branch_id);
+            } else {
+                $currentBranch = Branch::with('country')
+                    ->where('restaurant_id', $restaurant->id)
+                    ->when($selectedBranch, fn ($q) => $q->where('id', $selectedBranch))
+                    ->first();
             }
+        } elseif ($selectedBranch) {
+            $currentBranch = Branch::with('country')->find($selectedBranch);
+        }
         // Restaurant wise branch filtering
         if ($restaurant) {
             if ($user->role === 'branch_manager') {
@@ -71,7 +71,20 @@ class DashboardController extends Controller
         }
         // Super Admin Cards
         $totalRestaurants = Restaurant::count();
-        $totalBranches = Branch::count();
+        $user = Auth::user();
+
+        if ($user->role === 'owner') {
+
+            $totalBranches = Branch::query()->where('restaurant_id', app('restaurant')->id)->count();
+        } elseif ($user->role === 'branch_manager') {
+
+            $totalBranches = 1;
+
+        } else {
+
+            // Super Admin
+            $totalBranches = Branch::count();
+        }
         // If subscription relation exists
         $nearExpirySubscriptions = BranchSubscription::whereBetween('end_date', [
             now(),
@@ -212,6 +225,7 @@ class DashboardController extends Controller
             ->orderByDesc('id')
             ->take(10)
             ->get();
+
         $pendingVerification = Order::query()->where('branch_id', $user->branch_id)
             ->where('status', 'delivered')
             ->where('payment_status', 'pending')
@@ -233,6 +247,7 @@ class DashboardController extends Controller
         $topRestaurants = Restaurant::query()
             ->select(
                 'restaurants.id',
+                'restaurants.slug',   
                 'restaurants.name',
                 DB::raw('COUNT(DISTINCT branches.id) as total_branches'),
                 DB::raw('COUNT(orders.id) as total_orders'),
@@ -240,10 +255,15 @@ class DashboardController extends Controller
             )
             ->leftJoin('branches', 'branches.restaurant_id', '=', 'restaurants.id')
             ->leftJoin('orders', 'orders.branch_id', '=', 'branches.id')
-            ->groupBy('restaurants.id', 'restaurants.name')
+            ->groupBy(
+                'restaurants.id',
+                'restaurants.slug',
+                'restaurants.name'
+            )
             ->orderByDesc('total_revenue')
             ->take(10)
             ->get();
+
         $subscriptions = BranchSubscription::with([
             'branch.restaurant',
             'plan',
@@ -328,25 +348,53 @@ class DashboardController extends Controller
             'totalRestaurants',
             'nearExpirySubscriptions',
             'expiredSubscriptionCount', 'expiredSubscriptions', 'totalBranches', 'inventoryStocks', 'orderStatus', 'preparedOrders', 'pendingVerification', 'verifiedToday', 'todayCollection', 'topRestaurants', 'subscriptions', 'inventoryAlerts',
-            'revenue', 'revenueData', 'orderStatusData', 'restaurants','currentBranch'
+            'revenue', 'revenueData', 'orderStatusData', 'restaurants', 'currentBranch'
         ));
     }
-
     public function dashboardData(Request $request)
     {
+        $user = Auth::user();
 
         $restaurantId = $request->restaurant_id;
         $branchId = $request->branch_id;
 
-        if ($branchId) {
-            $branchIds = [$branchId];
-        } elseif ($restaurantId) {
-            $branchIds = Branch::where('restaurant_id', $restaurantId)
-                ->pluck('id')
-                ->toArray();
+        // Branch Selection Logic
+        if ($user->role === 'branch_manager') {
 
-            // dd($branchIds);
+            // Always use logged-in branch
+            $branchId = $user->branch_id;
+            $branchIds = [$branchId];
+
+        } elseif ($branchId) {
+
+            // Owner/Super Admin selected a branch
+            $branchIds = [$branchId];
+
+        } elseif ($restaurantId) {
+
+            // Owner selected restaurant but not branch
+            return response()->json([
+                'revenue' => [
+                    'today' => ['orders' => 0, 'amount' => 0],
+                    'yesterday' => ['orders' => 0, 'amount' => 0],
+                    'weekly' => ['orders' => 0, 'amount' => 0],
+                    'monthly' => ['orders' => 0, 'amount' => 0],
+                    'yearly' => ['orders' => 0, 'amount' => 0],
+                    'total' => ['orders' => 0, 'amount' => 0],
+                ],
+                'orderStatus' => [
+                    'pending' => 0,
+                    'preparing' => 0,
+                    'completed' => 0,
+                    'delivered' => 0,
+                ],
+                'currencySymbol' => '',
+                'preparedOrders' => [],
+            ]);
+
         } else {
+
+            // Super Admin
             $branchIds = Branch::pluck('id')->toArray();
         }
 
@@ -357,32 +405,22 @@ class DashboardController extends Controller
                 'orders' => (clone $orders)->whereDate('created_at', today())->count(),
                 'amount' => (clone $orders)->whereDate('created_at', today())->sum('total'),
             ],
-
             'yesterday' => [
                 'orders' => (clone $orders)->whereDate('created_at', today()->subDay())->count(),
                 'amount' => (clone $orders)->whereDate('created_at', today()->subDay())->sum('total'),
             ],
-
             'weekly' => [
-                'orders' => (clone $orders)
-                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-                    ->count(),
-
-                'amount' => (clone $orders)
-                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
-                    ->sum('total'),
+                'orders' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+                'amount' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total'),
             ],
-
             'monthly' => [
                 'orders' => (clone $orders)->whereMonth('created_at', now()->month)->count(),
                 'amount' => (clone $orders)->whereMonth('created_at', now()->month)->sum('total'),
             ],
-
             'yearly' => [
                 'orders' => (clone $orders)->whereYear('created_at', now()->year)->count(),
                 'amount' => (clone $orders)->whereYear('created_at', now()->year)->sum('total'),
             ],
-
             'total' => [
                 'orders' => (clone $orders)->count(),
                 'amount' => (clone $orders)->sum('total'),
@@ -391,15 +429,42 @@ class DashboardController extends Controller
 
         $orderStatus = [
             'pending' => (clone $orders)->where('status', 'pending')->count(),
-            'preparing' => (clone $orders)
-                ->whereIn('status', ['preparing', 'prepared'])
-                ->count(),
+            'preparing' => (clone $orders)->whereIn('status', ['preparing', 'prepared'])->count(),
             'completed' => (clone $orders)->where('status', 'completed')->count(),
+            'delivered' => (clone $orders)->where('status', 'delivered')->count(),
         ];
+
+        // Currency
+        $currencySymbol = '₹';
+
+        if ($user->role === 'branch_manager') {
+
+            $branch = Branch::with('country')->find($user->branch_id);
+
+        } elseif ($branchId) {
+
+            $branch = Branch::with('country')->find($branchId);
+
+        } else {
+
+            $branch = null;
+        }
+
+        if ($branch && $branch->country) {
+            $currencySymbol = $branch->country->currency_symbol;
+        }
+
+        $preparedOrders = Order::whereIn('branch_id', $branchIds)
+            ->whereIn('status', ['prepared', 'pending'])
+            ->latest()
+            ->take(10)
+            ->get();
 
         return response()->json([
             'revenue' => $revenue,
             'orderStatus' => $orderStatus,
+            'currencySymbol' => $currencySymbol,
+            'preparedOrders' => $preparedOrders,
         ]);
     }
 
@@ -574,49 +639,68 @@ class DashboardController extends Controller
 
         return $pdf->download('Insights_Report_'.now()->format('Y-m-d_His').'.pdf');
     }
-    /**
- * AJAX - Get Revenue Data for Dashboard Chart & Stats
- */
-public function getRevenueData(Request $request)
-{
-    $restaurantId = $request->restaurant_id;
-    $branchId = $request->branch_id;
 
-    if ($branchId) {
-        $branchIds = [$branchId];
-    } elseif ($restaurantId) {
-        $branchIds = Branch::where('restaurant_id', $restaurantId)
-            ->pluck('id')
-            ->toArray();
-    } else {
-        $branchIds = Branch::pluck('id')->toArray();
+    /**
+     * AJAX - Get Revenue Data for Dashboard Chart & Stats
+     */
+    public function getRevenueData(Request $request)
+    {
+        $restaurantId = $request->restaurant_id;
+        $branchId = $request->branch_id;
+
+        if ($branchId) {
+            $branchIds = [$branchId];
+        } elseif ($restaurantId) {
+            $branchIds = Branch::where('restaurant_id', $restaurantId)
+                ->pluck('id')
+                ->toArray();
+        } else {
+            $branchIds = Branch::pluck('id')->toArray();
+        }
+
+        $orders = Order::whereIn('branch_id', $branchIds);
+
+        $revenue = [
+            'today' => [
+                'orders' => (clone $orders)->whereDate('created_at', today())->count(),
+                'amount' => (clone $orders)->whereDate('created_at', today())->sum('total'),
+            ],
+            'weekly' => [
+                'orders' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+                'amount' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total'),
+            ],
+            'monthly' => [
+                'orders' => (clone $orders)->whereMonth('created_at', now()->month)->count(),
+                'amount' => (clone $orders)->whereMonth('created_at', now()->month)->sum('total'),
+            ],
+            'yearly' => [
+                'orders' => (clone $orders)->whereYear('created_at', now()->year)->count(),
+                'amount' => (clone $orders)->whereYear('created_at', now()->year)->sum('total'),
+            ],
+            'total' => [
+                'orders' => (clone $orders)->count(),
+                'amount' => (clone $orders)->sum('total'),
+            ],
+        ];
+
+        return response()->json($revenue);
     }
 
-    $orders = Order::whereIn('branch_id', $branchIds);
-
-    $revenue = [
-        'today' => [
-            'orders' => (clone $orders)->whereDate('created_at', today())->count(),
-            'amount' => (clone $orders)->whereDate('created_at', today())->sum('total'),
-        ],
-        'weekly' => [
-            'orders' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
-            'amount' => (clone $orders)->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total'),
-        ],
-        'monthly' => [
-            'orders' => (clone $orders)->whereMonth('created_at', now()->month)->count(),
-            'amount' => (clone $orders)->whereMonth('created_at', now()->month)->sum('total'),
-        ],
-        'yearly' => [
-            'orders' => (clone $orders)->whereYear('created_at', now()->year)->count(),
-            'amount' => (clone $orders)->whereYear('created_at', now()->year)->sum('total'),
-        ],
-        'total' => [
-            'orders' => (clone $orders)->count(),
-            'amount' => (clone $orders)->sum('total'),
-        ],
-    ];
-
-    return response()->json($revenue);
-}
+    public function restaurantRevenueDetails(Restaurant $restaurant)
+    {
+        $branches = Branch::with('country')
+            ->where('restaurant_id', $restaurant->id)
+            ->get();
+        $data = [];
+        foreach ($branches as $branch) {
+            $data[] = [
+                'country' => $branch->country?->name,
+                'branch' => $branch->name,
+                'orders' => Order::query()->where('branch_id', $branch->id)->count(),
+                'revenue' => Order::query()->where('branch_id', $branch->id)->sum('total'),
+                'currency' => $branch->country?->currency_symbol ?? '₹',
+            ];
+        }
+        return response()->json($data);
+    }
 }

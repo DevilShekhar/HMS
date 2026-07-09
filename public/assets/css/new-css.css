@@ -3919,11 +3919,11 @@ padding:16px;
 
 }
 .subscription-summary {
-    display: block !important; 
+    display: block !important;
 
 }
 .summary-pill {
-   
+
     margin-bottom: 20px;
 }
 .subscription-title .header-icon {
@@ -4151,4 +4151,144 @@ padding:16px;
 }
 .order-status i {
     font-size: 18px;
+}
+
+
+/* dashboard quick btn  */
+.quick-order-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    font-size: 0.87rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;           /* More modern pill shape */
+    background: linear-gradient(135deg, #ff8a00, #ff5f00);
+    box-shadow: 0 6px 20px rgba(255, 138, 0, 0.45);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-height: 42px;
+    letter-spacing: 0.3px;
+}
+
+/* Continuous Pulse + Glow */
+.quick-order-btn {
+    animation: superPulse 1.8s infinite ease-in-out,
+               shine 3s linear infinite;
+}
+
+/* Main Pulse Animation */
+@keyframes superPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 6px 20px rgba(255, 138, 0, 0.45);
+    }
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 10px 30px rgba(255, 138, 0, 0.65);
+    }
+}
+
+/* Shimmer Light Effect */
+@keyframes shine {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+}
+
+/* Background Shimmer Layer */
+.quick-order-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transform: skewX(-25deg);
+    animation: shimmerMove 2.5s linear infinite;
+}
+
+@keyframes shimmerMove {
+    0%   { transform: translateX(-150%) skewX(-25deg); }
+    100% { transform: translateX(400%) skewX(-25deg); }
+}
+
+/* Hover Effects */
+.quick-order-btn:hover {
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 12px 35px rgba(255, 138, 0, 0.7);
+}
+
+/* Icon Animation */
+.quick-order-btn i {
+    transition: all 0.4s ease;
+    font-size: 1.1rem;
+}
+
+.quick-order-btn:hover i {
+    transform: rotate(30deg) scale(1.25);
+}
+
+/* Active Press */
+.quick-order-btn:active {
+    transform: scale(0.94);
+    transition: transform 0.1s;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .quick-order-btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 1rem;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 992px) {
+    .quick-order-btn {
+        min-width: 170px;
+    }
+}
+/* Active Sidebar Item */
+.sidebar-menu li.active > a,
+.sidebar-menu li.active > a:hover {
+    background: linear-gradient(135deg, #6C5CE7, #8E44AD);
+    color: #fff !important;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.25);
+}
+
+/* Active Icon */
+.sidebar-menu li.active > a i,
+.sidebar-menu li.active > a svg {
+    color: #fff !important;
+    stroke: #fff !important;
+}
+
+/* Active Text */
+.sidebar-menu li.active > a span {
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Hover Effect */
+.sidebar-menu li a:hover {
+    background: #f4f1ff;
+    color: #ffffff;
+    border-radius: 12px;
+}
+
+.sidebar-menu li a:hover svg,
+.sidebar-menu li a:hover i {
+    color: #ffffff;
+    stroke: #ffffff;
 }

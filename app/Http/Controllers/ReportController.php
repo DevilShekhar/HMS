@@ -35,70 +35,103 @@ class ReportController extends Controller
         $user = Auth::user();
         $restaurant = app('restaurant');
 
+        // Get branches based on role
         if ($user->role == 'owner') {
-            $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
+
+            $branches = Branch::where('restaurant_id', $restaurant->id)->get();
+
+            if ($request->filled('branch_id')) {
+                $branchIds = [$request->branch_id];
+            } else {
+                // Owner has not selected a branch
+                $branchIds = [];
+            }
+
+        } elseif ($user->role == 'branch_manager') {
+
+            $branches = Branch::where('id', $user->branch_id)->get();
+            $branchIds = [$user->branch_id];
+
         } else {
-            $branches = Branch::query()->where('id', $user->branch_id)->get();
+
+            // Super Admin
+            $branches = Branch::all();
+
+            if ($request->filled('branch_id')) {
+                $branchIds = [$request->branch_id];
+            } else {
+                $branchIds = $branches->pluck('id')->toArray();
+            }
         }
 
-        if ($request->branch_id) {
-            $branchIds = [$request->branch_id];
-        } else {
-            $branchIds = $branches->pluck('id')->toArray();
+        $reports = collect();
+
+        if (! empty($branchIds)) {
+
+            $reports = $branches
+                ->whereIn('id', $branchIds)
+                ->map(function ($branch) {
+
+                    $orders = Order::where('branch_id', $branch->id);
+
+                    return [
+                        'branch_name' => $branch->name,
+
+                        'today' => (clone $orders)
+                            ->whereDate('created_at', Carbon::today())
+                            ->sum('total'),
+
+                        'yesterday' => (clone $orders)
+                            ->whereDate('created_at', Carbon::yesterday())
+                            ->sum('total'),
+
+                        'weekly' => (clone $orders)
+                            ->whereBetween(
+                                'created_at',
+                                [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]
+                            )
+                            ->sum('total'),
+
+                        'monthly' => (clone $orders)
+                            ->whereMonth('created_at', Carbon::now()->month)
+                            ->whereYear('created_at', Carbon::now()->year)
+                            ->sum('total'),
+
+                        'yearly' => (clone $orders)
+                            ->whereYear('created_at', Carbon::now()->year)
+                            ->sum('total'),
+
+                        'total' => (clone $orders)->sum('total'),
+                    ];
+                })
+                ->values();
         }
 
-        $reports = $branches
-            ->whereIn('id', $branchIds)
-            ->map(function ($branch) {
-                $orders = Order::query()->where('branch_id', $branch->id);
+        // Currency
+        $currencySymbol = '₹';
 
-                return [
-                    'branch_name' => $branch->name,
-
-                    'today' => (clone $orders)
-                        ->whereDate('created_at', Carbon::today())
-                        ->sum('total'),
-
-                    'yesterday' => (clone $orders)
-                        ->whereDate('created_at', Carbon::yesterday())
-                        ->sum('total'),
-
-                    'weekly' => (clone $orders)
-                        ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
-                        ->sum('total'),
-
-                    'monthly' => (clone $orders)
-                        ->whereMonth('created_at', Carbon::now()->month)
-                        ->whereYear('created_at', Carbon::now()->year)
-                        ->sum('total'),
-
-                    'yearly' => (clone $orders)
-                        ->whereYear('created_at', Carbon::now()->year)
-                        ->sum('total'),
-
-                    'total' => (clone $orders)
-                        ->sum('total'),
-                ];
-            })->values();
-
-        $currencySymbol = '₹'; // Default
-
-        $user = Auth::user();
-
-        if ($user->branch_id) {
+        if ($user->role == 'branch_manager') {
 
             $branch = Branch::with('country')->find($user->branch_id);
-
-            $currencySymbol = $branch?->country?->currency_symbol ?? '₹';
 
         } elseif ($request->filled('branch_id')) {
 
             $branch = Branch::with('country')->find($request->branch_id);
 
-            $currencySymbol = $branch?->country?->currency_symbol ?? '₹';
+        } else {
+
+            $branch = null;
         }
 
-        return view('admin.reports.revenue', compact('reports', 'branches', 'currencySymbol'));
+        if ($branch && $branch->country) {
+            $currencySymbol = $branch->country->currency_symbol;
+        }
+
+        return view('admin.reports.revenue', compact(
+            'reports',
+            'branches',
+            'currencySymbol'
+        ));
     }
 
     public function topSelling(Request $request)
@@ -164,38 +197,50 @@ class ReportController extends Controller
         $restaurant = app('restaurant');
         $user = Auth::user();
 
-        $branches = Branch::query()->where('restaurant_id', $restaurant->id);
+        $branchesQuery = Branch::query()->where('restaurant_id', $restaurant->id);
 
         if ($user->role === 'branch_manager') {
-            $branches->where('id', $user->branch_id);
+            $branchesQuery->where('id', $user->branch_id);
         } elseif ($request->filled('branch_id')) {
-            $branches->where('id', $request->branch_id);
+            $branchesQuery->where('id', $request->branch_id);
         }
 
-        $branches = $branches->get();
+        $branches = $branchesQuery->get();
+
+        // Force Currency Symbol
+        $currencySymbol = '₹';
+
+        if ($request->filled('branch_id')) {
+            $branch = Branch::with('country')->find($request->branch_id);
+            if ($branch && $branch->country) {
+                $currencySymbol = $branch->country->currency_symbol ?? '₹';
+            }
+        } elseif ($branches->isNotEmpty()) {
+            $branch = $branches->first()->load('country');
+            if ($branch && $branch->country) {
+                $currencySymbol = $branch->country->currency_symbol ?? '₹';
+            }
+        }
 
         $reports = [];
         foreach ($branches as $branch) {
             $reports[] = [
                 'branch_name' => $branch->name,
-                'today' => Order::query()->where('branch_id', $branch->id)
-                    ->whereDate('created_at', today())
-                    ->sum('total'),
-                'monthly' => Order::query()->where('branch_id', $branch->id)
+                'today' => Order::where('branch_id', $branch->id)->whereDate('created_at', today())->sum('total'),
+                'monthly' => Order::where('branch_id', $branch->id)
                     ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year)
-                    ->sum('total'),
-                'yearly' => Order::query()->where('branch_id', $branch->id)
-                    ->whereYear('created_at', now()->year)
-                    ->sum('total'),
-                'total' => Order::query()->where('branch_id', $branch->id)
-                    ->sum('total'),
+                    ->whereYear('created_at', now()->year)->sum('total'),
+                'yearly' => Order::where('branch_id', $branch->id)->whereYear('created_at', now()->year)->sum('total'),
+                'total' => Order::where('branch_id', $branch->id)->sum('total'),
             ];
         }
 
-        $pdf = Pdf::loadView('admin.reports.revenue_pdf', compact('reports'));
+        $pdf = Pdf::loadView('admin.reports.revenue_pdf', [
+            'reports' => $reports,
+            'currencySymbol' => $currencySymbol,
+        ]);
 
-        return $pdf->download('Revenue_Report.pdf');
+        return $pdf->download('Revenue_Report_'.now()->format('Y-m-d').'.pdf');
     }
 
     public function topSellingPdf(Request $request)

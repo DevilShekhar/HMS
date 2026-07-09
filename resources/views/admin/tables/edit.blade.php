@@ -13,15 +13,39 @@
                             <p>Update restaurant table.</p>
                     </div>
                 </div>
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
                 <div class="header-right">
-                     <a href="{{ route('restaurant.tables.index',['restaurant' => request()->route('restaurant')]) }}" class="premium-back-btn">
-                        <i class="fas fa-arrow-left"></i>
-                        Back To Tables
-                    </a>
+                    {{-- SUPER ADMIN LEVEL --}}
+                    @if (auth()->user()->role === 'super_admin')
+                        <a href="{{ route('tables.index') }}" class="premium-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                            Back To Tables
+                        </a>
+                        {{-- BRANCH LEVEL --}}
+                    @elseif(!empty($restaurantSlug) && !empty($branchSlug))
+                                    <a href="{{ route('branch.tables.index', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back To Tables
+                                    </a>
+                                    {{-- RESTAURANT LEVEL --}}
+                    @elseif(!empty($restaurantSlug))
+                                    <a href="{{ route('restaurant.tables.index', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back To Tables
+                                    </a>
+                    @endif
                 </div>
             </div>
         </div>
-    </section>   
+    </section>
     <section class="section premium-dashboard pt-0">
         <form action="{{ route('restaurant.tables.update',['restaurant' => request()->route('restaurant'),'table' => $table->id]) }}" method="POST">
             @csrf
@@ -76,8 +100,19 @@
                             <label>Capacity</label>
                             <input type="number" name="capacity" class=" premium-input" value="{{ $table->capacity }}">
                         </div>
+                        <div class="col-md-6 mb-4">
+                                    <label class="premium-label">
+                                            Status
+                                         <span>*</span></label>
+                                    <select name="status" class="form-control premium-input">
+                                        <option value="1" {{ $table->status == 1 ? 'selected' : '' }}> Active
+                                        </option>
+                                        <option value="0" {{ $table->status == 0 ? 'selected' : '' }}> Inactive
+                                        </option>
+                                    </select>
+                                </div>
                     </div>
-                    <div class="premium-card-footer">                       
+                    <div class="premium-card-footer">
                         <button type="submit" class="premium-btn btn-primary"> <i class="fas fa-plus-circle"></i>
                             Update Table
                         </button>

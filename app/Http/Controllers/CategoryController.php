@@ -10,39 +10,41 @@ use Illuminate\Support\Facades\Auth;
 class CategoryController extends Controller
 {
     public function index()
-    {
-        // $user = Auth::user();
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        if ($user->role == 'owner') {
+    if ($user->role === 'owner') {
 
-            $categories = Category::with([
+        $categories = Category::with([
                 'branch',
                 'creator',
             ])
-                ->where('restaurant_id', $user->restaurant_id)
-                ->latest()
-                ->paginate(10);
-        } else {
+            ->where('restaurant_id', $user->restaurant_id)
+            ->latest()
+            ->paginate(10);
 
-            $branchId = Branch::query()
-                ->where('branch_manager_id', $user->id)
-                ->value('id');
+    } elseif ($user->role === 'branch_manager') {
 
-            $categories = Category::with([
+        $categories = Category::with([
                 'branch',
                 'creator',
             ])
-                ->where('branch_id', $branchId)
-                ->latest()
-                ->paginate(10);
-        }
+            ->where('branch_id', $user->branch_id)
+            ->latest()
+            ->paginate(10);
 
-        return view(
-            'admin.categories.index',
-            compact('categories')
-        );
+    } else {
+
+        $categories = Category::with([
+                'branch',
+                'creator',
+            ])
+            ->latest()
+            ->paginate(10);
     }
+
+    return view('admin.categories.index', compact('categories'));
+}
 
     public function create()
     {
@@ -85,15 +87,17 @@ class CategoryController extends Controller
 
             $branchId = $request->branch_id;
 
-        } else {
+        } elseif ($user->role === 'branch_manager') {
 
-            $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
-
-            if (! $branch) {
+            if (! $user->branch_id) {
                 return back()->with('error', 'No branch assigned to this branch manager.');
             }
 
-            $branchId = $branch->id;
+            $branchId = $user->branch_id;
+
+        } else {
+
+            $branchId = $request->branch_id;
         }
 
         // Check duplicate category in the same branch
@@ -211,34 +215,33 @@ class CategoryController extends Controller
         }
     }
 
+    public function destroy($restaurant, $branch = null, $category = null)
+    {
+        if ($category === null) {
+            $category = Category::findOrFail($branch);
+            $branch = null;
+        } else {
+            $category = Category::findOrFail($category);
+        }
 
-public function destroy($restaurant, $branch = null, $category = null)
-{
-    if ($category === null) {
-        $category = Category::findOrFail($branch);
-        $branch = null;
-    } else {
-        $category = Category::findOrFail($category);
-    }
+        $category->update([
+            'is_active' => 0,
+        ]);
 
-    $category->update([
-        'is_active' => 0,
-    ]);
+        if (Auth::user()->role === 'super_admin') {
+            return redirect()->route('categories.index')
+                ->with('success', 'Category deactivated successfully.');
+        }
 
-    if (Auth::user()->role === 'super_admin') {
-        return redirect()->route('categories.index')
-            ->with('success', 'Category deactivated successfully.');
-    }
+        if ($branch) {
+            return redirect()->route('branch.categories.index', [
+                'restaurant' => $restaurant,
+                'branch' => $branch,
+            ])->with('success', 'Category deactivated successfully.');
+        }
 
-    if ($branch) {
-        return redirect()->route('branch.categories.index', [
+        return redirect()->route('restaurant.categories.index', [
             'restaurant' => $restaurant,
-            'branch' => $branch,
         ])->with('success', 'Category deactivated successfully.');
     }
-
-    return redirect()->route('restaurant.categories.index', [
-        'restaurant' => $restaurant,
-    ])->with('success', 'Category deactivated successfully.');
-}
 }
