@@ -111,7 +111,6 @@ class MenuItemController extends Controller
      */
     public function store(Request $request)
     {
-
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => [
@@ -128,7 +127,7 @@ class MenuItemController extends Controller
             'name.unique' => 'This menu item already exists in the selected category.',
         ]);
 
-        $restaurant = Restaurant::query()->where(
+        $restaurant = Restaurant::where(
             'slug',
             request()->route('restaurant')
         )->firstOrFail();
@@ -143,9 +142,18 @@ class MenuItemController extends Controller
 
             $branchId = $request->branch_id;
 
+
         } elseif ($user->role === 'branch_manager') {
 
             if (! $user->branch_id) {
+
+
+        } else {
+
+            $branch = Branch::where('branch_manager_id', Auth::id())->first();
+
+            if (!$branch) {
+
                 return back()->withErrors([
                     'branch' => 'Branch not assigned.',
                 ]);
@@ -164,9 +172,9 @@ class MenuItemController extends Controller
 
             $file = $request->file('image');
 
-            $filename = time().'_'.$file->getClientOriginalName();
+            $filename = time() . '_' . $file->getClientOriginalName();
 
-            if (! file_exists(public_path('uploads/menu-items'))) {
+            if (!file_exists(public_path('uploads/menu-items'))) {
                 mkdir(public_path('uploads/menu-items'), 0777, true);
             }
 
@@ -175,10 +183,20 @@ class MenuItemController extends Controller
                 $filename
             );
 
-            $image = 'uploads/menu-items/'.$filename;
+            $image = 'uploads/menu-items/' . $filename;
         }
 
+        // Get Branch Timezone
+        $branch = Branch::with('country')->find($branchId);
+
+        $timezone = $branch?->country?->timezone ?? config('app.timezone');
+
+        $menuItemDateTime = now($timezone);
+
         MenuItem::create([
+            'menu_items_datetime' => $menuItemDateTime,
+            'menu_items_timezone' => $timezone,
+
             'restaurant_id' => $restaurant->id,
             'owner_id' => $restaurant->users()
                 ->where('role', 'owner')
@@ -195,37 +213,28 @@ class MenuItemController extends Controller
             'is_available' => $request->is_available ?? 1,
             'is_active' => 1,
         ]);
-        if (Auth::user()->role === 'super_admin') {
 
+
+        if (Auth::user()->role === 'super_admin') {
             return redirect()
                 ->route('menu-items.index')
-                ->with(
-                    'success',
-                    'Menu Item Added Successfully'
-                );
+                ->with('success', 'Menu Item Added Successfully');
         }
-        if (Auth::user()->branch_id) {
 
+        if (Auth::user()->branch_id) {
             return redirect()
                 ->route('branch.menu-items.index', [
                     'restaurant' => $restaurant->slug,
                     'branch' => Auth::user()->branch->slug,
                 ])
-                ->with(
-                    'success',
-                    'Menu Item Added Successfully'
-                );
+                ->with('success', 'Menu Item Added Successfully');
         }
 
-        // Owner
         return redirect()
             ->route('restaurant.menu-items.index', [
                 'restaurant' => $restaurant->slug,
             ])
-            ->with(
-                'success',
-                'Menu Item Added Successfully'
-            );
+            ->with('success', 'Menu Item Added Successfully');
     }
 
     /**
@@ -303,8 +312,11 @@ class MenuItemController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    
     public function update(Request $request, $restaurant, $menu_item)
     {
+        
+
         $menuItem = MenuItem::findOrFail($menu_item);
 
         $request->validate([
@@ -312,6 +324,7 @@ class MenuItemController extends Controller
             'name' => 'required|max:255',
             'price' => 'required|numeric',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+
         ]);
 
         if (Auth::user()->hasRole('owner')) {
@@ -327,7 +340,11 @@ class MenuItemController extends Controller
 
             $branchId = $branch->id;
         }
+        $branch = Branch::with('country')->find($branchId);
 
+        $timezone = $branch?->country?->timezone ?? config('app.timezone');
+
+        $menuItemDateTime = now($timezone);
         $data = [
             'branch_id' => $branchId,
             'category_id' => $request->category_id,
@@ -337,6 +354,9 @@ class MenuItemController extends Controller
             'food_type' => $request->food_type,
             'is_available' => $request->is_available ?? 1,
             'is_active' => $request->is_active ?? 1,
+            'menu_items_datetime' => now($timezone),
+            'menu_items_timezone' => $timezone,
+            
         ];
 
         if ($request->hasFile('image')) {
@@ -351,9 +371,9 @@ class MenuItemController extends Controller
 
             $file = $request->file('image');
 
-            $filename = time().'_'.$file->getClientOriginalName();
+            $filename = time() . '_' . $file->getClientOriginalName();
 
-            if (! file_exists(public_path('uploads/menu-items'))) {
+            if (!file_exists(public_path('uploads/menu-items'))) {
                 mkdir(public_path('uploads/menu-items'), 0777, true);
             }
 
@@ -362,7 +382,7 @@ class MenuItemController extends Controller
                 $filename
             );
 
-            $data['image'] = 'uploads/menu-items/'.$filename;
+            $data['image'] = 'uploads/menu-items/' . $filename;
         }
 
         $menuItem->update($data);
