@@ -76,11 +76,6 @@ class RestaurantTableController extends Controller
             'table_number' => [
                 'required',
                 'max:50',
-                Rule::unique('restaurant_tables')->where(function ($query) use ($request) {
-                    return $query->where('cat_id', $request->cat_id)
-                        ->where('branch_id', $request->branch_id)
-                        ->where('restaurant_id', app('restaurant')->id);
-                }),
             ],
             'capacity' => 'required|integer|min:1',
         ]);
