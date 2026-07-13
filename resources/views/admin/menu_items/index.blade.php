@@ -107,6 +107,27 @@
                                             @endphp
 
 
+                                            {{-- SHOW --}}
+                                            @if (!empty($restaurantSlug) && !empty($branchSlug))
+                                                <a href="{{ route('branch.menu-items.show', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'branch' => $branchSlug,
+                                                    'menu_item' => $item->id,
+                                                ]) }}" class="btn btn-md btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @elseif(!empty($restaurantSlug))
+                                                <a href="{{ route('restaurant.menu-items.show', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'menu_item' => $item->id,
+                                                ]) }}" class="btn btn-md btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @else
+                                                <a href="{{ route('menu-items.show', $item->id) }}" class="btn btn-md btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endif
                                             {{-- EDIT --}}
                                             @if (!empty($restaurantSlug) && !empty($branchSlug))
                                                                             <a href="{{ route('branch.menu-items.edit', [
