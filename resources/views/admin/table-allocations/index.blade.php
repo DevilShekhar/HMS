@@ -33,15 +33,15 @@
                 <div class="header-right">
                     <a href="{{ route($route, $params) }}" class="premium-back-btn">
                         <i class="fas fa-plus"></i> New Allocation
-                    </a>                                 
+                    </a>
                 </div>
-            </div>    
-        </div>    
-    </section>    
+            </div>
+        </div>
+    </section>
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <div class="card">                    
+                <div class="card">
                     <div class="card-body">
                         <table class="table table-bordered table-hover" id="tableExport">
                             <thead>
@@ -56,7 +56,7 @@
                             <tbody>
                                 @forelse($allocations as $allocation)
                                     <tr>
-                                        <td>{{ $allocation->table->table_number }} ({{ $allocation->table->capacity }} pax)</td>
+                                        <td>{{ $allocation->table->table_number }} ({{ $allocation->table->capacity }} Seater)</td>
                                         <td>{{ $allocation->waiter->name }}</td>
                                         <td>{{ $allocation->branch->name }}</td>
                                         <td>
@@ -96,7 +96,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div>                    
+                    </div>
                 </div>
             </div>
         </div>

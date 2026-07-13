@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Restaurant;
 use App\Models\RestaurantTable;
+use App\Models\TableAllocation;
 use App\Models\TableCategory;
 use App\Models\User;
 use App\Notifications\NewOrderAssignedNotification;
@@ -24,44 +25,41 @@ class OrderController extends Controller
     {
         $restaurant = app('restaurant');
         $user = Auth::user();
+        $baseQuery = Order::query()
+            ->where('restaurant_id', $restaurant->id);
 
-        // Base query according to access
-        $baseQuery = Order::query()->where('restaurant_id', $restaurant->id);
+        switch ($user->role) {
 
-        if ($user->role == 'owner') {
+            case 'owner':
+                // Owner -> All restaurant orders
+                break;
 
-            // all orders
+            case 'branch_manager':
+            case 'waiter_head':
+                $baseQuery->where('branch_id', $user->branch_id);
+                break;
 
-        } elseif ($user->role == 'branch_manager') {
+            case 'chef':
+                $baseQuery->where('branch_id', $user->branch_id);
+                break;
 
-            $baseQuery->where('branch_id', $user->branch_id);
+            case 'cashier':
+                $baseQuery->where('branch_id', $user->branch_id)
+                    ->whereIn('status', [
+                        'delivered',
+                        'completed_waiting_cashier',
+                    ]);
+                break;
 
-        } elseif ($user->role == 'waiter_head') {
+            case 'customer':
+                $baseQuery->where('customer_id', $user->id);
+                break;
 
-            $baseQuery->where('branch_id', $user->branch_id);
-
-        } elseif ($user->role == 'chef') {
-
-            $baseQuery->where('chef_id', $user->id);
-
-        } elseif ($user->role == 'cashier') {
-
-            $baseQuery->where('branch_id', $user->branch_id)
-                ->whereIn('status', [
-                    'delivered',
-                    'completed_waiting_cashier',
-                ]);
-
-        } elseif ($user->role == 'customer') {
-
-            $baseQuery->where('customer_id', $user->id);
-
-        } else {
-
-            $baseQuery->where('branch_id', $user->branch_id);
+            default:
+                $baseQuery->where('branch_id', $user->branch_id);
+                break;
         }
 
-        // Counts
         $counts = [
             'all' => (clone $baseQuery)->count(),
 
@@ -102,7 +100,7 @@ class OrderController extends Controller
                 ->count(),
 
             'preparing' => (clone $baseQuery)
-                ->where('status', 'preparing')
+                ->whereIn('status', ['preparing', 'prepared'])
                 ->count(),
 
             'completed' => (clone $baseQuery)
@@ -112,87 +110,89 @@ class OrderController extends Controller
             'delivered' => (clone $baseQuery)
                 ->where('status', 'delivered')
                 ->count(),
+            'country' => (clone $baseQuery)
+                ->whereHas('branch.country')
+                ->count(),
         ];
-
-        // Orders listing
         $query = Order::with([
             'branch',
             'items',
             'chef',
-        ])
-            ->where('restaurant_id', $restaurant->id);
+        ])->where('restaurant_id', $restaurant->id);
 
-        // Apply same permission logic
-        if ($user->role == 'branch_manager') {
+        switch ($user->role) {
 
-            $query->where('branch_id', $user->branch_id);
+            case 'owner':
+                // Owner -> All restaurant orders
+                break;
 
-        } elseif ($user->role == 'waiter_head') {
+            case 'branch_manager':
+            case 'waiter_head':
+                $query->where('branch_id', $user->branch_id);
+                break;
 
-            $query->where('branch_id', $user->branch_id);
+            case 'chef':
+                $query->where('branch_id', $user->branch_id);
+                break;
 
-        } elseif ($user->role == 'chef') {
+            case 'cashier':
+                $query->where('branch_id', $user->branch_id)
+                    ->whereIn('status', [
+                        'delivered',
+                        'completed_waiting_cashier',
+                    ]);
+                break;
 
-            $query->where('chef_id', $user->id);
+            case 'customer':
+                $query->where('customer_id', $user->id);
+                break;
 
-        } elseif ($user->role == 'cashier') {
-
-            $query->where('branch_id', $user->branch_id)
-                ->whereIn('status', [
-                    'delivered',
-                    'completed_waiting_cashier',
-                ]);
-
-        } elseif ($user->role == 'customer') {
-
-            $query->where('customer_id', $user->id);
-
-        } elseif ($user->role != 'owner') {
-
-            $query->where('branch_id', $user->branch_id);
+            default:
+                $query->where('branch_id', $user->branch_id);
+                break;
         }
 
-        // Filter buttons
-        $filter = request('filter');
-
-        if ($filter == 'today') {
+        if (request('filter') == 'today') {
 
             $query->whereDate('created_at', today());
 
-        } elseif ($filter == 'customer') {
+        } elseif (request('filter') == 'customer') {
 
             $query->whereNotNull('customer_id');
 
-        } elseif ($filter == 'waiter') {
+        } elseif (request('filter') == 'waiter') {
 
             $query->whereHas('creator', function ($q) {
                 $q->where('role', 'waiter');
             });
 
-        } elseif ($filter == 'waiter_head') {
+        } elseif (request('filter') == 'waiter_head') {
 
             $query->whereHas('creator', function ($q) {
                 $q->where('role', 'waiter_head');
             });
 
-        } elseif ($filter == 'vip') {
+        } elseif (request('filter') == 'vip') {
 
             $query->where('order_type', 'vip');
-
         }
-        $fromDate = request('from_date');
-        $toDate = request('to_date');
 
-        if ($fromDate && $toDate) {
+        if (request('from_date') && request('to_date')) {
+
             $query->whereBetween('created_at', [
-                $fromDate.' 00:00:00',
-                $toDate.' 23:59:59',
+                request('from_date').' 00:00:00',
+                request('to_date').' 23:59:59',
             ]);
-        } elseif ($fromDate) {
-            $query->whereDate('created_at', '>=', $fromDate);
-        } elseif ($toDate) {
-            $query->whereDate('created_at', '<=', $toDate);
+
+        } elseif (request('from_date')) {
+
+            $query->whereDate('created_at', '>=', request('from_date'));
+
+        } elseif (request('to_date')) {
+
+            $query->whereDate('created_at', '<=', request('to_date'));
         }
+
         $orders = $query->latest()->get();
 
         return view('admin.orders.index', compact(
@@ -331,8 +331,11 @@ class OrderController extends Controller
 
         DB::transaction(function () use ($request, $restaurant, $orderType, $branchId) {
 
-            $chef = User::query()->where('role', 'chef')
+            $chef = User::query()
+                ->where('role', 'chef')
                 ->where('restaurant_id', $restaurant->id)
+                ->where('branch_id', $branchId)
+                ->where('status', 'active')
                 ->first();
 
             $token = $this->generateToken(
@@ -374,7 +377,6 @@ class OrderController extends Controller
                 'total' => 0,
             ]);
             if (Auth::user()->role === 'customer') {
-
                 $waiterHead = User::query()
                     ->where('restaurant_id', $restaurant->id)
                     ->where('role', 'waiter_head')
@@ -384,20 +386,15 @@ class OrderController extends Controller
                     ->first();
 
                 if ($waiterHead) {
-                    $waiterHead->notify(
-                        new NewOrderAssignedNotification($order)
-                    );
+                    $waiterHead->notify(new NewOrderAssignedNotification($order));
                 }
-
-            } else {
-
-                if ($chef) {
-                    $chef->notify(
-                        new NewOrderAssignedNotification($order)
-                    );
-                }
-
             }
+
+            // Always notify Chef (Kitchen team should always know about new orders)
+            if ($chef) {
+                $chef->notify(new NewOrderAssignedNotification($order));
+            }
+
             $total = 0;
 
             foreach ($request->menu_item_id as $key => $menuId) {
@@ -740,7 +737,6 @@ class OrderController extends Controller
         $order->load(['items', 'items.menuItem']);
 
         try {
-
             app(InventoryService::class)
                 ->deductRecipeStock($order);
 
@@ -748,16 +744,15 @@ class OrderController extends Controller
             $order->save();
 
         } catch (\Exception $e) {
-
-            return back()->with(
-                'error',
-                $e->getMessage()
-            );
+            return back()->with('error', $e->getMessage());
         }
 
-        // Notify only order creator
-        $creator = User::query()->find($order->created_by);
+        // ====================== NEW: NOTIFY TABLE WAITER ======================
+        $this->notifyTableWaiter($order);
+        // =====================================================================
 
+        // Notify order creator (existing)
+        $creator = User::query()->find($order->created_by);
         if ($creator) {
             $creator->notify(
                 new OrderStatusNotification($order, 'prepared')
@@ -1015,5 +1010,42 @@ class OrderController extends Controller
             '0',
             STR_PAD_LEFT
         );
+    }
+
+    /**
+     * Notify the waiter assigned to the table when order is prepared
+     */
+    private function notifyTableWaiter(Order $order)
+    {
+        if (empty($order->table_no) || empty($order->branch_id)) {
+            return;
+        }
+
+        $allocation = TableAllocation::with('waiter')
+            ->where('restaurant_id', $order->restaurant_id)
+            ->where('branch_id', $order->branch_id)
+            ->whereHas('table', function ($q) use ($order) {
+                $q->where('table_number', $order->table_no);
+            })
+            ->where('is_active', true)
+            ->first();
+
+        if ($allocation && $allocation->waiter) {
+            // ✅ Main Logic: Table allocated waiter ko notification
+            $allocation->waiter->notify(
+                new NewOrderAssignedNotification($order)
+            );
+        } else {
+            // Fallback: Agar waiter na mila to Waiter Head ko bhej do
+            $waiterHead = User::query()
+                ->where('restaurant_id', $order->restaurant_id)
+                ->where('role', 'waiter_head')
+                ->where('branch_id', $order->branch_id)
+                ->first();
+
+            if ($waiterHead) {
+                $waiterHead->notify(new NewOrderAssignedNotification($order));
+            }
+        }
     }
 }

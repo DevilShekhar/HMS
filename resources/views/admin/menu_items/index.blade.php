@@ -1,57 +1,55 @@
 @extends('layouts.app')
 @section('content')
-<section class="section premium-dashboard">
-    <div class="premium-floating-header">
-        <div class="header-content">
-            <div class="header-left">
-                <div class="header-icon">
-                    <i class="fas fa-clipboard-list"></i>
+    <section class="section premium-dashboard">
+        <div class="premium-floating-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <span class="header-badge">
+                            Menu Management
+                        </span>
+                        <h1>Menu Items</h1>
+                        <p>Manage restaurant menu items and keep your menu up to date.</p>
+                    </div>
                 </div>
-                <div>
-                    <span class="header-badge">
-                        Menu Management
-                    </span>
-                    <h1>Menu Items</h1>
-                    <p>Manage restaurant menu items and keep your menu up to date.</p>
+                @php
+                    $restaurantSlug = request()->route('restaurant');
+                    $branchSlug = request()->route('branch');
+                @endphp
+                <div class="header-right">
+                    @if (auth()->user()->role === 'super_admin')
+                        <a href="{{ route('menu-items.create') }}" class="premium-back-btn">
+                            <i class="fas fa-plus"></i>
+                            Add Menu Item
+                        </a>
+                    @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                                    <a href="{{ route('branch.menu-items.create', [
+                            'restaurant' => $restaurantSlug,
+                            'branch' => $branchSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Add Menu Item
+                                    </a>
+                    @elseif (!empty($restaurantSlug))
+                                    <a href="{{ route('restaurant.menu-items.create', [
+                            'restaurant' => $restaurantSlug,
+                        ]) }}" class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Add Menu Item
+                                    </a>
+                    @endif
                 </div>
-            </div>
-            @php
-                $restaurantSlug = request()->route('restaurant');
-                $branchSlug = request()->route('branch');
-            @endphp
-            <div class="header-right">
-                @if (auth()->user()->role === 'super_admin')
-                    <a href="{{ route('menu-items.create') }}" class="premium-back-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Menu Item
-                    </a>
-                @elseif (!empty($restaurantSlug) && !empty($branchSlug))
-                    <a href="{{ route('branch.menu-items.create', [
-                        'restaurant' => $restaurantSlug,
-                        'branch' => $branchSlug,
-                    ]) }}"
-                        class="premium-back-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Menu Item
-                    </a>
-                @elseif (!empty($restaurantSlug))
-                    <a href="{{ route('restaurant.menu-items.create', [
-                        'restaurant' => $restaurantSlug,
-                    ]) }}"
-                        class="premium-back-btn">
-                        <i class="fas fa-plus"></i>
-                        Add Menu Item
-                    </a>
-                @endif
             </div>
         </div>
-    </div>
-</section>
-    <section class="section premium-dashboard pt-0">       
-        <div class="card premium-block">            
+    </section>
+    <section class="section premium-dashboard pt-0">
+        <div class="card premium-block">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle"  id="tableExport">
+                    <table class="table table-hover align-middle" id="tableExport">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -79,7 +77,10 @@
                                     <td><strong>{{ $item->name }}</strong> </td>
                                     <td> {{ $item->branch->name ?? '-' }} </td>
                                     <td> {{ $item->category->name ?? '-' }} </td>
-                                    <td> ₹{{ number_format($item->price, 2) }} </td>
+                                    <td>
+                                        {{ $item->branch?->country?->currency_symbol ?? '₹' }}
+                                        {{ number_format($item->price, 2) }}
+                                    </td>
                                     <td>
                                         @if ($item->food_type == 'veg')
                                             <span class="badge bg-success">
@@ -108,54 +109,48 @@
 
                                             {{-- EDIT --}}
                                             @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                <a href="{{ route('branch.menu-items.edit', [
+                                                                            <a href="{{ route('branch.menu-items.edit', [
                                                     'restaurant' => $restaurantSlug,
                                                     'branch' => $branchSlug,
                                                     'menu_item' => $item->id,
-                                                ]) }}"
-                                                    class="btn btn-md btn-warning">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                                ]) }}" class="btn btn-md btn-warning">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>
                                             @elseif(!empty($restaurantSlug))
-                                                <a href="{{ route('restaurant.menu-items.edit', [
+                                                                            <a href="{{ route('restaurant.menu-items.edit', [
                                                     'restaurant' => $restaurantSlug,
                                                     'menu_item' => $item->id,
-                                                ]) }}"
-                                                    class="btn btn-md btn-warning">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                                ]) }}" class="btn btn-md btn-warning">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>
                                             @endif
 
 
 
                                             {{-- DELETE --}}
                                             @if (!empty($restaurantSlug) && !empty($branchSlug))
-                                                <form id="delete-form-{{ $item->id }}" method="POST"
-                                                    action="{{ route('branch.menu-items.destroy', [
+                                                                            <form id="delete-form-{{ $item->id }}" method="POST" action="{{ route('branch.menu-items.destroy', [
+                                                    'restaurant' => $restaurantSlug,
+                                                    'branch' => $branchSlug,
+                                                    'menu_item' => $item->id,
+                                                ]) }}" style="display:inline" class="delete-form btn-md">
+                                            @elseif(!empty($restaurantSlug))
+                                                                                    <form id="delete-form-{{ $item->id }}" method="POST" action="{{ route('restaurant.menu-items.destroy', [
                                                         'restaurant' => $restaurantSlug,
-                                                        'branch' => $branchSlug,
                                                         'menu_item' => $item->id,
-                                                    ]) }}"
-                                                    style="display:inline" class="delete-form btn-md">
-                                                @elseif(!empty($restaurantSlug))
-                                                    <form id="delete-form-{{ $item->id }}" method="POST"
-                                                        action="{{ route('restaurant.menu-items.destroy', [
-                                                            'restaurant' => $restaurantSlug,
-                                                            'menu_item' => $item->id,
-                                                        ]) }}"
-                                                        style="display:inline" class="delete-form btn-md">
-                                            @endif
+                                                    ]) }}" style="display:inline" class="delete-form btn-md">
+                                                @endif
 
-                                            @csrf
-                                            @method('DELETE')
+                                                    @csrf
+                                                    @method('DELETE')
 
-                                            <button type="submit" class="btn btn-md btn-danger">
+                                                    <button type="submit" class="btn btn-md btn-danger">
 
-                                                <i class="fas fa-trash"></i>
+                                                        <i class="fas fa-trash"></i>
 
-                                            </button>
+                                                    </button>
 
-                                            </form>
+                                                </form>
 
                                         </div>
                                     </td>
@@ -175,7 +170,7 @@
     </section>
     @if (session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
@@ -188,11 +183,11 @@
     @endif
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             document.querySelectorAll('.delete-form').forEach(form => {
 
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
 
                     e.preventDefault();
 
@@ -218,9 +213,9 @@
         });
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
-            $('.add-recipe-btn').click(function() {
+            $('.add-recipe-btn').click(function () {
 
                 let menuId = $(this).data('menu-id');
                 let menuName = $(this).data('menu-name');

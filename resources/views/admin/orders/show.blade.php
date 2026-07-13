@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $currency = $order->branch?->country?->currency_symbol ?? '₹';
+    @endphp
     <div class="section">
         <div class="page-card">
             <div class="card-header">
@@ -72,8 +75,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                    {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                    transition: var(--de-transition);">
+                                        {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                        transition: var(--de-transition);">
                                     @if($currentStep > 1)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -102,8 +105,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                    {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                    transition: var(--de-transition);">
+                                        {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                        transition: var(--de-transition);">
                                     @if($currentStep > 2)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -132,8 +135,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                    {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                    transition: var(--de-transition);">
+                                        {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                        transition: var(--de-transition);">
                                     @if($currentStep > 3)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -162,8 +165,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                    {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                    transition: var(--de-transition);">
+                                        {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                        transition: var(--de-transition);">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <div
@@ -181,7 +184,7 @@
                             style="text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--de-border);">
                             <span
                                 style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 50px;
-                    background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
+                        background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
                                 <i class="fas fa-circle"
                                     style="font-size: 0.5rem; animation: pulse-green 1.5s ease-in-out infinite;"></i>
                                 <span style="text-transform: uppercase;">
@@ -315,8 +318,8 @@
                                         {{ $item->menuItem->name ?? '-' }}
                                     </td>
                                     <td class="text-center"><span class="qty-badge">{{ $item->quantity }} </span></td>
-                                    <td class="text-end">₹{{ number_format($item->price, 2) }}</td>
-                                    <td class="text-end">₹{{ number_format($item->subtotal, 2) }}</td>
+                                    <td class="text-end">{{$currency}}{{ number_format($item->price, 2) }}</td>
+                                    <td class="text-end">{{$currency}}{{ number_format($item->subtotal, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -349,7 +352,7 @@
                                             Total</small>
                                         <h2 class="mb-0 fw-bold"
                                             style="background: var(--de-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                            ₹{{ number_format($order->total ?? $order->items->sum('subtotal'), 2) }}
+                                            {{$currency}}{{ number_format($order->total ?? $order->items->sum('subtotal'), 2) }}
                                         </h2>
                                     </div>
 

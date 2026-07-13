@@ -11,36 +11,32 @@ use Illuminate\Validation\Rule;
 
 class RestaurantTableController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
-        $query = RestaurantTable::with(['category', 'branch'])->where('restaurant_id', app('restaurant')->id);
-        if ($user->role == 'owner') {
-            $branchIds = Branch::query()->where(
-                'owner_id',
-                $user->id
-            )->pluck('id');
-            $query->whereIn(
-                'branch_id',
-                $branchIds
-            );
-        }
-        if ($user->role == 'branch_manager') {
-            $branch = Branch::query()->where(
-                'branch_manager_id',
-                $user->id
-            )->first();
-            if ($branch) {
-                $query->where(
-                    'branch_id',
-                    $branch->id
-                );
-            }
-        }
-        $tables = $query->latest()->paginate(20);
 
-        return view('admin.tables.index', compact('tables'));
+    public function index()
+{
+    $user = Auth::user();
+
+    $query = RestaurantTable::with(['category', 'branch'])
+        ->where('restaurant_id', app('restaurant')->id);
+
+    if ($user->role == 'owner') {
+
+        $branchIds = Branch::query()->where('restaurant_id', $user->restaurant_id)
+            ->pluck('id');
+
+        $query->whereIn('branch_id', $branchIds);
     }
+
+    // Branch Manager -> Only assigned branch
+    elseif ($user->role == 'branch_manager') {
+
+        $query->where('branch_id', $user->branch_id);
+    }
+
+    $tables = $query->latest()->paginate(20);
+
+    return view('admin.tables.index', compact('tables'));
+}
 
     public function create()
     {
@@ -123,29 +119,52 @@ class RestaurantTableController extends Controller
     }
 
     public function edit($restaurant, $branch = null, $table = null)
-    {
-        if ($table === null) {
-            $table = $branch;
-            $branch = null;
-        }
-
-        $table = RestaurantTable::findOrFail($table);
-
-        $user = Auth::user();
-        if ($user->role == 'owner') {
-            $branches = Branch::query()->where('owner_id', $user->id)->where('is_active', 1)->get();
-            $categories = TableCategory::query()->where('restaurant_id', app('restaurant')->id)->get();
-
-            return view('admin.tables.edit', compact('table', 'branches', 'categories'));
-        }
-        if ($user->role == 'branch_manager') {
-            $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
-            $categories = TableCategory::query()->where('branch_id', $branch->id)->get();
-
-            return view('admin.tables.edit', compact('table', 'branch', 'categories'));
-        }
-        abort(403);
+{
+    if ($table === null) {
+        $table = $branch;
+        $branch = null;
     }
+
+    $table = RestaurantTable::findOrFail($table);
+
+    $user = Auth::user();
+
+    if ($user->role == 'owner') {
+
+        $branches = Branch::query()->where('restaurant_id', $user->restaurant_id)
+            ->where('is_active', 1)
+            ->get();
+
+        $categories = TableCategory::query()->where('restaurant_id', $user->restaurant_id)
+            ->get();
+
+        return view('admin.tables.edit', compact(
+            'table',
+            'branches',
+            'categories'
+        ));
+    }
+
+    if ($user->role == 'branch_manager') {
+
+        $branch = Branch::findOrFail($user->branch_id);
+
+        // Prevent editing another branch's table
+        if ($table->branch_id != $branch->id) {
+            abort(403);
+        }
+
+        $categories = TableCategory::query()->where('branch_id', $branch->id)->get();
+
+        return view('admin.tables.edit', compact(
+            'table',
+            'branch',
+            'categories'
+        ));
+    }
+
+    abort(403);
+}
 
     public function update(Request $request, $restaurant, RestaurantTable $table)
     {

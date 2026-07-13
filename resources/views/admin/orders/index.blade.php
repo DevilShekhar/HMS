@@ -24,21 +24,23 @@
                         <div class="header-right">
 
                             @can('create-order')
-                            @if (auth()->user()->role === 'super_admin')
+                                @if (auth()->user()->role === 'super_admin')
 
 
-                            @elseif (!empty($restaurantSlug) && !empty($branchSlug))
-                                            <a href="{{ route('branch.orders.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug,]) }}" class="premium-back-btn">
-                                                <i class="fas fa-plus"></i>
-                                                Create Order
-                                            </a>
+                                @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                                    <a href="{{ route('branch.orders.create', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug,]) }}"
+                                        class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Create Order
+                                    </a>
 
-                            @elseif (!empty($restaurantSlug))
-                                            <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurantSlug,]) }}" class="premium-back-btn">
-                                                <i class="fas fa-plus"></i>
-                                                Create Order
-                                            </a>
-                            @endif
+                                @elseif (!empty($restaurantSlug))
+                                    <a href="{{ route('restaurant.orders.create', ['restaurant' => $restaurantSlug,]) }}"
+                                        class="premium-back-btn">
+                                        <i class="fas fa-plus"></i>
+                                        Create Order
+                                    </a>
+                                @endif
                             @endcan
                         </div>
                     </div>
@@ -298,8 +300,9 @@
                                         </td>
                                         <td style="padding: 12px 16px;">
                                             <span
-                                                style="font-weight: 700; font-size: 1rem; background: var(--de-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                                                ₹{{ number_format($order->total, 2) }}
+                                                style="font-weight:700;font-size:1rem;background:var(--de-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                                                {{ $order->branch?->country?->currency_symbol ?? '₹' }}
+                                                {{ number_format($order->total, 2) }}
                                             </span>
                                         </td>
                                         <td style="padding: 12px 16px; text-align: center;">

@@ -16,4 +16,5 @@ class Country extends Model
         'currency_symbol',
         'timezone', 'status',
     ];
+    
 }

@@ -11,23 +11,31 @@ use Illuminate\Validation\Rule;
 class TableCategoryController extends Controller
 {
     public function index()
-    {
-        $user = Auth::user();
-        $query = TableCategory::query()->with(['branch', 'creator'])->where('restaurant_id', app('restaurant')->id);
-        if ($user->role == 'owner') {
-            $branchIds = Branch::query()->where('owner_id', $user->id)->pluck('id');
-            $query->whereIn('branch_id', $branchIds);
-        }
-        if ($user->role == 'branch_manager') {
-            $branch = Branch::query()->where('branch_manager_id', $user->id)->first();
-            if ($branch) {
-                $query->where('branch_id', $branch->id);
-            }
-        }
-        $categories = $query->latest()->paginate(20);
+{
+    $user = Auth::user();
 
-        return view('admin.table_categories.index', compact('categories'));
+    $query = TableCategory::with(['branch', 'creator'])
+        ->where('restaurant_id', app('restaurant')->id);
+
+    // Owner -> All categories of their restaurant
+    if ($user->role == 'owner') {
+
+        $branchIds = Branch::query()->where('restaurant_id', $user->restaurant_id)
+            ->pluck('id');
+
+        $query->whereIn('branch_id', $branchIds);
     }
+
+    // Branch Manager -> Only assigned branch
+    elseif ($user->role == 'branch_manager') {
+
+        $query->where('branch_id', $user->branch_id);
+    }
+
+    $categories = $query->latest()->paginate(20);
+
+    return view('admin.table_categories.index', compact('categories'));
+}
 
     public function create()
     {

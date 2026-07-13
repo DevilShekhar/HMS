@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Branch;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       Schema::defaultStringLength(191);
+        View::composer('*', function ($view) {
+
+            $currentBranch = null;
+
+            if (Auth::check() && Auth::user()->branch_id) {
+
+                $currentBranch = Branch::with('country')
+                    ->find(Auth::user()->branch_id);
+            }
+
+            $view->with('currentBranch', $currentBranch);
+        });
+        Schema::defaultStringLength(191);
     }
 }

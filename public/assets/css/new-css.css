@@ -271,7 +271,6 @@
     color: #e74c3c;
     font-size: 0.8rem;
     margin-top: 4px;
-    display: block;
 }
 
 /* ----- table ----- */
@@ -4291,4 +4290,64 @@ padding:16px;
 .sidebar-menu li a:hover i {
     color: #ffffff;
     stroke: #ffffff;
+}
+
+
+/* Add these styles to your CSS file */
+.rms-revenue-item {
+    position: relative;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.rms-revenue-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.rms-revenue-icon {
+    font-size: 20px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.rms-revenue-value {
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+.rms-revenue-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.rms-stat-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rms-stat-row:last-child {
+    border-bottom: none;
+}
+
+.rms-stat-label {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.rms-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    transition: color 0.3s ease;
 }

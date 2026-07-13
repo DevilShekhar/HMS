@@ -19,7 +19,8 @@
         href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
         rel="stylesheet">
     <!-- Template Main CSS File -->
-    {{-- <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" > --}}
+    {{--
+    <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet"> --}}
     <!-- Add this to your <head> section if SweetAlert is not included -->
 
 
@@ -30,119 +31,166 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/bundles/summernote/summernote-bs4.css') }}">
     @yield('style')
-<style>
-    /* ================================
+    <style>
+        /* ================================
    EHT Premium Sidebar
 ================================ */
 
-.eht-sidebar {
-    background: #fff;
-    box-shadow: 0 0 25px rgba(0,0,0,.08);
-}
+        .eht-sidebar {
+            background: #fff;
+            box-shadow: 0 0 25px rgba(0, 0, 0, .08);
+        }
 
-.eht-sidebar .sidebar-menu li a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 6px 12px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    color: #444;
-    font-weight: 500;
-    transition: all .3s ease;
-}
+        .eht-sidebar .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 6px 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: #444;
+            font-weight: 500;
+            transition: all .3s ease;
+        }
 
-.eht-sidebar .sidebar-menu li a i {
-    transition: .3s;
-}
+        .eht-sidebar .sidebar-menu li a i {
+            transition: .3s;
+        }
 
-/* Hover */
-.eht-sidebar .sidebar-menu li a:hover {
-    background: linear-gradient(135deg, #ff8a00, #ff5f00);
-    color: #fff;
-    transform: translateX(4px);
-}
+        /* Hover */
+        .eht-sidebar .sidebar-menu li a:hover {
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            color: #fff;
+            transform: translateX(4px);
+        }
 
-.eht-sidebar .sidebar-menu li a:hover i {
-    color: #fff;
-}
+        .eht-sidebar .sidebar-menu li a:hover i {
+            color: #fff;
+        }
 
-/* Active */
-.eht-sidebar .sidebar-menu li.active > a,
-.eht-sidebar .sidebar-menu li.active > .nav-link {
-    background: linear-gradient(135deg, #ff8a00, #ff5f00);
-    color: #fff;
-}
+        /* Active */
+        .eht-sidebar .sidebar-menu li.active>a,
+        .eht-sidebar .sidebar-menu li.active>.nav-link {
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            color: #fff;
+        }
 
-.eht-sidebar .sidebar-menu li.active i {
-    color: #fff;
-}
+        .eht-sidebar .sidebar-menu li.active i {
+            color: #fff;
+        }
 
-/* Dropdown parent */
-.eht-sidebar .sidebar-menu .dropdown.active > a {
-    background: linear-gradient(135deg, #ff8a00, #ff5f00);
-    color: #fff;
-}
+        /* Dropdown parent */
+        .eht-sidebar .sidebar-menu .dropdown.active>a {
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            color: #fff;
+        }
 
-/* Dropdown items */
-.eht-sidebar .dropdown-menu li a {
-    padding-left: 48px;
-    font-size: 14px;
-    border-radius: 8px;
-}
+        /* Dropdown items */
+        .eht-sidebar .dropdown-menu li a {
+            padding-left: 48px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
 
-.eht-sidebar .dropdown-menu li a:hover {
-    background: linear-gradient(135deg, #ff8a00, #ff5f00);
-    color: #fff;
-}
+        .eht-sidebar .dropdown-menu li a:hover {
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            color: #fff;
+        }
 
-/* Section Header */
-.eht-sidebar .menu-header {
-    color: #999;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin: 20px 20px 8px;
-}
+        /* Section Header */
+        .eht-sidebar .menu-header {
+            color: #999;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 20px 20px 8px;
+        }
 
-/* Logo */
-.eht-sidebar .header-logo {
-    max-height: 42px;
-}
+        /* Logo */
+        .eht-sidebar .header-logo {
+            max-height: 42px;
+        }
 
-.eht-sidebar .logo-name {
-    color: #222;
-    font-size: 24px;
-    font-weight: 700;
-}
+        .eht-sidebar .logo-name {
+            color: #222;
+            font-size: 24px;
+            font-weight: 700;
+        }
 
-/* Scrollbar */
-.eht-sidebar::-webkit-scrollbar {
-    width: 6px;
-}
+        /* Scrollbar */
+        .eht-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
 
-.eht-sidebar::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #ff8a00, #ff5f00);
-    border-radius: 20px;
-}
+        .eht-sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            border-radius: 20px;
+        }
 
-.sidebar-menu li a:hover i,
-.sidebar-menu li a:hover svg,
-.sidebar-menu li a:hover .fas,
-.sidebar-menu li.active > a i,
-.sidebar-menu li.active > a svg,
-.sidebar-menu li.active > a .fas {
-    color: #fff;
-}
-.sidebar-menu li a i,
-.sidebar-menu li a svg,
-.sidebar-menu li a .fas,
-.sidebar-menu li a .far,
-.sidebar-menu li a .fab {
-    color: #ff8a00;
-    transition: all .3s ease;
-}
-</style>
+        .sidebar-menu li a:hover i,
+        .sidebar-menu li a:hover svg,
+        .sidebar-menu li a:hover .fas,
+        .sidebar-menu li.active>a i,
+        .sidebar-menu li.active>a svg,
+        .sidebar-menu li.active>a .fas {
+            color: #fff;
+        }
+
+        .sidebar-menu li a i,
+        .sidebar-menu li a svg,
+        .sidebar-menu li a .fas,
+        .sidebar-menu li a .far,
+        .sidebar-menu li a .fab {
+            color: #ff8a00;
+            transition: all .3s ease;
+        }
+
+        /* Quick Order Floating Button - Mobile Only */
+        .quick-order-btn-new {
+            position: fixed;
+            bottom: 50%;
+            right: 20px;
+            transform: translateY(50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff8a00, #ff5f00);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 138, 0, 0.4);
+            z-index: 1030;
+            font-size: 28px;
+            transition: box-shadow .3s ease;
+            animation: floatBtn 2s ease-in-out infinite;
+        }
+
+        @keyframes floatBtn {
+
+            0%,
+            100% {
+                transform: translateY(50%);
+            }
+
+            50% {
+                transform: translateY(calc(50% - 8px));
+            }
+        }
+
+        .quick-order-btn-new:hover {
+            animation-play-state: paused;
+            transform: translateY(50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 138, 0, .5);
+        }
+
+        @media (min-width:768px) {
+            .quick-order-btn-new {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -319,7 +367,7 @@
             <!-- SIDEBAR START -->
 
             <!-- <div class="main-sidebar sidebar-style-2"> -->
-                <div class="eht-sidebar main-sidebar sidebar-style-2">
+            <div class="eht-sidebar main-sidebar sidebar-style-2">
                 <aside id="sidebar-wrapper">
 
                     @php
@@ -852,7 +900,6 @@
 
                         @endif
                         @can('view-table')
-
                             <li class="dropdown">
                                 <a href="#" class="nav-link has-dropdown">
                                     <i data-feather="grid"></i>
@@ -866,30 +913,30 @@
                                         $branchSlug = request()->route('branch');
                                     @endphp
 
-
                                     {{-- SUPER ADMIN --}}
-                                    @if (auth()->user()->role === 'super_admin')
+                                    @if(auth()->user()->role === 'super_admin')
+
                                         <li>
-                                            <a href="#">
-                                                Table Categories
-                                            </a>
+                                            <a href="#">Table Categories</a>
                                         </li>
 
                                         <li>
-                                            <a href="#">
-                                                Tables
-                                            </a>
+                                            <a href="#">Tables</a>
                                         </li>
+
+                                        @can('table-allocation')
+                                            <li>
+                                                <a href="#">Table Allocations</a>
+                                            </li>
+                                        @endcan
 
                                         <li>
-                                            <a href="#">
-                                                Add Table
-                                            </a>
+                                            <a href="#">Add Table</a>
                                         </li>
-
 
                                         {{-- BRANCH LEVEL --}}
-                                    @elseif (!empty($restaurantSlug) && !empty($branchSlug))
+                                    @elseif($restaurantSlug && $branchSlug)
+
                                                                 <li>
                                                                     <a href="{{ route('branch.table-categories.index', [
                                             'restaurant' => $restaurantSlug,
@@ -908,6 +955,17 @@
                                                                     </a>
                                                                 </li>
 
+                                                                @can('table-allocation')
+                                                                                        <li>
+                                                                                            <a href="{{ route('branch.table-allocations.index', [
+                                                                        'restaurant' => $restaurantSlug,
+                                                                        'branch' => $branchSlug,
+                                                                    ]) }}">
+                                                                                                Table Allocations
+                                                                                            </a>
+                                                                                        </li>
+                                                                @endcan
+
                                                                 <li>
                                                                     <a href="{{ route('branch.tables.create', [
                                             'restaurant' => $restaurantSlug,
@@ -917,9 +975,9 @@
                                                                     </a>
                                                                 </li>
 
-
                                                                 {{-- RESTAURANT LEVEL --}}
-                                    @elseif (!empty($restaurantSlug))
+                                    @elseif($restaurantSlug)
+
                                                                 <li>
                                                                     <a href="{{ route('restaurant.table-categories.index', [
                                             'restaurant' => $restaurantSlug,
@@ -935,27 +993,16 @@
                                                                         Tables
                                                                     </a>
                                                                 </li>
-                                                                <li>
-                                                                    @php
-                                                                        $restaurantSlug = request()->route('restaurant');
-                                                                        $branchSlug = request()->route('branch');
-                                                                    @endphp
 
-                                                                    @if($branchSlug)
-                                                                                                <a href="{{ route('branch.table-allocations.index', [
-                                                                            'restaurant' => $restaurantSlug,
-                                                                            'branch' => $branchSlug,
-                                                                        ]) }}">
-                                                                                                    Table Allocations
-                                                                                                </a>
-                                                                    @else
-                                                                                                <a href="{{ route('restaurant.table-allocations.index', [
-                                                                            'restaurant' => $restaurantSlug,
-                                                                        ]) }}">
-                                                                                                    Table Allocations
-                                                                                                </a>
-                                                                    @endif
-                                                                </li>
+                                                                @can('table-allocation')
+                                                                                        <li>
+                                                                                            <a href="{{ route('restaurant.table-allocations.index', [
+                                                                        'restaurant' => $restaurantSlug,
+                                                                    ]) }}">
+                                                                                                Table Allocations
+                                                                                            </a>
+                                                                                        </li>
+                                                                @endcan
 
                                                                 <li>
                                                                     <a href="{{ route('restaurant.tables.create', [
@@ -964,11 +1011,11 @@
                                                                         Add Table
                                                                     </a>
                                                                 </li>
+
                                     @endif
 
                                 </ul>
                             </li>
-
                         @endcan
                         {{-- Order Management --}}
                         @can('view-order')
@@ -1080,9 +1127,9 @@
                                                 )
                                                 <li>
                                                     <a href="{{ route('customer.orders', [
-                                'restaurant' => auth()->user()->restaurant->slug,
-                                'branch' => auth()->user()->branch->slug,
-                            ]) }}">
+                                                        'restaurant' => auth()->user()->restaurant->slug,
+                                                        'branch' => auth()->user()->branch->slug,
+                                                    ]) }}">
                                                         <i data-feather="shopping-bag"></i>
                                                         <span>My History</span>
                                                     </a>
@@ -1140,7 +1187,14 @@
 
             <main id="main-contentmain" class="main-content">
                 @yield('content')
+                <!-- Quick Order Button - Mobile Only -->
+
             </main>
+            @if(Auth::user()->role !== 'super_admin')
+                <button type="button" class="quick-order-btn-new" onclick="quickOrderAction()" title="Quick Order">
+                    <i class="fas fa-utensils"></i>
+                </button>
+            @endif
         </div>
     </div>
     <script src="{{ asset('assets/js/app.min.js') }}"></script>
@@ -1322,6 +1376,18 @@
             });
 
         });
+        @if(Auth::user()->role !== 'super_admin')
+            function quickOrderAction() {
+                window.location.href = "{{ request()->route('branch')
+            ? route('branch.orders.create', [
+                'restaurant' => request()->route('restaurant'),
+                'branch' => request()->route('branch'),
+            ])
+            : route('restaurant.orders.create', [
+                'restaurant' => request()->route('restaurant'),
+            ]) }}";
+            }
+        @endif
     </script>
 
     @stack('scripts')

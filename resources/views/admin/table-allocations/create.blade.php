@@ -79,10 +79,10 @@
                                     <input type="text" class="premium-input" value="{{ $branches->first()->name }}" readonly>
                                     <input type="hidden" name="branch_id" value="{{ $branches->first()->id }}">
                                 @else
-                                    <select name="branch_id" class="premium-input" required>
+                                    <select name="branch_id" id="branch_id" class="premium-input" required>
                                         <option value="">-- Select Branch --</option>
                                         @foreach($branches as $branch)
-                                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                            <option value="{{ $branch->id }}">
                                                 {{ $branch->name }}
                                             </option>
                                         @endforeach
@@ -96,14 +96,16 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Table <span class="text-danger">*</span></label>
-                                <select name="table_id" class="premium-input" required>
+
+                                <select name="table_id" id="table_id" class="premium-input" required>
                                     <option value="">-- Select Table --</option>
                                     @foreach($tables as $table)
-                                        <option value="{{ $table->id }}" {{ old('table_id') == $table->id ? 'selected' : '' }}>
+                                        <option value="{{ $table->id }}" data-branch="{{ $table->branch_id }}">
                                             {{ $table->table_number }} ({{ $table->capacity }} Seats)
                                         </option>
                                     @endforeach
                                 </select>
+
                                 @error('table_id')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
@@ -112,39 +114,73 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Waiter</label>
-                                <select name="waiter_id" class="premium-input" required>
+
+                                <select name="waiter_id" id="waiter_id" class="premium-input">
                                     <option value="">-- Select Waiter --</option>
                                     @foreach($waiters as $waiter)
-                                        <option value="{{ $waiter->id }}">{{ $waiter->name }} ({{ $waiter->email }})</option>
+                                        <option value="{{ $waiter->id }}" data-branch="{{ $waiter->branch_id }}">
+                                            {{ $waiter->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Create Allocation</button>
-                        @php
-                            $restaurant = request()->route('restaurant');
-                            $branch = request()->route('branch');
-                            if ($branch) {
-                                $cancelRoute = 'branch.table-allocations.index';
-                                $cancelParams = [
-                                    'restaurant' => $restaurant,
-                                    'branch' => $branch,
-                                ];
-                            } else {
-                                $cancelRoute = 'restaurant.table-allocations.index';
-                                $cancelParams = [
-                                    'restaurant' => $restaurant,
-                                ];
-                            }
-                        @endphp
-                        <a href="{{ route($cancelRoute, $cancelParams) }}" class="btn btn-secondary">
-                            Cancel
-                        </a>
-                    </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Create Allocation</button>
+                            @php
+                                $restaurant = request()->route('restaurant');
+                                $branch = request()->route('branch');
+                                if ($branch) {
+                                    $cancelRoute = 'branch.table-allocations.index';
+                                    $cancelParams = [
+                                        'restaurant' => $restaurant,
+                                        'branch' => $branch,
+                                    ];
+                                } else {
+                                    $cancelRoute = 'restaurant.table-allocations.index';
+                                    $cancelParams = [
+                                        'restaurant' => $restaurant,
+                                    ];
+                                }
+                            @endphp
+                            <a href="{{ route($cancelRoute, $cancelParams) }}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
             </form>
         </div>
         </div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const branch = document.getElementById('branch_id');
+            const table = document.getElementById('table_id');
+            const waiter = document.getElementById('waiter_id');
+
+            function filterBranchData() {
+
+                const branchId = branch.value;
+
+                table.value = '';
+                waiter.value = '';
+
+                table.querySelectorAll('option[data-branch]').forEach(option => {
+                    option.hidden = branchId && option.dataset.branch != branchId;
+                });
+
+                waiter.querySelectorAll('option[data-branch]').forEach(option => {
+                    option.hidden = branchId && option.dataset.branch != branchId;
+                });
+            }
+
+            if (branch) {
+                branch.addEventListener('change', filterBranchData);
+
+                // If branch is already selected (old value), filter immediately
+                filterBranchData();
+            }
+
+        });
+    </script>
 @endsection
