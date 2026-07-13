@@ -17,43 +17,43 @@ class MenuItemController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-{
-    $restaurant = Restaurant::query()->where('slug', request()->route('restaurant'))->firstOrFail();
+    {
+        $restaurant = Restaurant::query()->where('slug', request()->route('restaurant'))->firstOrFail();
 
-    if (Auth::user()->role == 'owner') {
+        if (Auth::user()->role == 'owner') {
 
-        $menuItems = MenuItem::with([
+            $menuItems = MenuItem::with([
                 'branch.country',
-                'category'
+                'category',
             ])
-            ->where('restaurant_id', $restaurant->id)
-            ->latest()
-            ->get();
+                ->where('restaurant_id', $restaurant->id)
+                ->latest()
+                ->get();
 
-    } else {
+        } else {
 
-        $branch = Branch::query()->where('slug', request()->route('branch'))->firstOrFail();
+            $branch = Branch::query()->where('slug', request()->route('branch'))->firstOrFail();
 
-        $menuItems = MenuItem::with([
+            $menuItems = MenuItem::with([
                 'branch.country',
-                'category'
+                'category',
             ])
-            ->where('restaurant_id', $restaurant->id)
-            ->where('branch_id', $branch->id)
-            ->where('is_active', 1)
-            ->latest()
-            ->get();
+                ->where('restaurant_id', $restaurant->id)
+                ->where('branch_id', $branch->id)
+                ->where('is_active', 1)
+                ->latest()
+                ->get();
+        }
+
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
+
+        $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)->get();
+
+        return view(
+            'admin.menu_items.index',
+            compact('menuItems', 'branches', 'inventoryItems')
+        );
     }
-
-    $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
-
-    $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)->get();
-
-    return view(
-        'admin.menu_items.index',
-        compact('menuItems', 'branches', 'inventoryItems')
-    );
-}
 
     /**
      * Show the form for creating a new resource.
@@ -129,8 +129,8 @@ class MenuItemController extends Controller
             'price' => 'required|numeric',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ], [
-        'name.unique' => 'This menu item already exists in the selected category.',
-    ]);
+            'name.unique' => 'This menu item already exists in the selected category.',
+        ]);
 
         $restaurant = Restaurant::query()->where(
             'slug',
@@ -453,5 +453,29 @@ class MenuItemController extends Controller
                 'restaurant' => $restaurant,
             ])
             ->with('success', 'Menu Item Deactivated Successfully');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($restaurant, $branch = null, $menu_item = null)
+    {
+        // Handle both route patterns
+        if ($menu_item === null) {
+            $menu_item = $branch;
+            $branch = null;
+        }
+
+        $menuItem = MenuItem::with(['branch', 'category'])->findOrFail($menu_item);
+
+        // Authorization check
+        $user = Auth::user();
+        if ($user->role === 'branch_manager') {
+            if ($menuItem->branch_id != $user->branch_id) {
+                abort(403);
+            }
+        }
+
+        return view('admin.menu_items.show', compact('menuItem'));
     }
 }
