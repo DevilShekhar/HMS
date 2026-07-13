@@ -187,6 +187,7 @@
                                 data-id="{{ $item->id }}"
                                 data-name="{{ $item->name }}"
                                 data-price="{{ $item->price }}"
+                                data-category="{{ $item->category?->name ?? '' }}"
                                 data-currency="{{ $branch->country?->currency_symbol ?? '₹' }}">
                                 <div class="de-item-img">
                                     @if ($item->image)
@@ -603,36 +604,51 @@
             // ============================
             // CUSTOMER HISTORY
             // ============================
-            $('#mobile_number').on('blur', function () {
-                const phone = $(this).val();
-                if (!phone || phone.length < 10) return;
+            document.getElementById('mobile_number')?.addEventListener('blur', function () {
+                    const phone = this.value.trim();
 
-                $.get("{{ route('customer.history') }}", { phone: phone }, function (response) {
-                    if (!response.found) {
+                    if (!phone || phone.length < 10) {
                         $('#customerHistory').hide();
                         return;
                     }
 
-                    $('#customerHistory').show();
-                    $('#visitCount').text(response.total_visits);
-                    $('#lastVisit').text(response.last_visit || '-');
+                    $.get("{{ route('customer.history') }}", { phone: phone })
+                        .done(function (response) {
+                            if (!response.found) {
+                                $('#customerHistory').hide();
+                                return;
+                            }
 
-                    let html = '';
-                    response.orders.slice(0, 5).forEach(o => {
-                        const date = new Date(o.created_at).toLocaleDateString('en-GB', {
-                            day: '2-digit', month: 'short', year: 'numeric'
+                            $('#customerHistory').show();
+                            $('#visitCount').text(response.total_visits || 0);
+                            $('#lastVisit').text(response.last_visit || '-');
+
+                            let html = '';
+                            if (response.orders && response.orders.length > 0) {
+                                response.orders.slice(0, 5).forEach(o => {
+                                    const date = new Date(o.created_at).toLocaleDateString('en-GB', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    });
+                                    html += `
+                                        <tr>
+                                            <td>${date}</td>
+                                            <td><span style="background:var(--de-bg);padding:2px 14px;border-radius:50px;font-size:0.7rem;">${escapeHtml(o.order_type || 'normal')}</span></td>
+                                            <td class="de-amount">${formatCurrency(o.total || 0)}</td>
+                                        </tr>
+                                    `;
+                                });
+                            } else {
+                                html = `<tr><td colspan="3" class="text-center">No previous orders found.</td></tr>`;
+                            }
+                            $('#historyRows').html(html);
+                        })
+                        .fail(function () {
+                            $('#customerHistory').hide();
+                            console.log('Failed to fetch customer history');
                         });
-                        html += `
-                                <tr>
-                                    <td>${date}</td>
-                                    <td><span style="background:var(--de-bg);padding:2px 14px;border-radius:50px;font-size:0.7rem;">${escapeHtml(o.order_type)}</span></td>
-                                    <td class="de-amount">${formatCurrency(o.total)}</td>
-                                </tr>
-                            `;
-                    });
-                    $('#historyRows').html(html);
                 });
-            });
 
             // ============================
             // INIT

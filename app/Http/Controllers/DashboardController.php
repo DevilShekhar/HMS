@@ -25,7 +25,6 @@ class DashboardController extends Controller
             ? app('restaurant')
             : null;
         $currentBranch = null;
-
         if ($restaurant) {
             if ($user->role === 'branch_manager' && $user->branch_id) {
                 $currentBranch = Branch::with('country')
@@ -204,6 +203,33 @@ class DashboardController extends Controller
 
         }
 
+        $query = Order::query();
+
+        if ($restaurant) {
+            $query->where('restaurant_id', $restaurant->id);
+        }
+
+        if (Auth::user()->role == 'owner') {
+
+            // Owner -> All orders of this restaurant
+
+        } elseif (
+            in_array(Auth::user()->role, [
+                'branch_manager',
+                'waiter_head',
+                'chef',
+                'cashier',
+            ])
+        ) {
+
+            // Branch users -> Only their branch
+            $orders->where('branch_id', Auth::user()->branch_id);
+
+        } elseif (Auth::user()->role == 'customer') {
+
+            $orders->where('customer_id', Auth::id());
+        }
+
         $orderStatus = [
             'pending' => (clone $orders)
                 ->where('status', 'pending')
@@ -216,6 +242,7 @@ class DashboardController extends Controller
             'completed' => (clone $orders)
                 ->where('status', 'completed')
                 ->count(),
+
             'delivered' => (clone $orders)
                 ->where('status', 'delivered')
                 ->count(),
@@ -247,7 +274,7 @@ class DashboardController extends Controller
         $topRestaurants = Restaurant::query()
             ->select(
                 'restaurants.id',
-                'restaurants.slug',   
+                'restaurants.slug',
                 'restaurants.name',
                 DB::raw('COUNT(DISTINCT branches.id) as total_branches'),
                 DB::raw('COUNT(orders.id) as total_orders'),
@@ -341,7 +368,7 @@ class DashboardController extends Controller
                 $orderStatus['completed'],
             ],
         ];
-        $restaurants = Restaurant::all();
+        $restaurants = Restaurant::query()->get()->where('status', 1);
 
         return view('admin.dashboard', compact(
             'revenue',
@@ -351,8 +378,10 @@ class DashboardController extends Controller
             'revenue', 'revenueData', 'orderStatusData', 'restaurants', 'currentBranch'
         ));
     }
+
     public function dashboardData(Request $request)
     {
+
         $user = Auth::user();
 
         $restaurantId = $request->restaurant_id;
@@ -361,42 +390,24 @@ class DashboardController extends Controller
         // Branch Selection Logic
         if ($user->role === 'branch_manager') {
 
-            // Always use logged-in branch
             $branchId = $user->branch_id;
             $branchIds = [$branchId];
 
         } elseif ($branchId) {
 
-            // Owner/Super Admin selected a branch
             $branchIds = [$branchId];
 
         } elseif ($restaurantId) {
 
-            // Owner selected restaurant but not branch
-            return response()->json([
-                'revenue' => [
-                    'today' => ['orders' => 0, 'amount' => 0],
-                    'yesterday' => ['orders' => 0, 'amount' => 0],
-                    'weekly' => ['orders' => 0, 'amount' => 0],
-                    'monthly' => ['orders' => 0, 'amount' => 0],
-                    'yearly' => ['orders' => 0, 'amount' => 0],
-                    'total' => ['orders' => 0, 'amount' => 0],
-                ],
-                'orderStatus' => [
-                    'pending' => 0,
-                    'preparing' => 0,
-                    'completed' => 0,
-                    'delivered' => 0,
-                ],
-                'currencySymbol' => '',
-                'preparedOrders' => [],
-            ]);
+            $branchIds = Branch::query()->where('restaurant_id', $restaurantId)
+                ->pluck('id')
+                ->toArray();
 
         } else {
 
-            // Super Admin
             $branchIds = Branch::pluck('id')->toArray();
         }
+
 
         $orders = Order::whereIn('branch_id', $branchIds);
 
@@ -435,22 +446,31 @@ class DashboardController extends Controller
         ];
 
         // Currency
-        $currencySymbol = '₹';
+        // Currency
+        $currencySymbol = '';
 
         if ($user->role === 'branch_manager') {
 
-            $branch = Branch::with('country')->find($user->branch_id);
+            $branch = Branch::with('country')
+                ->find($user->branch_id);
 
         } elseif ($branchId) {
 
-            $branch = Branch::with('country')->find($branchId);
+            $branch = Branch::with('country')
+                ->find($branchId);
+
+        } elseif ($restaurantId) {
+
+            $branch = Branch::with('country')
+                ->where('restaurant_id', $restaurantId)
+                ->first();
 
         } else {
 
             $branch = null;
         }
 
-        if ($branch && $branch->country) {
+        if ($branch?->country) {
             $currencySymbol = $branch->country->currency_symbol;
         }
 
@@ -477,11 +497,12 @@ class DashboardController extends Controller
         return view('admin.insights', compact('restaurants'));
     }
 
-    public function getBranches(Restaurant $restaurant)
+    public function getBranches($id)
     {
-        return $restaurant->branches()
+        $branches = Branch::query()->where('restaurant_id', $id)
             ->orderBy('name')
             ->get(['id', 'name']);
+        return response()->json($branches);
     }
 
     public function getInsights(Request $request, Restaurant $restaurant)
@@ -651,7 +672,7 @@ class DashboardController extends Controller
         if ($branchId) {
             $branchIds = [$branchId];
         } elseif ($restaurantId) {
-            $branchIds = Branch::where('restaurant_id', $restaurantId)
+            $branchIds = Branch::query()->where('restaurant_id', $restaurantId)
                 ->pluck('id')
                 ->toArray();
         } else {
@@ -701,6 +722,7 @@ class DashboardController extends Controller
                 'currency' => $branch->country?->currency_symbol ?? '₹',
             ];
         }
+
         return response()->json($data);
     }
 }

@@ -33,37 +33,59 @@ class TableAllocationController extends Controller
     }
 
     public function create()
-    {
-        $user = Auth::user();
-        $restaurantId = app('restaurant')->id;
+{
+    $user = Auth::user();
+    $restaurantId = app('restaurant')->id;
+    $selectedBranch = request('branch_id');
 
-        if ($user->role === 'owner') {
-            $branches = Branch::query()->where('owner_id', $user->id)
-                ->where('is_active', 1)
-                ->get();
-        } elseif ($user->branch_id) {
-            $branches = Branch::query()->where('id', $user->branch_id)->get();
-        } else {
-            abort(403);
-        }
+    if ($user->role === 'owner') {
+
+        $branches = Branch::query()->where('restaurant_id', $restaurantId)
+            ->where('owner_id', $user->id)
+            ->where('is_active', 1)
+            ->get();
 
         $tables = RestaurantTable::query()->where('restaurant_id', $restaurantId)
+            ->where('status', 1)
+            ->when($selectedBranch, function ($q) use ($selectedBranch) {
+                $q->where('branch_id', $selectedBranch);
+            })
+            ->get();
+
+        $waiters = User::query()->where('restaurant_id', $restaurantId)
+            ->where('role', 'waiter')
+            ->when($selectedBranch, function ($q) use ($selectedBranch) {
+                $q->where('branch_id', $selectedBranch);
+            })
+            ->get();
+
+    } else {
+
+        $branches = Branch::query()->where('id', $user->branch_id)->get();
+
+        $tables = RestaurantTable::query()->where('restaurant_id', $restaurantId)
+            ->where('branch_id', $user->branch_id)
             ->where('status', 1)
             ->get();
 
         $waiters = User::query()->where('restaurant_id', $restaurantId)
             ->where('role', 'waiter')
-            ->when($user->branch_id, fn ($q) => $q->where('branch_id', $user->branch_id))
+            ->where('branch_id', $user->branch_id)
             ->get();
-
-        return view('admin.table-allocations.create', compact('branches', 'tables', 'waiters'));
     }
+
+    return view('admin.table-allocations.create', compact(
+        'branches',
+        'tables',
+        'waiters'
+    ));
+}
 
     public function store(Request $request)
     {
         $request->validate([
             'branch_id' => 'required|exists:branches,id',
-            'table_id' => 'required|exists:restaurant_tables,id',
+            'table_id' => 'required|exists:tables,id',
             'waiter_id' => 'required|exists:users,id',
             'allocation_date' => 'nullable|date',
             'shift' => 'nullable|string|max:50',
@@ -120,7 +142,7 @@ class TableAllocationController extends Controller
 
         $request->validate([
             'branch_id' => 'required|exists:branches,id',
-            'table_id' => 'required|exists:restaurant_tables,id',
+            'table_id' => 'required|exists:tables,id',
             'waiter_id' => 'required|exists:users,id',
 
         ]);

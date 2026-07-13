@@ -32,19 +32,16 @@ Route::get('/login', function () {
 
 Auth::routes();
 
-Route::get('/dashboard/branches/{restaurantId}', function ($restaurantId) {
-    $branches = Branch::query()
-        ->where('restaurant_id', $restaurantId)
-        ->orderBy('name')
-        ->get(['id', 'name']);
 
-    return response()->json($branches);
-})->name('dashboard.branches');
-Route::get('/dashboard/branches/{restaurant}', function ($restaurant) {
-    return App\Models\Branch::query()->where('restaurant_id', $restaurant)
-        ->select('id', 'name')
-        ->get();
-});
+Route::get('/dashboard/branches/{restaurant}', [DashboardController::class, 'getBranches'])
+    ->name('dashboard.branches');
+
+Route::get('/restaurants/{restaurant}/revenue-details',
+    [DashboardController::class, 'restaurantRevenueDetails']
+)->name('restaurants.revenue.details');
+
+Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
+    ->name('dashboard.data');
 Route::get(
     '/restaurants/{restaurant}/revenue-details',
     [DashboardController::class,'restaurantRevenueDetails']
