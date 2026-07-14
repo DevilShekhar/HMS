@@ -258,7 +258,7 @@ Route::prefix('{restaurant}')
         Route::get('/inventory/sample', [InventoryController::class, 'downloadSample'])
             ->name('restaurant.inventory.sample');
         Route::get('/inventory/export', [InventoryController::class, 'export'])
-            ->name('branch.inventory.export');
+            ->name('restaurant.inventory.export');
 
         Route::middleware(['auth'])->group(function () {
 

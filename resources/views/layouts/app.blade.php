@@ -194,6 +194,7 @@
 </head>
 
 <body>
+
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
             <nav class="navbar navbar-expand-lg main-navbar sticky">
@@ -1224,6 +1225,9 @@
     <audio id="vipNotificationSound" preload="auto" loop>
         <source src="{{ asset('sounds/vip-order-notification.mp3') }}" type="audio/mpeg">
     </audio>
+    <audio id="lowStockSound" preload="auto" loop>
+        <source src="{{ asset('sounds/low-stock.mp3') }}" type="audio/mpeg">
+    </audio>
 
 
     <script>
@@ -1231,6 +1235,7 @@
 
             const normalSound = document.getElementById('notificationSound');
             const vipSound = document.getElementById('vipNotificationSound');
+            const lowStockSound = document.getElementById('lowStockSound');
 
             let isProcessing = false;
             let currentSound = null;
@@ -1239,7 +1244,8 @@
             function unlockAudio() {
                 const unlockPromise = Promise.all([
                     normalSound.play().catch(() => { }),
-                    vipSound.play().catch(() => { })
+                    vipSound.play().catch(() => { }),
+                    lowStockSound.play().catch(() => { })
                 ]);
 
                 unlockPromise.then(() => {
@@ -1247,6 +1253,8 @@
                     normalSound.currentTime = 0;
                     vipSound.pause();
                     vipSound.currentTime = 0;
+                    lowStockSound.pause();
+                    lowStockSound.currentTime = 0;
                 }).catch(() => { });
 
                 // Remove listener after first successful unlock
@@ -1273,14 +1281,20 @@
 
                     const notification = data[0];
                     const nData = notification.data;
-
+                    const isLowStock = nData.type === 'low-stock';
                     const isVip = (nData.order_type || '').toLowerCase() === 'vip';
 
                     // Stop previous sounds
                     stopAllSounds();
 
                     // Select sound
-                    currentSound = isVip ? vipSound : normalSound;
+                    if (isLowStock) {
+                        currentSound = lowStockSound;
+                    } else if (isVip) {
+                        currentSound = vipSound;
+                    } else {
+                        currentSound = normalSound;
+                    }
 
                     currentSound.currentTime = 0;
                     currentSound.loop = true;
@@ -1290,33 +1304,71 @@
                         console.log("Sound play failed:", err);
                     });
 
-                    Swal.fire({
-                        icon: isVip ? 'warning' : 'success',
-                        title: isVip ? '👑 VIP Order Assigned!' : '🛎 New Order Assigned',
-                        html: `
-                    <strong>Token #${nData.token_no}</strong><br>
-                    Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
-                    ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
-                    ${isVip ? '<strong style="color:#ff8a00;">VIP ORDER</strong><br>' : ''}
-                    ${nData.message}
-                `,
-                        confirmButtonText: 'OK',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        timer: 10000,
-                        timerProgressBar: true
-                    }).then(async (result) => {
-                        stopAllSounds();
-                        await markReadAndDelete(notification.id);
-                        isProcessing = false;
+                    if (isLowStock) {
 
-                        if (result.isConfirmed) {
-                            let url = '/' + nData.restaurant_slug;
-                            if (nData.branch_slug) url += '/' + nData.branch_slug;
-                            url += '/orders/' + nData.order_id;
-                            window.location.href = url;
-                        }
-                    });
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '📦 Low Stock Alert',
+                            html: `
+                            <strong>Item:</strong> ${nData.item_name}<br>
+                            <strong>Remaining Stock:</strong> ${nData.remaining_stock}<br>
+                            <strong>Minimum Stock:</strong> ${nData.minimum_stock}<br><br>
+                            ${nData.message}
+                        `,
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            timer: 10000,
+                            timerProgressBar: true
+
+                        }).then(async () => {
+
+                            stopAllSounds();
+                            await markReadAndDelete(notification.id);
+                            isProcessing = false;
+
+                        });
+
+                    } else {
+
+                        Swal.fire({
+                            icon: isVip ? 'warning' : 'success',
+                            title: isVip ? '👑 VIP Order Assigned!' : '🛎 New Order Assigned',
+                            html: `
+                                <strong>Token #${nData.token_no}</strong><br>
+                                Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
+                                ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
+                                ${isVip ? '<strong style="color:#ff8a00;">VIP ORDER</strong><br>' : ''}
+                                ${nData.message}
+                            `,
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            timer: 10000,
+                            timerProgressBar: true
+
+                        }).then(async (result) => {
+
+                            stopAllSounds();
+                            await markReadAndDelete(notification.id);
+                            isProcessing = false;
+
+                            if (result.isConfirmed) {
+
+                                let url = '/' + nData.restaurant_slug;
+
+                                if (nData.branch_slug) {
+                                    url += '/' + nData.branch_slug;
+                                }
+
+                                url += '/orders/' + nData.order_id;
+
+                                window.location.href = url;
+                            }
+
+                        });
+
+                    }
 
                     // Safety
                     setTimeout(() => {
@@ -1335,7 +1387,7 @@
             }
 
             function stopAllSounds() {
-                [normalSound, vipSound].forEach(sound => {
+                [normalSound, vipSound, lowStockSound].forEach(sound => {
                     if (sound) {
                         sound.pause();
                         sound.currentTime = 0;

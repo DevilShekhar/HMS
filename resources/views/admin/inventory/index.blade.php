@@ -50,6 +50,7 @@
                             @endif
 
                             {{-- Bulk Upload --}}
+                            @can('bulk-upload')
                             @if($branchSlug)
                                     <a href="{{ route('branch.inventory.import.form', [
                                     'restaurant' => $restaurantSlug,
@@ -68,6 +69,7 @@
                                         Bulk Upload
                                     </a>
                             @endif
+
 
                             {{-- Add More Items --}}
                             @if($branchSlug)
@@ -90,6 +92,7 @@
                                         Add More Items
                                     </a>
                             @endif
+                            @endcan
 
                         @endcan
                     </div>
