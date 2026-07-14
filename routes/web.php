@@ -259,6 +259,8 @@ Route::prefix('{restaurant}')
             ->name('restaurant.inventory.sample');
         Route::get('/inventory/export', [InventoryController::class, 'export'])
             ->name('restaurant.inventory.export');
+        Route::post('orders/{order}/rating', [OrderController::class, 'storeRating'])
+            ->name('restaurant.orders.rating');
 
         Route::middleware(['auth'])->group(function () {
 
@@ -310,6 +312,12 @@ Route::prefix('{restaurant}')
                     ->name('branch.inventory.sample');
                 Route::get('/inventory/export', [InventoryController::class, 'export'])
                     ->name('branch.inventory.export');
+
+                Route::post('orders/{order}/rating', [OrderController::class, 'storeRating'])
+                    ->name('branch.orders.rating');
+
+                Route::get('customer-feedback', [OrderController::class, 'ratings'])
+                    ->name('branch.customer-feedback');
                 Route::resource('categories', CategoryController::class)->names([
                     'index' => 'branch.categories.index',
                     'create' => 'branch.categories.create',

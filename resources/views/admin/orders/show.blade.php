@@ -41,6 +41,23 @@
                                 {{ ucfirst($order->status) }}
                             </span>
                         @endif
+
+                        @if($order->status == 'completed' && !$order->rating)
+                            <button class="btn btn-warning btn-lg rating-btn" data-bs-toggle="modal"
+                                data-bs-target="#ratingModal">
+                                <span class="btn-content">
+                                    <span class="btn-icon">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </span>
+                                    <span class="btn-text">Share Your Experience</span>
+                                    <span class="btn-sparkle">
+                                        <i class="fas fa-sparkles"></i>
+                                    </span>
+                                </span>
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -75,8 +92,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                            {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                            transition: var(--de-transition);">
+                                                                    {{ $currentStep >= 1 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                                                    transition: var(--de-transition);">
                                     @if($currentStep > 1)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -105,8 +122,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                            {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                            transition: var(--de-transition);">
+                                                                    {{ $currentStep >= 2 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                                                    transition: var(--de-transition);">
                                     @if($currentStep > 2)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -135,8 +152,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                            {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                            transition: var(--de-transition);">
+                                                                    {{ $currentStep >= 3 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                                                    transition: var(--de-transition);">
                                     @if($currentStep > 3)
                                         <i class="fas fa-check"></i>
                                     @else
@@ -165,8 +182,8 @@
                             <div
                                 style="text-align: center; flex: 1; position: relative; z-index: 2; min-width: 0; padding: 0 2px;">
                                 <div style="width: 40px; height: 40px; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-                                            {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
-                                            transition: var(--de-transition);">
+                                                                    {{ $currentStep >= 4 ? 'background: #32CD32; color: #fff; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);' : 'background: var(--de-bg); color: var(--de-text-light); border: 2px solid var(--de-border);' }}
+                                                                    transition: var(--de-transition);">
                                     <i class="fas fa-check-circle"></i>
                                 </div>
                                 <div
@@ -184,7 +201,7 @@
                             style="text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--de-border);">
                             <span
                                 style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 50px;
-                            background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
+                                                    background: #32CD32; color: #fff; font-weight: 600; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(50, 205, 50, 0.35);">
                                 <i class="fas fa-circle"
                                     style="font-size: 0.5rem; animation: pulse-green 1.5s ease-in-out infinite;"></i>
                                 <span style="text-transform: uppercase;">
@@ -342,10 +359,10 @@
                             <div class="col-lg-4 mb-3 mb-lg-0">
                                 <div class="d-flex align-items-center">
                                     @if(auth()->user()->role != 'chef')
-                                    <div class="icon rounded-3 p-3 me-3"
-                                        style="background: rgba(255, 107, 53, 0.1); color: var(--de-primary);">
-                                        <i class="fas fa-wallet fa-lg"></i>
-                                    </div>
+                                        <div class="icon rounded-3 p-3 me-3"
+                                            style="background: rgba(255, 107, 53, 0.1); color: var(--de-primary);">
+                                            <i class="fas fa-wallet fa-lg"></i>
+                                        </div>
 
                                         <div>
                                             <small class="d-block"
@@ -436,6 +453,157 @@
 
         </div>
     </div>
+    <div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+
+                @if(auth()->user()->branch_id)
+                            <form method="POST" action="{{ route('branch.orders.rating', [
+                        'restaurant' => $restaurant->slug,
+                        'branch' => $order->branch->slug,
+                        'order' => $order->id
+                    ]) }}">
+                @else
+                                    <form method="POST" action="{{ route('restaurant.orders.rating', [
+                            'restaurant' => $restaurant->slug,
+                            'order' => $order->id
+                        ]) }}">
+                    @endif
+
+                        @csrf
+
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <h5 class="modal-title fw-bold" id="ratingModalLabel" style="color: #1a1a2e;">
+                                    <i class="fas fa-heart me-2" style="color: #f59e0b;"></i>
+                                    <span
+                                        style="background: linear-gradient(135deg, #f59e0b, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                                        We Value Your Feedback
+                                    </span>
+                                </h5>
+                                <small class="text-muted" style="font-size: 0.85rem;">
+                                    <i class="fas fa-quote-left me-1" style="color: #f59e0b; opacity: 0.5;"></i>
+                                    Your opinion helps us create better experiences
+                                </small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body pt-2 pb-1">
+
+                            <!-- Order Summary with Elegant Design -->
+                            <div class="order-summary-card mb-4 p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="text-muted small d-block" style="font-size: 0.75rem;">
+                                            <i class="fas fa-receipt me-1"></i> Order Reference
+                                        </span>
+                                        <div class="fw-bold" style="color: #1a1a2e; font-size: 1rem;">
+                                            #{{ $order->id }} • {{ $order->branch->name ?? $restaurant->name }}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge completed-badge">
+                                            <i class="fas fa-check-circle me-1"></i> Delivered
+                                        </span>
+                                        <div class="text-muted small mt-1">
+                                            <i class="far fa-calendar-alt me-1"></i>
+                                            {{ $order->updated_at->format('M d, Y') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Star Rating Section -->
+                            <div class="text-center mb-3">
+                                <div class="rating-header">
+                                    <span class="rating-emoji">😊</span>
+                                    <h6 class="fw-bold mb-1" style="color: #1a1a2e; font-size: 1.1rem;">
+                                        How was your experience?
+                                    </h6>
+                                    <p class="text-muted small" style="font-size: 0.8rem;">
+                                        Tap a star to share your honest feedback
+                                    </p>
+                                </div>
+
+                                <div class="rating-stars-container">
+                                    <div class="rating-stars d-flex justify-content-center gap-2">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <div class="star-wrapper" data-rating="{{ $i }}">
+                                                <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}"
+                                                    class="d-none">
+                                                <label for="star{{ $i }}" class="star-label">
+                                                    <i class="fas fa-star"></i>
+                                                </label>
+                                                <span class="star-tooltip">
+                                                    @if($i == 1)
+                                                        <i class="fas fa-angry" style="color: #ef4444;"></i> Poor
+                                                    @elseif($i == 2)
+                                                        <i class="fas fa-frown" style="color: #f97316;"></i> Fair
+                                                    @elseif($i == 3)
+                                                        <i class="fas fa-meh" style="color: #eab308;"></i> Good
+                                                    @elseif($i == 4)
+                                                        <i class="fas fa-smile" style="color: #22c55e;"></i> Great
+                                                    @else
+                                                        <i class="fas fa-crown" style="color: #f59e0b;"></i> Outstanding
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        @endfor
+                                    </div>
+
+                                    <!-- Dynamic Rating Message -->
+                                    <div id="ratingMessage" class="rating-message mt-2">
+                                        <i class="fas fa-star me-1" style="color: #f59e0b; opacity: 0.6;"></i>
+                                        Select a rating to get started
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Feedback Section -->
+                            <div class="feedback-section mt-3">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="fas fa-pencil-alt" style="color: #f59e0b; font-size: 0.9rem;"></i>
+                                    <label class="fw-semibold" style="color: #1a1a2e; font-size: 0.95rem; margin: 0;">
+                                        Share Your Experience
+                                    </label>
+                                    <span class="badge"
+                                        style="background: #f59e0b; color: white; font-size: 0.6rem; padding: 2px 8px;">
+                                        Optional
+                                    </span>
+                                </div>
+                                <div class="position-relative">
+                                    <textarea class="form-control feedback-input" rows="3" name="remark"
+                                        placeholder="Tell us what you loved or how we can improve... We're all ears! 👂"
+                                        style="resize: none; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; font-size: 0.9rem; transition: all 0.3s;"></textarea>
+                                    <div class="char-counter" id="charCounter">
+                                        <span id="charCount">0</span> / 500
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer border-0 pt-1 pb-3">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 cancel-btn"
+                                data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i> Maybe Later
+                            </button>
+                            <button type="submit" class="btn rounded-pill px-5 submit-btn" id="submitFeedback">
+                                <span class="submit-btn-content">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    <span>Submit Feedback</span>
+                                    <i class="fas fa-sparkles ms-2"></i>
+                                </span>
+                            </button>
+                        </div>
+
+                    </form>
+
+            </div>
+        </div>
+    </div>
+
 @endsection
 {{-- notification scritp --}}
 <audio id="notificationSound" preload="auto">
@@ -542,5 +710,215 @@
                 }
             });
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ratingInputs = document.querySelectorAll('input[name="rating"]');
+        const messageEl = document.getElementById('ratingMessage');
+        const textarea = document.querySelector('.feedback-input');
+        const charCount = document.getElementById('charCount');
+        const submitBtn = document.getElementById('submitFeedback');
+        const modal = document.getElementById('ratingModal');
+
+        // Rating data matching the frontend display
+        const ratingData = {
+            1: {
+                emoji: '😔',
+                label: 'Poor',
+                message: 'We appreciate your honesty. We\'ll work harder to improve!',
+                color: '#ef4444',
+                icon: 'fa-angry'
+            },
+            2: {
+                emoji: '🙁',
+                label: 'Fair',
+                message: 'Thank you for your feedback. We\'re committed to doing better.',
+                color: '#f97316',
+                icon: 'fa-frown'
+            },
+            3: {
+                emoji: '😊',
+                label: 'Good',
+                message: 'Good to know! We\'re always striving to exceed expectations.',
+                color: '#eab308',
+                icon: 'fa-meh'
+            },
+            4: {
+                emoji: '😄',
+                label: 'Great',
+                message: 'Wonderful! We\'re so glad you enjoyed your experience with us!',
+                color: '#22c55e',
+                icon: 'fa-smile'
+            },
+            5: {
+                emoji: '🌟',
+                label: 'Outstanding',
+                message: 'Absolutely amazing! Thank you for making our day! You\'re the best!',
+                color: '#f59e0b',
+                icon: 'fa-crown'
+            }
+        };
+
+        // ===== STAR RATING INTERACTION =====
+        ratingInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                const rating = parseInt(this.value);
+                const data = ratingData[rating];
+
+                // Update message with emoji and personalized text
+                messageEl.innerHTML = `
+                    <span style="font-size: 1.2rem;">${data.emoji}</span>
+                    <span style="color: ${data.color}; font-weight: 600;">${data.message}</span>
+                `;
+                messageEl.style.background = `rgba(${hexToRgb(data.color)}, 0.08)`;
+                messageEl.style.color = '#1a1a2e';
+                messageEl.style.border = `1px solid ${data.color}`;
+                messageEl.style.padding = '8px 20px';
+
+                // Create subtle celebration for 4-5 stars
+                if (rating >= 4) {
+                    createMiniCelebration();
+                }
+
+                // Enable submit button
+                submitBtn.disabled = false;
+            });
+
+            // Hover effect for star tooltips
+            input.addEventListener('mouseenter', function () {
+                const rating = parseInt(this.value);
+                const data = ratingData[rating];
+                if (!this.checked) {
+                    messageEl.innerHTML = `
+                        <span style="font-size: 1rem;">${data.emoji}</span>
+                        <span style="color: ${data.color};">${data.message}</span>
+                    `;
+                    messageEl.style.background = `rgba(${hexToRgb(data.color)}, 0.05)`;
+                    messageEl.style.border = `1px solid ${data.color}`;
+                }
+            });
+        });
+
+        // Reset message when leaving stars
+        document.querySelector('.rating-stars').addEventListener('mouseleave', function () {
+            const checked = document.querySelector('input[name="rating"]:checked');
+            if (!checked) {
+                messageEl.innerHTML = `
+                    <i class="fas fa-star me-1" style="color: #f59e0b; opacity: 0.6;"></i>
+                    Select a rating to get started
+                `;
+                messageEl.style.background = 'transparent';
+                messageEl.style.border = 'none';
+                messageEl.style.padding = '8px 16px';
+            }
+        });
+
+        // ===== CHARACTER COUNTER =====
+        textarea.addEventListener('input', function () {
+            const length = this.value.length;
+            charCount.textContent = length;
+
+            if (length > 450) {
+                document.querySelector('.char-counter').classList.add('limit-reached');
+            } else {
+                document.querySelector('.char-counter').classList.remove('limit-reached');
+            }
+
+            if (length >= 500) {
+                this.value = this.value.substring(0, 500);
+                charCount.textContent = 500;
+            }
+        });
+
+        // ===== FORM VALIDATION =====
+        submitBtn.addEventListener('click', function (e) {
+            const rating = document.querySelector('input[name="rating"]:checked');
+            if (!rating) {
+                e.preventDefault();
+                messageEl.innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2" style="color: #ef4444;"></i>
+                    <span style="color: #ef4444; font-weight: 600;">Please select a rating before submitting!</span>
+                `;
+                messageEl.style.background = 'rgba(239, 68, 68, 0.08)';
+                messageEl.style.border = '1px solid #ef4444';
+                messageEl.style.padding = '8px 20px';
+
+                // Shake animation
+                messageEl.classList.remove('shake-animation');
+                void messageEl.offsetWidth;
+                messageEl.classList.add('shake-animation');
+
+                // Scroll to rating section
+                document.querySelector('.rating-stars-container').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+
+        // ===== CONFETTI CELEBRATION =====
+        function createMiniCelebration() {
+            const colors = ['#f59e0b', '#f97316', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#fbbf24'];
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+
+            for (let i = 0; i < 30; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.top = '-10px';
+                piece.style.width = Math.random() * 8 + 4 + 'px';
+                piece.style.height = Math.random() * 8 + 4 + 'px';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                piece.style.animationDuration = Math.random() * 2 + 1.5 + 's';
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                container.appendChild(piece);
+            }
+
+            setTimeout(() => {
+                container.remove();
+            }, 3000);
+        }
+
+        // ===== HELPER FUNCTIONS =====
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+
+        // ===== RESET ON MODAL CLOSE =====
+        modal.addEventListener('hidden.bs.modal', function () {
+            // Don't reset if form was submitted
+            if (!document.querySelector('.submit-btn:disabled')) {
+                const checked = document.querySelector('input[name="rating"]:checked');
+                if (!checked) {
+                    messageEl.innerHTML = `
+                        <i class="fas fa-star me-1" style="color: #f59e0b; opacity: 0.6;"></i>
+                        Select a rating to get started
+                    `;
+                    messageEl.style.background = 'transparent';
+                    messageEl.style.border = 'none';
+                    messageEl.style.padding = '8px 16px';
+                }
+            }
+        });
+
+        // ===== SUBMIT SUCCESS HANDLING =====
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="submit-btn-content">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    <span>Submitting...</span>
+                </span>
+            `;
+        });
     });
 </script>

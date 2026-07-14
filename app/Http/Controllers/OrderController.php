@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderRating;
 use App\Models\Restaurant;
 use App\Models\RestaurantTable;
 use App\Models\TableAllocation;
@@ -699,7 +700,7 @@ class OrderController extends Controller
     {
         return response()->json(
             Auth::user()->unreadNotifications()
-                ->whereIn('data->type', ['order-notification', 'order-status-notification','low-stock'])
+                ->whereIn('data->type', ['order-notification', 'order-status-notification', 'low-stock'])
                 ->latest()
                 ->get()
         );
@@ -1030,5 +1031,61 @@ class OrderController extends Controller
                 $waiterHead->notify(new NewOrderAssignedNotification($order));
             }
         }
+    }
+
+    public function storeRating(Request $request, $restaurant, $branch, Order $order)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'remark' => 'nullable|string|max:1000',
+        ]);
+
+        if ($order->status != 'completed') {
+            return back()->with('error', 'Only completed orders can be rated.');
+        }
+
+        OrderRating::updateOrCreate(
+            [
+                'order_id' => $order->id,
+            ],
+            [
+                'restaurant_id' => $order->restaurant_id,
+                'branch_id' => $order->branch_id,
+                'rating' => $request->rating,
+                'remark' => $request->remark,
+            ]
+        );
+
+        return back()->with(
+            'success',
+            '❤️ We truly appreciate your feedback! Your insights help us create amazing experiences.'
+        );
+    }
+
+    public function ratings()
+    {
+        $user = Auth::user();
+        $restaurant = app('restaurant');
+
+        $ratings = OrderRating::with([
+            'order.items.menuItem',
+            'order.branch.country',
+            'customer',
+        ])
+            ->where('restaurant_id', $restaurant->id);
+
+        // Branch manager / branch users
+        if ($user->branch_id) {
+            $ratings->where('branch_id', $user->branch_id);
+        }
+
+        $ratings = $ratings
+            ->latest()
+            ->paginate(10);
+
+        return view(
+            'admin.orders.ratings',
+            compact('ratings', 'restaurant')
+        );
     }
 }
