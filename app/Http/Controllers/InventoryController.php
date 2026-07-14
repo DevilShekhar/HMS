@@ -9,8 +9,12 @@ use App\Models\Branch;
 use App\Models\InventoryItem;
 use App\Models\InventoryTransaction;
 use App\Models\Restaurant;
+use App\Models\User;
+use App\Notifications\LowStockNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -330,6 +334,40 @@ class InventoryController extends Controller
         $inventory->update([
             'updated_by' => Auth::id(),
         ]);
+        $inventory->refresh();
+        $alreadySent = DB::table('notifications')
+            ->where('type', 'App\\Notifications\\LowStockNotification')
+            ->whereJsonContains('data->inventory_id', $inventory->id)
+            ->whereNull('read_at')
+            ->exists();
+
+        if (
+            ! $alreadySent &&
+            $inventory->remaining_stock <= $inventory->minimum_stock
+        ) {
+
+            $users = User::query()->where('restaurant_id', $inventory->restaurant_id)
+                ->where(function ($q) use ($inventory) {
+                    $q->where('role', 'owner')
+                        ->orWhere(function ($q2) use ($inventory) {
+                            $q2->where('role', 'branch_manager')
+                                ->where('branch_id', $inventory->branch_id);
+                        });
+                })
+                ->get();
+
+            foreach ($users as $user) {
+
+                $user->notify(new LowStockNotification($inventory));
+
+                Log::info('Notification sent', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'remaining_stock' => $inventory->remaining_stock,
+                    'minimum_stock' => $inventory->minimum_stock,
+                ]);
+            }
+        }
 
         return redirect()
             ->route(

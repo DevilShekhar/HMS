@@ -699,7 +699,7 @@ class OrderController extends Controller
     {
         return response()->json(
             Auth::user()->unreadNotifications()
-                ->whereIn('data->type', ['order-notification', 'order-status-notification'])
+                ->whereIn('data->type', ['order-notification', 'order-status-notification','low-stock'])
                 ->latest()
                 ->get()
         );

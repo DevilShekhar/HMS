@@ -9,7 +9,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable,HasRoles;
+    use HasFactory, HasRoles,Notifiable;
 
     protected $fillable = [
         'name',
@@ -62,18 +62,19 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
     public function branches()
     {
-        return $this->hasMany(Branch::class,'owner_id');
+        return $this->hasMany(Branch::class, 'owner_id');
     }
 
     public function managedBranch()
     {
-        return $this->hasOne(Branch::class,'branch_manager_id');
+        return $this->hasOne(Branch::class, 'branch_manager_id');
     }
+
     public function orders()
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
-
 }
