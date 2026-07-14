@@ -16,7 +16,7 @@
                         <p>Select metrics below to filter pipeline aggregates in real-time</p>
                     </div>
                 </div>
-                <div class="header-right">                       
+                <div class="header-right">
                     <button class="premium-back-btn" id="downloadPdfBtn">
                         <i class="fas fa-plus"></i>
                         Download PDF
@@ -158,13 +158,26 @@
 @endsection
 @push('scripts')
     <script>
+        // Add this function at the top of your script
+        function getCurrencySymbol() {
+            return window.currentCurrencySymbol || '₹';
+        }
+
+        // Update the formatCurrency function
+        function formatCurrency(amount) {
+            const symbol = getCurrencySymbol();
+            return symbol + parseFloat(amount).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
         $(document).ready(function () {
             let currentRestaurantSlug = null;
             let currentBranchId = null;
             let rawDataCache = {};
             const ITEMS_PER_PAGE = 5;
             let currentDateFrom = null;
-            let currentDateTo = null;           
+            let currentDateTo = null;
             function setDefaultDates() {
                 const today = new Date();
                 const thirtyDaysAgo = new Date();
@@ -191,7 +204,7 @@
                     return;
                 }
                 currentDateFrom = fromDate;
-                currentDateTo = toDate;                
+                currentDateTo = toDate;
                 updateDateRangeDisplay(fromDate, toDate);
                 if (currentBranchId) {
                     updateSelectedInsights();
@@ -214,7 +227,7 @@
                 if (currentBranchId) {
                     updateSelectedInsights();
                 }
-            });          
+            });
             function updateDateRangeDisplay(fromDate, toDate) {
                 const from = new Date(fromDate);
                 const to = new Date(toDate);
@@ -251,6 +264,17 @@
             $('#branch_id').change(function () {
                 currentBranchId = $(this).val();
                 if (currentBranchId) {
+                    // Get the branch currency when selecting
+                    $.ajax({
+                        url: `/insights/restaurants/${currentRestaurantSlug}/branches/${currentBranchId}/currency`,
+                        method: 'GET',
+                        success: function (res) {
+                            if (res.currency_symbol) {
+                                window.currentCurrencySymbol = res.currency_symbol;
+                            }
+                        }
+                    });
+
                     $('#insightNav').show();
                     $('#branchPrompt').hide();
                     $('#placeholder').show();
@@ -274,17 +298,17 @@
             });
             function resetContentArea() {
                 $('#insightContent .panel-body').html(`
-                    <div class="branch-prompt" id="branchPrompt">
-                        <span class="prompt-icon">📍</span>
-                        <h5>Select a Branch to Begin</h5>
-                        <p>Please choose a restaurant group and subsidiary branch above to start exploring metrics.</p>
-                    </div>
-                    <div class="placeholder-empty" id="placeholder" style="display:none;">
-                        <span class="empty-icon">📊</span>
-                        <h5>Assemble Dashboard Elements</h5>
-                        <p>Select metrics above to organize data logs.</p>
-                    </div>
-                `);
+                                        <div class="branch-prompt" id="branchPrompt">
+                                            <span class="prompt-icon">📍</span>
+                                            <h5>Select a Branch to Begin</h5>
+                                            <p>Please choose a restaurant group and subsidiary branch above to start exploring metrics.</p>
+                                        </div>
+                                        <div class="placeholder-empty" id="placeholder" style="display:none;">
+                                            <span class="empty-icon">📊</span>
+                                            <h5>Assemble Dashboard Elements</h5>
+                                            <p>Select metrics above to organize data logs.</p>
+                                        </div>
+                                    `);
             }
             function updateSelectedInsights() {
                 let selectedTypes = [];
@@ -293,25 +317,25 @@
                 });
                 if (selectedTypes.length === 0) {
                     $('#insightContent .panel-body').html(`
-                        <div class="placeholder-empty">
-                            <span class="empty-icon">📊</span>
-                            <h5>Interactive Telemetry Builder</h5>
-                            <p>Toggle checkmark nodes above to load multiple contextual tabular frames concurrently.</p>
-                        </div>
-                    `);
+                                            <div class="placeholder-empty">
+                                                <span class="empty-icon">📊</span>
+                                                <h5>Interactive Telemetry Builder</h5>
+                                                <p>Toggle checkmark nodes above to load multiple contextual tabular frames concurrently.</p>
+                                            </div>
+                                        `);
                     return;
                 }
                 let containersHtml = '';
                 selectedTypes.forEach(type => {
                     containersHtml += `<div id="block-${type}" class="insight-block">
-                        <div class="text-center py-4 text-muted">
-                            <div class="spinner"></div>
-                                Fetching data for <strong>${type}</strong>...
-                            </div>
-                        </div>`;
+                                            <div class="text-center py-4 text-muted">
+                                                <div class="spinner"></div>
+                                                    Fetching data for <strong>${type}</strong>...
+                                                </div>
+                                            </div>`;
                 });
                 $('#insightContent .panel-body').html(containersHtml);
-                selectedTypes.forEach(type => {                    
+                selectedTypes.forEach(type => {
                     let requestData = {
                         branch_id: currentBranchId,
                         type: type
@@ -328,6 +352,10 @@
                         data: requestData,
                         success: function (res) {
                             console.log(`📊 ${type} data received:`, res);
+                            if (res.currency_symbol) {
+                                window.currentCurrencySymbol = res.currency_symbol;
+                            }
+
                             // Store the raw response
                             rawDataCache[type] = res;
                             // For menu type, ensure we have the right structure
@@ -358,15 +386,15 @@
                             console.error(`❌ Error fetching ${type}:`, error);
                             console.error('Response:', xhr.responseText);
                             $(`#block-${type}`).html(`
-                                <div class="alert alert-danger" role="alert" style="border-radius:var(--radius);border:1px solid #fca5a5;background:#fef2f2;padding:1rem 1.25rem;">
-                                    <strong>!</strong> Failed to fetch data for <strong>${type.toUpperCase()}</strong>
-                                    <br><small>Error: ${error || 'Unknown error'}</small>
-                                </div>
-                            `);
+                                                    <div class="alert alert-danger" role="alert" style="border-radius:var(--radius);border:1px solid #fca5a5;background:#fef2f2;padding:1rem 1.25rem;">
+                                                        <strong>!</strong> Failed to fetch data for <strong>${type.toUpperCase()}</strong>
+                                                        <br><small>Error: ${error || 'Unknown error'}</small>
+                                                    </div>
+                                                `);
                         }
                     });
                 });
-            }            
+            }
             $(document).on('click', '.pagination .page-link', function (e) {
                 e.preventDefault();
                 let type = $(this).data('type');
@@ -374,12 +402,24 @@
                 if (targetPage) {
                     renderPaginatedBlock(type, targetPage);
                 }
-            });            
+            });
             function renderPaginatedBlock(type, page) {
                 let data = rawDataCache[type];
+
+                // Get currency from the stored data
+                let currencySymbol = data.currency_symbol || window.currentCurrencySymbol || '₹';
+
+                // Helper function to format price with dynamic currency
+                function formatPrice(amount) {
+                    return currencySymbol + parseFloat(amount).toLocaleString('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+
                 let html = '';
+
                 if (type === 'menu') {
-                    console.log('🔄 Rendering menu with data:', data);
                     let items = [];
                     if (data && data.menu_items) {
                         items = data.menu_items;
@@ -393,83 +433,87 @@
                             }
                         }
                     }
-                    console.log(`📋 Found ${items.length} menu items`);
+
                     let totalItems = items.length;
                     let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
                     let startIndex = (page - 1) * ITEMS_PER_PAGE;
                     let paginatedItems = items.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
                     html = `
-                            <div class="block-header">
-                                <span class="block-icon">🍽️</span>
-                                <span class="block-title">Menu Structure Records</span>
-                                <span class="block-badge">${totalItems} items</span>
-                            </div>
-                            <div class="table-wrapper">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Item Identity</th>
-                                            <th>Unit Standard Price</th>
-                                            <th>Category</th>
-                                            <th style="text-align:right;">Operational Node State</th>
-                                        </tr>
-                                    </thead>
+                        <div class="block-header">
+                            <span class="block-icon">🍽️</span>
+                            <span class="block-title">Menu Structure Records</span>
+                            <span class="block-badge">${totalItems} items</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item Identity</th>
+                                        <th>Unit Standard Price</th>
+                                        <th>Category</th>
+                                        <th style="text-align:right;">Operational Node State</th>
+                                    </tr>
+                                </thead>
                                 <tbody>`;
-                                if (paginatedItems.length > 0) {
-                                    paginatedItems.forEach(item => {
-                                    let categoryName = 'N/A';
-                                    if (item.category) {
-                                        categoryName = item.category.name || 'N/A';
-                                    } else if (item.category_name) {
-                                        categoryName = item.category_name;
-                                    }
-                                    html += `
-                                        <tr>
-                                            <td><strong>${item.name || 'Unnamed Item'}</strong></td>
-                                            <td class="price">₹${parseFloat(item.price || 0).toLocaleString('en-IN')}</td>
-                                            <td>${categoryName}</td>
-                                            <td style="text-align:right;">
-                                                <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
-                                                <span class="dot"></span>
-                                                    ${item.is_active ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </td>
-                                        </tr>`;
-                                });
-                                } else {
-                                    html += `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--gray-500);">
-                                        No menu records found.
-                                    </td></tr>`;
-                                }
-                                html += `</tbody></table></div>`;
-                                if (totalPages > 1) {
-                                    html += buildPagination(type, page, totalPages);
-                                }
+
+                    if (paginatedItems.length > 0) {
+                        paginatedItems.forEach(item => {
+                            let categoryName = 'N/A';
+                            if (item.category) {
+                                categoryName = item.category.name || 'N/A';
+                            } else if (item.category_name) {
+                                categoryName = item.category_name;
                             }
-                            else if (type === 'orders') {
-                                let orders = data.orders || [];
-                                let totalItems = orders.length;
-                                let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
-                                let startIndex = (page - 1) * ITEMS_PER_PAGE;
-                                let paginatedOrders = orders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-                                html = `
-                                    <div class="block-header">
-                                        <span class="block-icon">📦</span>
-                                        <span class="block-title">Live Order Execution Logs</span>
-                                        <span class="block-badge">${totalItems} orders</span>
-                                    </div>
-                                    <div class="table-wrapper">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Workflow Reference</th>
-                                                    <th>Customer Context</th>
-                                                    <th>Gross Invoice Value</th>
-                                                    <th>State Status</th>
-                                                    <th style="text-align:right;">Date Clocked</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>`;
+                            html += `
+                                <tr>
+                                    <td><strong>${item.name || 'Unnamed Item'}</strong></td>
+                                    <td class="price">${formatPrice(item.price)}</td>
+                                    <td>${categoryName}</td>
+                                    <td style="text-align:right;">
+                                        <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
+                                            <span class="dot"></span>
+                                            ${item.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </td>
+                                </tr>`;
+                        });
+                    } else {
+                        html += `<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--gray-500);">
+                            No menu records found.
+                        </td></tr>`;
+                    }
+                    html += `</tbody></table></div>`;
+
+                    if (totalPages > 1) {
+                        html += buildPagination(type, page, totalPages);
+                    }
+                }
+                else if (type === 'orders') {
+                    let orders = data.orders || [];
+                    let totalItems = orders.length;
+                    let totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+                    let startIndex = (page - 1) * ITEMS_PER_PAGE;
+                    let paginatedOrders = orders.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+                    html = `
+                        <div class="block-header">
+                            <span class="block-icon">📦</span>
+                            <span class="block-title">Live Order Execution Logs</span>
+                            <span class="block-badge">${totalItems} orders</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Workflow Reference</th>
+                                        <th>Customer Context</th>
+                                        <th>Gross Invoice Value</th>
+                                        <th>State Status</th>
+                                        <th style="text-align:right;">Date Clocked</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
 
                     if (paginatedOrders.length > 0) {
                         paginatedOrders.forEach(order => {
@@ -478,18 +522,18 @@
                             if (order.status === 'pending') badgeClass = 'pending';
 
                             html += `
-                                            <tr>
-                                                <td><span class="order-id">#${order.id}</span></td>
-                                                <td>${order.customer_name || '<span style="color:var(--gray-400);">Anonymous</span>'}</td>
-                                                <td class="price">₹${parseFloat(order.total).toLocaleString('en-IN')}</td>
-                                                <td>
-                                                    <span class="status-badge ${badgeClass}">
-                                                        <span class="dot"></span>
-                                                        ${order.status}
-                                                    </span>
-                                                </td>
-                                                <td style="text-align:right;color:var(--gray-500);font-size:0.8rem;">${new Date(order.created_at).toLocaleDateString('en-IN')}</td>
-                                            </tr>`;
+                                <tr>
+                                    <td><span class="order-id">#${order.id}</span></td>
+                                    <td>${order.customer_name || '<span style="color:var(--gray-400);">Anonymous</span>'}</td>
+                                    <td class="price">${formatPrice(order.total)}</td>
+                                    <td>
+                                        <span class="status-badge ${badgeClass}">
+                                            <span class="dot"></span>
+                                            ${order.status}
+                                        </span>
+                                    </td>
+                                    <td style="text-align:right;color:var(--gray-500);font-size:0.8rem;">${new Date(order.created_at).toLocaleDateString('en-IN')}</td>
+                                </tr>`;
                         });
                     } else {
                         html += `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--gray-500);">No orders found for the selected date range.</td></tr>`;
@@ -502,26 +546,26 @@
                 }
                 else if (type === 'revenue') {
                     html = `
-                                    <div class="block-header">
-                                        <span class="block-icon">💰</span>
-                                        <span class="block-title">Asset Financial Balance Deck</span>
-                                        ${currentDateFrom && currentDateTo ? `<span class="block-badge">${new Date(currentDateFrom).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${new Date(currentDateTo).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>` : ''}
-                                    </div>
-                                    <div class="revenue-grid">
-                                        <div class="revenue-stat">
-                                            <div class="stat-label">Todays Revenue</div>
-                                            <div class="stat-value">₹${parseFloat(data.revenue.today || 0).toLocaleString('en-IN')}</div>
-                                        </div>
-                                        <div class="revenue-stat">
-                                            <div class="stat-label">Monthly Revenue</div>
-                                            <div class="stat-value">₹${parseFloat(data.revenue.this_month || 0).toLocaleString('en-IN')}</div>
-                                        </div>
-                                        <div class="revenue-stat primary">
-                                            <div class="stat-label">LTV Cumulative Value</div>
-                                            <div class="stat-value">₹${parseFloat(data.revenue.total || 0).toLocaleString('en-IN')}</div>
-                                        </div>
-                                    </div>
-                                `;
+                        <div class="block-header">
+                            <span class="block-icon">💰</span>
+                            <span class="block-title">Asset Financial Balance Deck</span>
+                            ${currentDateFrom && currentDateTo ? `<span class="block-badge">${new Date(currentDateFrom).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${new Date(currentDateTo).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>` : ''}
+                        </div>
+                        <div class="revenue-grid">
+                            <div class="revenue-stat">
+                                <div class="stat-label">Todays Revenue</div>
+                                <div class="stat-value">${formatPrice(data.revenue.today || 0)}</div>
+                            </div>
+                            <div class="revenue-stat">
+                                <div class="stat-label">Monthly Revenue</div>
+                                <div class="stat-value">${formatPrice(data.revenue.this_month || 0)}</div>
+                            </div>
+                            <div class="revenue-stat primary">
+                                <div class="stat-label">LTV Cumulative Value</div>
+                                <div class="stat-value">${formatPrice(data.revenue.total || 0)}</div>
+                            </div>
+                        </div>
+                    `;
                 }
                 else if (type === 'inventory') {
                     let items = data.inventory && data.inventory.items ? data.inventory.items : [];
@@ -537,45 +581,45 @@
                     let inStockCount = summary.in_stock || 0;
 
                     html = `
-                                    <div class="block-header">
-                                        <span class="block-icon">📦</span>
-                                        <span class="block-title">Supply-Chain Stock Balances</span>
-                                        <span class="block-badge">${totalItems} items</span>
-                                    </div>
+                        <div class="block-header">
+                            <span class="block-icon">📦</span>
+                            <span class="block-title">Supply-Chain Stock Balances</span>
+                            <span class="block-badge">${totalItems} items</span>
+                        </div>
 
-                                    <div class="inventory-summary-grid">
-                                        <div class="inventory-summary-card total">
-                                            <div class="summary-number">${totalCount}</div>
-                                            <div class="summary-label">Total Items</div>
-                                        </div>
-                                        <div class="inventory-summary-card in-stock">
-                                            <div class="summary-number">${inStockCount}</div>
-                                            <div class="summary-label">In Stock</div>
-                                        </div>
-                                        <div class="inventory-summary-card low-stock">
-                                            <div class="summary-number">${lowStockCount}</div>
-                                            <div class="summary-label">Low Stock</div>
-                                        </div>
-                                        <div class="inventory-summary-card out-of-stock">
-                                            <div class="summary-number">${outOfStockCount}</div>
-                                            <div class="summary-label">Out of Stock</div>
-                                        </div>
-                                    </div>
+                        <div class="inventory-summary-grid">
+                            <div class="inventory-summary-card total">
+                                <div class="summary-number">${totalCount}</div>
+                                <div class="summary-label">Total Items</div>
+                            </div>
+                            <div class="inventory-summary-card in-stock">
+                                <div class="summary-number">${inStockCount}</div>
+                                <div class="summary-label">In Stock</div>
+                            </div>
+                            <div class="inventory-summary-card low-stock">
+                                <div class="summary-number">${lowStockCount}</div>
+                                <div class="summary-label">Low Stock</div>
+                            </div>
+                            <div class="inventory-summary-card out-of-stock">
+                                <div class="summary-number">${outOfStockCount}</div>
+                                <div class="summary-label">Out of Stock</div>
+                            </div>
+                        </div>
 
-                                    <div class="table-wrapper">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Item Name</th>
-                                                    <th style="text-align:center;">Total Stock</th>
-                                                    <th style="text-align:center;">Remaining Stock</th>
-                                                    <th style="text-align:center;">Minimum Stock</th>
-                                                    <th style="text-align:center;">Unit</th>
-                                                    <th style="text-align:center;">Status</th>
-                                                    <th style="text-align:center;">Is Active</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>`;
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th style="text-align:center;">Total Stock</th>
+                                        <th style="text-align:center;">Remaining Stock</th>
+                                        <th style="text-align:center;">Minimum Stock</th>
+                                        <th style="text-align:center;">Unit</th>
+                                        <th style="text-align:center;">Status</th>
+                                        <th style="text-align:center;">Is Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
 
                     if (paginatedItems.length > 0) {
                         paginatedItems.forEach(item => {
@@ -593,25 +637,25 @@
                             }
 
                             html += `
-                                            <tr>
-                                                <td><strong>${item.name}</strong></td>
-                                                <td style="text-align:center;font-weight:600;">${item.total_stock}</td>
-                                                <td style="text-align:center;font-weight:600;">${item.remaining_stock}</td>
-                                                <td style="text-align:center;font-weight:600;">${item.minimum_stock}</td>
-                                                <td style="text-align:center;">${item.unit || 'N/A'}</td>
-                                                <td style="text-align:center;">
-                                                    <span class="status-badge ${statusClass}">
-                                                        <span class="dot"></span>
-                                                        ${stockStatus}
-                                                    </span>
-                                                </td>
-                                                <td style="text-align:center;">
-                                                    <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
-                                                        <span class="dot"></span>
-                                                        ${item.is_active ? 'Yes' : 'No'}
-                                                    </span>
-                                                </td>
-                                            </tr>`;
+                                <tr>
+                                    <td><strong>${item.name}</strong></td>
+                                    <td style="text-align:center;font-weight:600;">${item.total_stock}</td>
+                                    <td style="text-align:center;font-weight:600;">${item.remaining_stock}</td>
+                                    <td style="text-align:center;font-weight:600;">${item.minimum_stock}</td>
+                                    <td style="text-align:center;">${item.unit || 'N/A'}</td>
+                                    <td style="text-align:center;">
+                                        <span class="status-badge ${statusClass}">
+                                            <span class="dot"></span>
+                                            ${stockStatus}
+                                        </span>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <span class="status-badge ${item.is_active ? 'active' : 'inactive'}">
+                                            <span class="dot"></span>
+                                            ${item.is_active ? 'Yes' : 'No'}
+                                        </span>
+                                    </td>
+                                </tr>`;
                         });
                     } else {
                         html += `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--gray-500);">No inventory items found.</td></tr>`;
@@ -631,29 +675,29 @@
             // ==========================================
             function buildPagination(type, currentPage, totalPages) {
                 let paginationHtml = `
-                                <div class="pagination-wrapper">
-                                    <div class="page-info">
-                                        Showing Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>
-                                    </div>
-                                    <ul class="pagination">
-                                        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                                            <a class="page-link" href="#" data-type="${type}" data-page="${currentPage - 1}">Previous</a>
-                                        </li>`;
+                                                    <div class="pagination-wrapper">
+                                                        <div class="page-info">
+                                                            Showing Page <strong>${currentPage}</strong> of <strong>${totalPages}</strong>
+                                                        </div>
+                                                        <ul class="pagination">
+                                                            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                                                                <a class="page-link" href="#" data-type="${type}" data-page="${currentPage - 1}">Previous</a>
+                                                            </li>`;
 
                 for (let i = 1; i <= totalPages; i++) {
                     paginationHtml += `
-                                    <li class="page-item ${currentPage === i ? 'active' : ''}">
-                                        <a class="page-link" href="#" data-type="${type}" data-page="${i}">${i}</a>
-                                    </li>`;
+                                                        <li class="page-item ${currentPage === i ? 'active' : ''}">
+                                                            <a class="page-link" href="#" data-type="${type}" data-page="${i}">${i}</a>
+                                                        </li>`;
                 }
 
                 paginationHtml += `
-                                        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                                            <a class="page-link" href="#" data-type="${type}" data-page="${currentPage + 1}">Next</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            `;
+                                                            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                                                                <a class="page-link" href="#" data-type="${type}" data-page="${currentPage + 1}">Next</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                `;
 
                 return paginationHtml;
             }

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InventoryExport;
+use App\Exports\InventorySampleExport;
+use App\Imports\InventoryImport;
 use App\Models\Branch;
 use App\Models\InventoryItem;
 use App\Models\InventoryTransaction;
@@ -9,26 +12,34 @@ use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryController extends Controller
 {
     public function index()
-{
-    $restaurant = app('restaurant');
-    $user = Auth::user();
+    {
+        $restaurant = app('restaurant');
+        $user = Auth::user();
 
-    $query = InventoryItem::with(['branch', 'creator', 'updater'])
-        ->where('restaurant_id', $restaurant->id);
+        $query = InventoryItem::with(['branch', 'creator', 'updater'])
+            ->where('restaurant_id', $restaurant->id);
 
-    // Branch Manager - only own branch inventory
-    if ($user->branch_id) {
-        $query->where('branch_id', $user->branch_id);
+        // Branch Manager - only own branch inventory
+        if ($user->branch_id) {
+            $query->where('branch_id', $user->branch_id);
+        }
+
+        // Check whether inventory exists
+        $hasInventory = (clone $query)->exists();
+
+        // Get paginated data
+        $items = $query->latest()->paginate(20);
+
+        return view('admin.inventory.index', compact(
+            'items',
+            'hasInventory'
+        ));
     }
-
-    $items = $query->latest()->paginate(20);
-
-    return view('admin.inventory.index', compact('items'));
-}
 
     public function create($restaurant, $branch = null)
     {
@@ -210,18 +221,29 @@ class InventoryController extends Controller
         }
     }
 
-    public function destroy($restaurant, $inventory)
+    public function destroy($restaurant, $branch = null, $inventory = null)
     {
+        if ($inventory === null) {
+            $inventory = $branch;
+            $branch = null;
+        }
+
         $inventory = InventoryItem::findOrFail($inventory);
 
         $inventory->update([
             'is_active' => 0,
         ]);
 
-        return back()->with(
-            'success',
-            'Inventory Deactivated Successfully'
-        );
+        if ($branch) {
+            return redirect()->route('branch.inventory.index', [
+                'restaurant' => $restaurant,
+                'branch' => $branch,
+            ])->with('success', 'Inventory deactivated successfully.');
+        }
+
+        return redirect()->route('restaurant.inventory.index', [
+            'restaurant' => $restaurant,
+        ])->with('success', 'Inventory deactivated successfully.');
     }
 
     public function stockInForm(Restaurant $restaurant, Branch $branch, InventoryItem $inventory)
@@ -330,6 +352,41 @@ class InventoryController extends Controller
         return view(
             'admin.inventory.transactions',
             compact('inventory', 'transactions')
+        );
+    }
+
+    public function importForm()
+    {
+        return view('admin.inventory.import');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        Excel::import(new InventoryImport, $request->file('file'));
+
+        return back()->with(
+            'success',
+            'Inventory imported successfully.'
+        );
+    }
+
+    public function downloadSample()
+    {
+        return Excel::download(
+            new InventorySampleExport,
+            'inventory_sample.xlsx'
+        );
+    }
+
+    public function export()
+    {
+        return Excel::download(
+            new InventoryExport,
+            'inventory.xlsx'
         );
     }
 }

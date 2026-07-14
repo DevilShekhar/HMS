@@ -1,5 +1,4 @@
 @can('create-branch')
-
     @extends('layouts.app')
     @section('content')
         <section class="section premium-dashboard">

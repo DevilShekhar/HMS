@@ -32,19 +32,22 @@ Route::get('/login', function () {
 
 Auth::routes();
 
+Route::get('/dashboard/branches/{restaurantId}', function ($restaurantId) {
+    $branches = Branch::query()
+        ->where('restaurant_id', $restaurantId)
+        ->orderBy('name')
+        ->get(['id', 'name']);
 
-Route::get('/dashboard/branches/{restaurant}', [DashboardController::class, 'getBranches'])
-    ->name('dashboard.branches');
-
-Route::get('/restaurants/{restaurant}/revenue-details',
-    [DashboardController::class, 'restaurantRevenueDetails']
-)->name('restaurants.revenue.details');
-
-Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
-    ->name('dashboard.data');
+    return response()->json($branches);
+})->name('dashboard.branches');
+Route::get('/dashboard/branches/{restaurant}', function ($restaurant) {
+    return Branch::query()->where('restaurant_id', $restaurant)
+        ->select('id', 'name')
+        ->get();
+});
 Route::get(
     '/restaurants/{restaurant}/revenue-details',
-    [DashboardController::class,'restaurantRevenueDetails']
+    [DashboardController::class, 'restaurantRevenueDetails']
 )->name('restaurants.revenue.details');
 
 Route::get('/dashboard/data', [DashboardController::class, 'dashboardData'])
@@ -246,6 +249,17 @@ Route::prefix('{restaurant}')
         Route::post('/{branch}/login', [LoginController::class, 'branchLogin'])
             ->name('branch.login.submit');
 
+        Route::get('/inventory/import', [InventoryController::class, 'importForm'])
+            ->name('restaurant.inventory.import.form');
+
+        Route::post('/inventory/import', [InventoryController::class, 'importStore'])
+            ->name('restaurant.inventory.import');
+
+        Route::get('/inventory/sample', [InventoryController::class, 'downloadSample'])
+            ->name('restaurant.inventory.sample');
+        Route::get('/inventory/export', [InventoryController::class, 'export'])
+            ->name('branch.inventory.export');
+
         Route::middleware(['auth'])->group(function () {
 
             Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('restaurant.dashboard');
@@ -286,6 +300,16 @@ Route::prefix('{restaurant}')
                 Route::get('/orders/{order}/bill', [OrderController::class, 'generateBill'])->name('branch.orders.bill');
                 Route::resource('table-allocations', TableAllocationController::class)
                     ->names('branch.table-allocations');
+
+                Route::get('/inventory/import', [InventoryController::class, 'importForm'])
+                    ->name('branch.inventory.import.form');
+
+                Route::post('/inventory/import', [InventoryController::class, 'importStore'])
+                    ->name('branch.inventory.import');
+                Route::get('/inventory/sample', [InventoryController::class, 'downloadSample'])
+                    ->name('branch.inventory.sample');
+                Route::get('/inventory/export', [InventoryController::class, 'export'])
+                    ->name('branch.inventory.export');
                 Route::resource('categories', CategoryController::class)->names([
                     'index' => 'branch.categories.index',
                     'create' => 'branch.categories.create',

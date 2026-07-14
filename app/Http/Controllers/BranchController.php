@@ -25,7 +25,7 @@ class BranchController extends Controller
         $query = Branch::with([
             'restaurant',
             'owner',
-            'manager','country'
+            'manager', 'country',
         ]);
 
         if ($user->role === 'owner') {
@@ -68,6 +68,10 @@ class BranchController extends Controller
      */
     public function create()
     {
+
+        if (! Auth::user()->hasRole('super_admin')) {
+            abort(403, 'Unauthorized access.');
+        }
         $restaurants = Restaurant::query()->where('status', 1)
             ->orderBy('name')
             ->get();
@@ -120,18 +124,6 @@ class BranchController extends Controller
             'gst_enabled' => 'nullable|boolean',
             'gst' => 'nullable|numeric|min:0|max:100',
         ]);
-
-        // $exists = Branch::query()->where('restaurant_id', $validated['restaurant_id'])
-        //     ->where('owner_id', $validated['owner_id'])
-        //     ->exists();
-
-        // if ($exists) {
-        //     return back()
-        //         ->withErrors([
-        //             'owner_id' => 'This owner is already assigned to the selected restaurant.',
-        //         ])
-        //         ->withInput();
-        // }
 
         $validated['is_active'] = 1;
         $validated['slug'] = Str::slug($validated['name']);
@@ -271,7 +263,7 @@ class BranchController extends Controller
                 'branch',
                 'restaurants',
                 'owners',
-                'managers', 'plans', 'currentSubscription','countries'
+                'managers', 'plans', 'currentSubscription', 'countries'
             )
         );
     }

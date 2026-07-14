@@ -74,7 +74,7 @@ class MenuItemController extends Controller
                 ->where('is_active', 1)
                 ->get();
 
-        } elseif ($user->role === 'branch_manager') {
+        } if ($user->role === 'branch_manager') {
 
             $branch = Branch::findOrFail($user->branch_id);
 
@@ -85,19 +85,26 @@ class MenuItemController extends Controller
                 ->where('is_active', 1)
                 ->get();
 
+            $menuItems = MenuItem::query()->where('restaurant_id', $restaurant->id)
+                ->where('branch_id', $branch->id)
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get();
+
         } else {
 
-            $branches = collect();
+            $branches = Branch::query()->where('restaurant_id', $restaurant->id)
+                ->where('is_active', 1)
+                ->get();
 
             $categories = collect();
+
+            $menuItems = collect();
         }
 
         return view(
-            'admin.menu_items.create',
-            compact(
-                'branches',
-                'categories'
-            )
+            'admin.your-view',
+            compact('branches', 'categories', 'menuItems')
         );
     }
 

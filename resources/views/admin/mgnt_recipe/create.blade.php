@@ -103,30 +103,40 @@
                             </div>
 
                             {{-- Branch --}}
-                            <div class="col-md-6 mb-4">
+                            {{-- Branch --}}
+@if(auth()->user()->role == 'branch_manager')
 
-                                <label>
-                                    Branch
-                                </label>
+    <input type="hidden" name="branch_id" value="{{ auth()->user()->branch_id }}">
 
-                                <select name="branch_id" class="form-control premium-input" required>
+    <div class="col-md-6 mb-4">
+        <label>Branch</label>
+        <input type="text"
+               class="form-control premium-input"
+               value="{{ auth()->user()->branch->name }}"
+               readonly>
+    </div>
 
-                                    <option value="">
-                                        Select Branch
-                                    </option>
+@else
 
-                                    @foreach ($branches as $branch)
-                                        <option value="{{ $branch->id }}">
-                                            {{ $branch->name }}
-                                        </option>
-                                    @endforeach
+    <div class="col-md-6 mb-4">
+        <label>Branch</label>
 
-                                </select>
-                                @error('branch_id')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+        <select name="branch_id" class="form-control premium-input" required>
+            <option value="">Select Branch</option>
 
-                            </div>
+            @foreach($branches as $branch)
+                <option value="{{ $branch->id }}">
+                    {{ $branch->name }}
+                </option>
+            @endforeach
+        </select>
+
+        @error('branch_id')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div>
+
+@endif
 
                             {{-- Menu Item --}}
                             <div class="col-md-12 mb-4">

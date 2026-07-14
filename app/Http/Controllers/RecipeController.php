@@ -38,40 +38,55 @@ class RecipeController extends Controller
     }
 
     public function create($restaurant)
-    {
-        $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
+{
+    $restaurant = Restaurant::query()->where('slug', $restaurant)->firstOrFail();
 
-        $branches = Branch::query()->where(
-            'restaurant_id',
-            $restaurant->id
-        )->get();
+    $user = Auth::user();
 
-        $menuItems = MenuItem::query()->where(
-            'restaurant_id',
-            $restaurant->id
-        )->get();
+    if ($user->branch_id) {
 
-        $inventoryItems = InventoryItem::query()->where(
-            'restaurant_id',
-            $restaurant->id
-        )->get();
+        $branches = Branch::query()->where('id', $user->branch_id)->get();
 
-        $recipes = Recipe::with([
-            'menuItem',
-            'inventory',
-        ])
-            ->where('restaurant_id', $restaurant->id)
-            ->latest()
+        $menuItems = MenuItem::query()->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $user->branch_id)
+            ->orderBy('name')
             ->get();
 
-        return view('admin.mgnt_recipe.create', compact(
-            'restaurant',
-            'branches',
-            'menuItems',
-            'inventoryItems',
-            'recipes'
-        ));
+        $inventoryItems = InventoryItem::query()->where('restaurant_id', $restaurant->id)
+            ->where('branch_id', $user->branch_id)
+            ->orderBy('name')
+            ->get();
+
+    } else {
+
+        // Owner / Super Admin
+
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)
+            ->orderBy('name')
+            ->get();
+
+        // Keep empty until branch selected
+        $menuItems = collect();
+
+        $inventoryItems = collect();
     }
+
+    $recipes = Recipe::with([
+        'menuItem',
+        'inventory',
+    ])
+    ->where('restaurant_id', $restaurant->id)
+    ->latest()
+    ->get();
+
+    return view('admin.mgnt_recipe.create', compact(
+        'restaurant',
+        'branches',
+        'menuItems',
+        'inventoryItems',
+        'recipes'
+    ));
+}
 
     public function store(Request $request, $restaurant)
     {
@@ -153,7 +168,7 @@ class RecipeController extends Controller
 
         if ($branchSlug) {
 
-            $branch = Branch::where('slug', $branchSlug)
+            $branch = Branch::query()->where('slug', $branchSlug)
                 ->where('restaurant_id', $restaurant->id)
                 ->firstOrFail();
 
@@ -178,7 +193,7 @@ class RecipeController extends Controller
             abort(404);
         }
 
-        $branches = Branch::where('restaurant_id', $restaurant->id)->get();
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)->get();
         $menuItems = MenuItem::query()->where('restaurant_id', $restaurant->id)->get();
 
         return view('admin.mgnt_recipe.edit', compact(
@@ -202,7 +217,7 @@ class RecipeController extends Controller
         $branch = null;
 
         if ($branchSlug) {
-            $branch = Branch::where('slug', $branchSlug)
+            $branch = Branch::query()->where('slug', $branchSlug)
                 ->where('restaurant_id', $restaurant->id)
                 ->firstOrFail();
         }
@@ -323,7 +338,7 @@ class RecipeController extends Controller
 
         if ($branchSlug) {
 
-            $branch = Branch::where('slug', $branchSlug)
+            $branch = Branch::query()->where('slug', $branchSlug)
                 ->where('restaurant_id', $restaurant->id)
                 ->firstOrFail();
 

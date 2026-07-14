@@ -12,7 +12,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -408,7 +407,6 @@ class DashboardController extends Controller
             $branchIds = Branch::pluck('id')->toArray();
         }
 
-
         $orders = Order::whereIn('branch_id', $branchIds);
 
         $revenue = [
@@ -497,11 +495,14 @@ class DashboardController extends Controller
         return view('admin.insights', compact('restaurants'));
     }
 
-    public function getBranches($id)
+    public function getBranches($slug)
     {
-        $branches = Branch::query()->where('restaurant_id', $id)
+        $restaurant = Restaurant::query()->where('slug', $slug)->firstOrFail();
+
+        $branches = Branch::query()->where('restaurant_id', $restaurant->id)
             ->orderBy('name')
             ->get(['id', 'name']);
+
         return response()->json($branches);
     }
 
@@ -510,82 +511,88 @@ class DashboardController extends Controller
         $branchId = $request->get('branch_id');
         $type = $request->get('type');
 
+        // Get currency from branch
+        $currencySymbol = '₹'; // default
+        if ($branchId) {
+            $branch = Branch::with('country')->find($branchId);
+            if ($branch && $branch->country) {
+                $currencySymbol = $branch->country->currency_symbol ?? '₹';
+            }
+        } else {
+            // If no branch selected, get first branch's currency
+            $branch = Branch::with('country')->where('restaurant_id', $restaurant->id)->first();
+            if ($branch && $branch->country) {
+                $currencySymbol = $branch->country->currency_symbol ?? '₹';
+            }
+        }
+
         $data = [];
+        $data['currency_symbol'] = $currencySymbol; // Add currency to response
 
-        try {
-            // MENU
-            if (in_array($type, ['menu', null])) {
-                $query = MenuItem::with('category')
-                    ->where('restaurant_id', $restaurant->id);
-                if ($branchId) {
-                    $query->where('branch_id', $branchId);
-                }
+        // MENU
+        if (in_array($type, ['menu', null])) {
+            $query = MenuItem::with('category')
+                ->where('restaurant_id', $restaurant->id);
+            if ($branchId) {
+                $query->where('branch_id', $branchId);
+            }
+            $data['menu_items'] = $query->select('id', 'name', 'price', 'is_active', 'description')
+                ->latest()->take(25)->get();
+        }
 
-                $data['menu_items'] = $query->select('id', 'name', 'price', 'is_active', 'description')
-                    ->latest()->take(25)->get();
+        // ORDERS
+        if (in_array($type, ['orders', null])) {
+            $query = Order::query()->where('restaurant_id', $restaurant->id);
+            if ($branchId) {
+                $query->where('branch_id', $branchId);
+            }
+            $data['orders'] = $query->select('id', 'customer_name', 'total', 'status', 'created_at')
+                ->latest()->take(20)->get();
+        }
+
+        // REVENUE
+        if (in_array($type, ['revenue', null])) {
+            $revenueQuery = Order::query()->where('restaurant_id', $restaurant->id)
+                ->where('payment_status', 'verified');
+            if ($branchId) {
+                $revenueQuery->where('branch_id', $branchId);
             }
 
-            // ORDERS
-            if (in_array($type, ['orders', null])) {
-                $query = Order::query()->where('restaurant_id', $restaurant->id);
-                if ($branchId) {
-                    $query->where('branch_id', $branchId);
-                }
+            $today = now()->format('Y-m-d');
 
-                $data['orders'] = $query->select('id', 'customer_name', 'total', 'status', 'created_at')
-                    ->latest()->take(20)->get();
+            $data['revenue'] = [
+                'today' => $revenueQuery->clone()
+                    ->whereDate('created_at', $today)
+                    ->sum('total'),
+                'this_month' => $revenueQuery->clone()
+                    ->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('total'),
+                'total' => $revenueQuery->sum('total'),
+            ];
+        }
+
+        // INVENTORY
+        if (in_array($type, ['inventory', null])) {
+            $query = InventoryItem::query()->where('restaurant_id', $restaurant->id);
+            if ($branchId) {
+                $query->where('branch_id', $branchId);
             }
 
-            if (in_array($type, ['revenue', null])) {
-                $revenueQuery = Order::query()->where('restaurant_id', $restaurant->id)
-                    ->where('payment_status', 'verified');
-
-                if ($branchId) {
-                    $revenueQuery->where('branch_id', $branchId);
-                }
-
-                $today = now()->format('Y-m-d');
-
-                $data['revenue'] = [
-                    'today' => $revenueQuery->clone()
-                        ->whereDate('created_at', $today)
-                        ->sum('total'),
-
-                    'this_month' => $revenueQuery->clone()
-                        ->whereMonth('created_at', now()->month)
-                        ->whereYear('created_at', now()->year)
-                        ->sum('total'),
-
-                    'total' => $revenueQuery->sum('total'),
-                ];
-            }
-            // INVENTORY
-            if (in_array($type, ['inventory', null])) {
-                $query = InventoryItem::query()->where('restaurant_id', $restaurant->id);
-                if ($branchId) {
-                    $query->where('branch_id', $branchId);
-                }
-
-                $data['inventory'] = [
-                    'total_items' => $query->count(),
-                    'low_stock' => $query->clone()->whereRaw('remaining_stock <= minimum_stock')->count(),
-                    'out_of_stock' => $query->clone()->where('remaining_stock', '<=', 0)->count(),
-                    'in_stock' => $query->clone()->where('remaining_stock', '>', 0)->count(),
-                    'items' => $query->select(
-                        'name',
-                        'total_stock',
-                        'remaining_stock',
-                        'minimum_stock',
-                        'unit',
-                        'is_active'
-                    )->latest()->take(20)->get(),
-                ];
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Insights Error: '.$e->getMessage());
-
-            return response()->json(['error' => $e->getMessage()], 500);
+            $data['inventory'] = [
+                'total_items' => $query->count(),
+                'low_stock' => $query->clone()->whereRaw('remaining_stock <= minimum_stock')->count(),
+                'out_of_stock' => $query->clone()->where('remaining_stock', '<=', 0)->count(),
+                'in_stock' => $query->clone()->where('remaining_stock', '>', 0)->count(),
+                'items' => $query->select(
+                    'name',
+                    'total_stock',
+                    'remaining_stock',
+                    'minimum_stock',
+                    'unit',
+                    'is_active'
+                )->latest()->take(20)->get(),
+            ];
         }
 
         return response()->json($data);

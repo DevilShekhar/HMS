@@ -9,7 +9,7 @@
     <meta content="" name="keywords">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicons -->
-    <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
+    <link href="{{ asset('assets/img/removed-bg-eht-logo.png') }}" rel="icon">
     <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
@@ -377,7 +377,8 @@
 
                     <div class="sidebar-brand">
                         <a href="#">
-                            <img alt="image" src="{{ asset('assets/img/logo.png') }}" class="header-logo">
+                            <img alt="image" src="{{ asset('assets/img/removed-bg-eht-logo.png') }}"
+                                class="header-logo">
                             <span class="logo-name">EHT</span>
                         </a>
                     </div>
@@ -1127,9 +1128,9 @@
                                                 )
                                                 <li>
                                                     <a href="{{ route('customer.orders', [
-                                                        'restaurant' => auth()->user()->restaurant->slug,
-                                                        'branch' => auth()->user()->branch->slug,
-                                                    ]) }}">
+                                'restaurant' => auth()->user()->restaurant->slug,
+                                'branch' => auth()->user()->branch->slug,
+                            ]) }}">
                                                         <i data-feather="shopping-bag"></i>
                                                         <span>My History</span>
                                                     </a>
@@ -1220,27 +1221,44 @@
     <audio id="notificationSound" preload="auto" loop>
         <source src="{{ asset('sounds/order-notification.mp3') }}" type="audio/mpeg">
     </audio>
+    <audio id="vipNotificationSound" preload="auto" loop>
+        <source src="{{ asset('sounds/vip-order-notification.mp3') }}" type="audio/mpeg">
+    </audio>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            const notificationSound = document.getElementById('notificationSound');
+            const normalSound = document.getElementById('notificationSound');
+            const vipSound = document.getElementById('vipNotificationSound');
+
             let isProcessing = false;
+            let currentSound = null;
 
-            // Unlock audio on first interaction
-            document.addEventListener('click', function unlockAudio() {
-                notificationSound.play().then(() => {
-                    notificationSound.pause();
-                    notificationSound.currentTime = 0;
+            // Stronger Audio Unlock
+            function unlockAudio() {
+                const unlockPromise = Promise.all([
+                    normalSound.play().catch(() => { }),
+                    vipSound.play().catch(() => { })
+                ]);
+
+                unlockPromise.then(() => {
+                    normalSound.pause();
+                    normalSound.currentTime = 0;
+                    vipSound.pause();
+                    vipSound.currentTime = 0;
                 }).catch(() => { });
-                document.removeEventListener('click', unlockAudio);
-            }, {
-                once: true
-            });
 
-            setInterval(fetchNotifications, 4000);
+                // Remove listener after first successful unlock
+                document.removeEventListener('click', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+            }
+
+            // Listen for user interaction (click or touch)
+            document.addEventListener('click', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+
+            setInterval(fetchNotifications, 5000);
 
             async function fetchNotifications() {
                 if (isProcessing) return;
@@ -1249,42 +1267,48 @@
                     const response = await fetch("{{ route('chef.notifications') }}");
                     const data = await response.json();
 
-                    console.log("Notifications:", data);
-
-                    if (!data || !data.length) return;
+                    if (!data || data.length === 0) return;
 
                     isProcessing = true;
 
                     const notification = data[0];
                     const nData = notification.data;
 
-                    // Start looping sound
-                    notificationSound.currentTime = 0;
-                    notificationSound.loop = true;
-                    notificationSound.play().catch(() => { });
+                    const isVip = (nData.order_type || '').toLowerCase() === 'vip';
 
-                    let title = nData.status === 'prepared' ? '✅ Order Prepared!' : '🛎 New Order Assigned';
+                    // Stop previous sounds
+                    stopAllSounds();
+
+                    // Select sound
+                    currentSound = isVip ? vipSound : normalSound;
+
+                    currentSound.currentTime = 0;
+                    currentSound.loop = true;
+
+                    // Try to play
+                    currentSound.play().catch(err => {
+                        console.log("Sound play failed:", err);
+                    });
 
                     Swal.fire({
-                        icon: 'success',
-                        title: title,
+                        icon: isVip ? 'warning' : 'success',
+                        title: isVip ? '👑 VIP Order Assigned!' : '🛎 New Order Assigned',
                         html: `
-                            <strong>Token #${nData.token_no}</strong><br>
-                            Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
-                            ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
-                            ${nData.message}
-                        `,
+                    <strong>Token #${nData.token_no}</strong><br>
+                    Customer: <strong>${nData.customer_name || 'Walk-in'}</strong><br>
+                    ${nData.table_no ? `Table: <strong>${nData.table_no}</strong><br>` : ''}
+                    ${isVip ? '<strong style="color:#ff8a00;">VIP ORDER</strong><br>' : ''}
+                    ${nData.message}
+                `,
                         confirmButtonText: 'OK',
                         allowOutsideClick: false,
                         allowEscapeKey: false,
-                        timer: 30000 // 30 seconds max
+                        timer: 10000,
+                        timerProgressBar: true
                     }).then(async (result) => {
-                        // Stop sound when popup is closed
-                        notificationSound.pause();
-                        notificationSound.currentTime = 0;
-                        notificationSound.loop = false;
-
+                        stopAllSounds();
                         await markReadAndDelete(notification.id);
+                        isProcessing = false;
 
                         if (result.isConfirmed) {
                             let url = '/' + nData.restaurant_slug;
@@ -1292,14 +1316,32 @@
                             url += '/orders/' + nData.order_id;
                             window.location.href = url;
                         }
-                    }).finally(() => {
-                        isProcessing = false;
                     });
+
+                    // Safety
+                    setTimeout(() => {
+                        if (isProcessing) {
+                            stopAllSounds();
+                            markReadAndDelete(notification.id);
+                            isProcessing = false;
+                        }
+                    }, 11000);
 
                 } catch (e) {
                     console.error("Notification error:", e);
+                    stopAllSounds();
                     isProcessing = false;
                 }
+            }
+
+            function stopAllSounds() {
+                [normalSound, vipSound].forEach(sound => {
+                    if (sound) {
+                        sound.pause();
+                        sound.currentTime = 0;
+                        sound.loop = false;
+                    }
+                });
             }
 
             async function markReadAndDelete(id) {
@@ -1307,30 +1349,17 @@
                 try {
                     await fetch(`/notifications/read/${id}`, {
                         method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': token
-                        }
+                        headers: { 'X-CSRF-TOKEN': token }
                     });
                     await fetch(`/notifications/delete/${id}`, {
                         method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': token
-                        }
+                        headers: { 'X-CSRF-TOKEN': token }
                     });
                 } catch (e) {
                     console.error(e);
                 }
             }
         });
-        $(document).ready(function () {
-
-            $('#description').summernote({
-                height: 250,
-                placeholder: 'Enter offer description here...'
-            });
-
-        });
-
     </script>
 
     @if (session('success'))

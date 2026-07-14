@@ -207,6 +207,9 @@ class OrderController extends Controller
         $restaurant = app('restaurant');
 
         $user = Auth::user();
+        if ($user->role === 'owner') {
+            abort(403, 'Owners are not allowed to create orders.');
+        }
 
         $branchId = $user->branch_id;
 
@@ -295,7 +298,6 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'customer_name' => 'required',
             'mobile_number' => 'required',
@@ -305,27 +307,27 @@ class OrderController extends Controller
             'email' => 'nullable',
             'table_category' => 'required',
             'table_no' => 'required',
+            'order_type' => 'nullable|in:normal,vip',   // ← Added validation
         ]);
 
         $restaurant = app('restaurant');
 
-        $orderType = Auth::user()->role == 'waiter_head'
-            ? ($request->order_type ?? 'normal')
-            : 'normal';
+        // Improved order_type logic
+        $orderType = 'normal';
+
+        if (in_array(Auth::user()->role, ['waiter_head', 'branch_manager', 'owner'])) {
+            $orderType = $request->order_type === 'vip' ? 'vip' : 'normal';
+        }
 
         $user = Auth::user();
 
         if ($user->role == 'owner') {
-
             $branchId = Branch::query()
                 ->where('restaurant_id', $restaurant->id)
                 ->value('id');
         } elseif ($user->branch_id) {
-
             $branchId = $user->branch_id;
         } else {
-
-            // Restaurant level users
             $branchId = null;
         }
 
@@ -338,16 +340,12 @@ class OrderController extends Controller
                 ->where('status', 'active')
                 ->first();
 
-            $token = $this->generateToken(
-                $orderType,
-                $restaurant->id,
-                $branchId
-            );
+            $token = $this->generateToken($orderType, $restaurant->id, $branchId);
+
             $branch = Branch::with('country')->find($branchId);
-
             $timezone = $branch?->country?->timezone ?? config('app.timezone');
-
             $orderDateTime = now($timezone);
+
             $order = Order::create([
                 'restaurant_id' => $restaurant->id,
                 'branch_id' => $branchId,
@@ -356,13 +354,9 @@ class OrderController extends Controller
                 'order_timezone' => $timezone,
 
                 'chef_id' => $chef?->id,
-                'created_by' => Auth::user()->role === 'customer'
-                    ? null
-                    : Auth::id(),
+                'created_by' => Auth::user()->role === 'customer' ? null : Auth::id(),
 
-                'customer_id' => Auth::user()->role === 'customer'
-                    ? Auth::id()
-                    : null,
+                'customer_id' => Auth::user()->role === 'customer' ? Auth::id() : null,
                 'customer_name' => $request->customer_name,
                 'mobile_number' => $request->mobile_number,
                 'token_no' => $token,
@@ -376,13 +370,13 @@ class OrderController extends Controller
                 'tax' => 0,
                 'total' => 0,
             ]);
+
+            // Notifications
             if (Auth::user()->role === 'customer') {
                 $waiterHead = User::query()
                     ->where('restaurant_id', $restaurant->id)
                     ->where('role', 'waiter_head')
-                    ->when($branchId, function ($q) use ($branchId) {
-                        $q->where('branch_id', $branchId);
-                    })
+                    ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
                     ->first();
 
                 if ($waiterHead) {
@@ -390,22 +384,19 @@ class OrderController extends Controller
                 }
             }
 
-            // Always notify Chef (Kitchen team should always know about new orders)
             if ($chef) {
                 $chef->notify(new NewOrderAssignedNotification($order));
             }
 
+            // Create Order Items
             $total = 0;
-
             foreach ($request->menu_item_id as $key => $menuId) {
                 if (empty($menuId)) {
                     continue;
                 }
 
                 $menuItem = MenuItem::findOrFail($menuId);
-
                 $qty = $request->quantity[$key] ?? 1;
-
                 $subtotal = $menuItem->price * $qty;
 
                 OrderItem::create([
@@ -426,12 +417,10 @@ class OrderController extends Controller
             ]);
         });
 
-        // After transaction
-
+        // Redirect logic remains same...
         $user = Auth::user();
 
         if ($user->branch_id) {
-
             return redirect()
                 ->route('branch.orders.index', [
                     'restaurant' => $restaurant->slug,
@@ -441,18 +430,12 @@ class OrderController extends Controller
         }
 
         if ($user->restaurant_id) {
-
             return redirect()
-                ->route('restaurant.orders.index', [
-                    'restaurant' => $restaurant->slug,
-                ])
+                ->route('restaurant.orders.index', ['restaurant' => $restaurant->slug])
                 ->with('success', 'Order created successfully.');
         }
 
-        // Super admin
-        return redirect()
-            ->route('orders.index')
-            ->with('success', 'Order created successfully.');
+        return redirect()->route('orders.index')->with('success', 'Order created successfully.');
     }
 
     private function generateToken(
@@ -894,37 +877,38 @@ class OrderController extends Controller
     {
         $restaurantId = Auth::user()->restaurant_id;
         $branchId = Auth::user()->branch_id;
+        $phone = $request->phone;
 
-        $customer = User::query()->where('phone', $request->phone)
-            ->where('role', 'customer')
-            ->where('restaurant_id', $restaurantId)
-            ->where('branch_id', $branchId)
-            ->first();
-
-        if (! $customer) {
-            return response()->json([
-                'found' => false,
-            ]);
-        }
-
-        $orders = Order::query()->where('customer_id', $customer->id)
+        $orders = Order::query()
+            ->where('mobile_number', $phone)
             ->where('restaurant_id', $restaurantId)
             ->where('branch_id', $branchId)
             ->latest()
             ->get();
 
-        $lastOrder = Order::query()->where('customer_id', $customer->id)
-            ->where('restaurant_id', $restaurantId)
-            ->where('branch_id', $branchId)
-            ->latest()
-            ->first();
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'found' => false,
+            ]);
+        }
+
+        // Get the customer name from the first order
+        $customerName = $orders->first()->customer_name ?? 'Customer';
+        $lastOrder = $orders->first();
 
         return response()->json([
             'found' => true,
-            'customer_name' => $customer->name,
+            'customer_name' => $customerName,
             'total_visits' => $orders->count(),
             'last_visit' => optional($lastOrder)->created_at?->format('d M Y'),
-            'orders' => $orders,
+            'orders' => $orders->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'created_at' => $order->created_at,
+                    'order_type' => $order->order_type ?? 'Normal',
+                    'total' => $order->total ?? 0,
+                ];
+            }),
         ]);
     }
 
@@ -1031,7 +1015,6 @@ class OrderController extends Controller
             ->first();
 
         if ($allocation && $allocation->waiter) {
-            // ✅ Main Logic: Table allocated waiter ko notification
             $allocation->waiter->notify(
                 new NewOrderAssignedNotification($order)
             );
