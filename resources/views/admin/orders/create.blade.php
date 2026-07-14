@@ -1,3 +1,4 @@
+@can('create-order')
 @extends('layouts.app')
 
 @section('content')
@@ -658,3 +659,4 @@
         </script>
     @endpush
 @endsection
+@endcan

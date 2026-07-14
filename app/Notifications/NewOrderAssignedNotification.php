@@ -31,6 +31,7 @@ class NewOrderAssignedNotification extends Notification
             'table_no' => $this->order->table_no,
             'restaurant_slug' => $this->order->restaurant->slug,
             'branch_slug' => $this->order->branch?->slug,
+            'order_type' => $this->order->order_type,
             'message' => 'New Order Assigned',
             'status' => 'pending',
         ];

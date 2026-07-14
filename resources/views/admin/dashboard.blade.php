@@ -71,16 +71,16 @@
 
                             {{-- Quick Order Button --}}
                             @can('create-order')
-                                                <a href="{{ auth()->user()->branch_id
-                                ? route('branch.orders.create', ['restaurant' => currentRestaurantSlug(), 'branch' => currentBranchSlug()])
-                                : route('restaurant.orders.create', ['restaurant' => currentRestaurantSlug()]) }}"
-                                                    class="quick-order-btn"
-                                                    style="display:inline-flex; align-items:center; gap:6px; padding:4px 18px; height:32px; background: linear-gradient(135deg, #ff8a00, #ff5f00); color:#ffffff; font-weight:600; font-size:0.8rem; border-radius:6px; text-decoration:none; white-space:nowrap; border:none; box-shadow: 0 2px 8px rgba(255, 138, 0, 0.3); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; position:relative; overflow:hidden;">
-                                                    <i class="fas fa-bolt" style="font-size:0.75rem; transition:transform 0.3s ease;"></i>
-                                                    Quick Order
-                                                    <span
-                                                        style="position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.2); transform:translate(-50%, -50%); transition:width 0.6s ease, height 0.6s ease;"></span>
-                                                </a>
+                                <a href="{{ auth()->user()->branch_id
+                                    ? route('branch.orders.create', ['restaurant' => currentRestaurantSlug(), 'branch' => currentBranchSlug()])
+                                    : route('restaurant.orders.create', ['restaurant' => currentRestaurantSlug()]) }}"
+                                    class="quick-order-btn"
+                                    style="display:inline-flex; align-items:center; gap:6px; padding:4px 18px; height:32px; background: linear-gradient(135deg, #ff8a00, #ff5f00); color:#ffffff; font-weight:600; font-size:0.8rem; border-radius:6px; text-decoration:none; white-space:nowrap; border:none; box-shadow: 0 2px 8px rgba(255, 138, 0, 0.3); transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; position:relative; overflow:hidden;">
+                                    <i class="fas fa-bolt" style="font-size:0.75rem; transition:transform 0.3s ease;"></i>
+                                    Quick Order
+                                    <span
+                                        style="position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.2); transform:translate(-50%, -50%); transition:width 0.6s ease, height 0.6s ease;"></span>
+                                </a>
                             @endcan
                         </div>
                     </div>
@@ -1228,229 +1228,209 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
-<script>
-    // Initialize variables
-    let currentRestaurant = '';
-    let currentBranch = '';
-    let currencySymbol = '{{ $currencySymbol ?? "₹" }}';
-    let revenueChart;
-    let donutChart;
-    let revenueTrendChart;
+    <script>
+        // Initialize variables
+        let currentRestaurant = '';
+        let currentBranch = '';
+        let currencySymbol = '{{ $currencySymbol ?? "₹" }}';
+        let revenueChart;
+        let donutChart;
+        let revenueTrendChart;
 
-    // Get branch currency from PHP
-    let branchCurrency = '{{ isset($currentBranch) && $currentBranch->country ? $currentBranch->country->currency_symbol : ($currencySymbol ?? "₹") }}';
+        // Get branch currency from PHP
+        let branchCurrency = '{{ isset($currentBranch) && $currentBranch->country ? $currentBranch->country->currency_symbol : ($currencySymbol ?? "₹") }}';
 
-    @if(auth()->user()->role == 'super_admin')
-        branchCurrency = '{{ $currencySymbol ?? "₹" }}';
-    @endif
+        @if(auth()->user()->role == 'super_admin')
+            branchCurrency = '{{ $currencySymbol ?? "₹" }}';
+        @endif
 
-    currencySymbol = branchCurrency;
+        currencySymbol = branchCurrency;
 
-    @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
-        currentBranch = '{{ $currentBranch->id }}';
-    @endif
+        @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
+            currentBranch = '{{ $currentBranch->id }}';
+        @endif
 
-    // ============ FUNCTIONS ============
+        // ============ FUNCTIONS ============
 
-    function loadBranches(restaurantId) {
-        const branchSelect = document.getElementById('branchFilter');
-        if (!branchSelect || !restaurantId) {
-            if (branchSelect) {
-                branchSelect.innerHTML = '<option value="">All Branches</option>';
-            }
-            return;
-        }
-
-        branchSelect.innerHTML = '<option value="">Loading branches...</option>';
-        branchSelect.disabled = true;
-
-        fetch('/dashboard/branches/' + restaurantId)
-            .then(response => response.json())
-            .then(data => {
-                branchSelect.innerHTML = '<option value="">All Branches</option>';
-                branchSelect.disabled = false;
-
-                let branches = [];
-                if (Array.isArray(data)) {
-                    branches = data;
-                } else if (data.branches && Array.isArray(data.branches)) {
-                    branches = data.branches;
-                } else if (data.data && Array.isArray(data.data)) {
-                    branches = data.data;
+        function loadBranches(restaurantId) {
+            const branchSelect = document.getElementById('branchFilter');
+            if (!branchSelect || !restaurantId) {
+                if (branchSelect) {
+                    branchSelect.innerHTML = '<option value="">All Branches</option>';
                 }
-
-                if (branches.length > 0) {
-                    branches.forEach(branch => {
-                        const option = document.createElement('option');
-                        option.value = branch.id;
-                        option.textContent = branch.name;
-                        branchSelect.appendChild(option);
-
-                        @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
-                            if (branch.id == {{ $currentBranch->id }}) {
-                                option.selected = true;
-                            }
-                        @endif
-                    });
-                } else {
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'No branches available';
-                    branchSelect.appendChild(option);
-                }
-            })
-            .catch(() => {
-                branchSelect.innerHTML = '<option value="">Error loading branches</option>';
-                branchSelect.disabled = false;
-            });
-    }
-
-    // Function to reset all revenue elements to just "0" without currency
-    function resetRevenueToZero() {
-    // Reset all revenue display elements to just "0" without currency
-        const revenueIds = [
-            'todayRevenue',
-            'yesterdayRevenue',
-            'weeklyRevenueDisplay',
-            'monthlyRevenueDisplay',
-            'yearlyRevenueDisplay',
-            'totalRevenue',
-            'weeklyRevenue',
-            'monthlyRevenue',
-            'yearlyRevenue'
-        ];
-
-        revenueIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.innerHTML = '0';
-                // Keep color styling but remove currency
-                if (id === 'todayRevenue') el.style.color = '#4e73df';
-                else if (id === 'yesterdayRevenue') el.style.color = '#e74a3b';
-                else if (id === 'weeklyRevenueDisplay' || id === 'weeklyRevenue') el.style.color = '#1cc88a';
-                else if (id === 'monthlyRevenueDisplay' || id === 'monthlyRevenue') el.style.color = '#36b9cc';
-                else if (id === 'yearlyRevenueDisplay' || id === 'yearlyRevenue') el.style.color = '#f6c23e';
-                else if (id === 'totalRevenue') el.style.color = '#1cc88a';
-            }
-        });
-
-        // Reset total orders
-        const totalOrders = document.getElementById('totalOrders');
-        if (totalOrders) {
-            totalOrders.innerHTML = '0';
-            totalOrders.style.color = '#4e73df';
-        }
-    }
-
-    function refreshAllData() {
-        // If no restaurant selected, reset everything to "0" without currency
-        if (!currentRestaurant && !currentBranch) {
-            resetRevenueToZero();
-
-            if (typeof revenueChart !== 'undefined' && revenueChart) {
-                revenueChart.updateSeries([{
-                    data: [0, 0, 0, 0, 0]
-                }]);
+                return;
             }
 
-            if (typeof donutChart !== 'undefined' && donutChart) {
-                donutChart.updateSeries([0, 0, 0, 0]);
-            }
+            branchSelect.innerHTML = '<option value="">Loading branches...</option>';
+            branchSelect.disabled = true;
 
-            updatePreparedOrdersTable([]);
-            return;
-        }
+            fetch('/dashboard/branches/' + restaurantId)
+                .then(response => response.json())
+                .then(data => {
+                    branchSelect.innerHTML = '<option value="">All Branches</option>';
+                    branchSelect.disabled = false;
 
-        let url = `/dashboard/data?restaurant_id=${currentRestaurant}`;
-        if (currentBranch) {
-            url += `&branch_id=${currentBranch}`;
-        }
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                currencySymbol = data.currencySymbol || branchCurrency || '₹';
-
-                if (data.preparedOrders !== undefined) {
-                    updatePreparedOrdersTable(data.preparedOrders);
-                }
-
-                // Update revenue cards - show currency only if amount > 0
-                const revenueData = [
-                    { id: 'todayRevenue', amount: Number(data.revenue?.today?.amount || 0), color: '#4e73df' },
-                    { id: 'yesterdayRevenue', amount: Number(data.revenue?.yesterday?.amount || 0), color: '#e74a3b' },
-                    { id: 'weeklyRevenueDisplay', amount: Number(data.revenue?.weekly?.amount || 0), color: '#1cc88a' },
-                    { id: 'monthlyRevenueDisplay', amount: Number(data.revenue?.monthly?.amount || 0), color: '#36b9cc' },
-                    { id: 'yearlyRevenueDisplay', amount: Number(data.revenue?.yearly?.amount || 0), color: '#f6c23e' }
-                ];
-
-                revenueData.forEach(item => {
-                    const el = document.getElementById(item.id);
-                    if (el) {
-                        if (item.amount > 0) {
-                            el.innerHTML = currencySymbol + item.amount.toLocaleString();
-                        } else {
-                            el.innerHTML = '0';
-                        }
-                        el.style.color = item.color;
+                    let branches = [];
+                    if (Array.isArray(data)) {
+                        branches = data;
+                    } else if (data.branches && Array.isArray(data.branches)) {
+                        branches = data.branches;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        branches = data.data;
                     }
-                });
 
-                // Total Revenue
-                const totalAmount = Number(data.revenue?.total?.amount || 0);
-                const totalRevenueEl = document.getElementById('totalRevenue');
-                if (totalRevenueEl) {
-                    if (totalAmount > 0) {
-                        totalRevenueEl.innerHTML = currencySymbol + totalAmount.toLocaleString();
+                    if (branches.length > 0) {
+                        branches.forEach(branch => {
+                            const option = document.createElement('option');
+                            option.value = branch.id;
+                            option.textContent = branch.name;
+                            branchSelect.appendChild(option);
+
+                            @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
+                                if (branch.id == {{ $currentBranch->id }}) {
+                                    option.selected = true;
+                                }
+                            @endif
+                        });
                     } else {
-                        totalRevenueEl.innerHTML = '0';
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No branches available';
+                        branchSelect.appendChild(option);
                     }
-                    totalRevenueEl.style.color = '#1cc88a';
-                }
+                })
+                .catch(() => {
+                    branchSelect.innerHTML = '<option value="">Error loading branches</option>';
+                    branchSelect.disabled = false;
+                });
+        }
 
-                // Total Orders
-                const totalOrdersEl = document.getElementById('totalOrders');
-                if (totalOrdersEl) {
-                    totalOrdersEl.innerHTML = Number(data.revenue?.total?.orders || 0).toLocaleString();
-                    totalOrdersEl.style.color = '#4e73df';
-                }
+        // Function to reset all revenue elements to just "0" without currency
+        function resetRevenueToZero() {
+        // Reset all revenue display elements to just "0" without currency
+            const revenueIds = [
+                'todayRevenue',
+                'yesterdayRevenue',
+                'weeklyRevenueDisplay',
+                'monthlyRevenueDisplay',
+                'yearlyRevenueDisplay',
+                'totalRevenue',
+                'weeklyRevenue',
+                'monthlyRevenue',
+                'yearlyRevenue'
+            ];
 
-                // Update charts
+            revenueIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '0';
+                    // Keep color styling but remove currency
+                    if (id === 'todayRevenue') el.style.color = '#4e73df';
+                    else if (id === 'yesterdayRevenue') el.style.color = '#e74a3b';
+                    else if (id === 'weeklyRevenueDisplay' || id === 'weeklyRevenue') el.style.color = '#1cc88a';
+                    else if (id === 'monthlyRevenueDisplay' || id === 'monthlyRevenue') el.style.color = '#36b9cc';
+                    else if (id === 'yearlyRevenueDisplay' || id === 'yearlyRevenue') el.style.color = '#f6c23e';
+                    else if (id === 'totalRevenue') el.style.color = '#1cc88a';
+                }
+            });
+
+            // Reset total orders
+            const totalOrders = document.getElementById('totalOrders');
+            if (totalOrders) {
+                totalOrders.innerHTML = '0';
+                totalOrders.style.color = '#4e73df';
+            }
+        }
+
+        function refreshAllData() {
+            @if(auth()->user()->role == 'owner')
+            if (!currentBranch) {
+                resetAllData();
+                return;
+            }
+            @endif
+
+            @if(auth()->user()->role == 'super_admin')
+            if (!currentRestaurant && !currentBranch) {
+                resetAllData();
+                return;
+            }
+            @endif
+            // If no restaurant selected, reset everything to "0" without currency
+            if (!currentRestaurant && !currentBranch) {
+                resetRevenueToZero();
+
                 if (typeof revenueChart !== 'undefined' && revenueChart) {
                     revenueChart.updateSeries([{
-                        data: [
-                            Number(data.revenue?.today?.amount || 0),
-                            Number(data.revenue?.yesterday?.amount || 0),
-                            Number(data.revenue?.weekly?.amount || 0),
-                            Number(data.revenue?.monthly?.amount || 0),
-                            Number(data.revenue?.yearly?.amount || 0)
-                        ]
+                        data: [0, 0, 0, 0, 0]
                     }]);
                 }
 
                 if (typeof donutChart !== 'undefined' && donutChart) {
-                    donutChart.updateSeries([
-                        data.orderStatus?.pending ?? 0,
-                        data.orderStatus?.preparing ?? 0,
-                        data.orderStatus?.completed ?? 0,
-                        data.orderStatus?.delivered ?? 0
-                    ]);
+                    donutChart.updateSeries([0, 0, 0, 0]);
                 }
 
-                if (typeof revenueTrendChart !== 'undefined' && revenueTrendChart) {
-                    revenueTrendChart.updateSeries([
-                        {
-                            name: 'Orders',
-                            data: [
-                                Number(data.revenue?.today?.orders || 0),
-                                Number(data.revenue?.yesterday?.orders || 0),
-                                Number(data.revenue?.weekly?.orders || 0),
-                                Number(data.revenue?.monthly?.orders || 0),
-                                Number(data.revenue?.yearly?.orders || 0)
-                            ]
-                        },
-                        {
-                            name: 'Revenue (' + currencySymbol + ')',
+                updatePreparedOrdersTable([]);
+                return;
+            }
+
+            let url = `/dashboard/data?restaurant_id=${currentRestaurant}`;
+            if (currentBranch) {
+                url += `&branch_id=${currentBranch}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    currencySymbol = data.currencySymbol || branchCurrency || '₹';
+
+                    if (data.preparedOrders !== undefined) {
+                        updatePreparedOrdersTable(data.preparedOrders);
+                    }
+
+                    // Update revenue cards - show currency only if amount > 0
+                    const revenueData = [
+                        { id: 'todayRevenue', amount: Number(data.revenue?.today?.amount || 0), color: '#4e73df' },
+                        { id: 'yesterdayRevenue', amount: Number(data.revenue?.yesterday?.amount || 0), color: '#e74a3b' },
+                        { id: 'weeklyRevenueDisplay', amount: Number(data.revenue?.weekly?.amount || 0), color: '#1cc88a' },
+                        { id: 'monthlyRevenueDisplay', amount: Number(data.revenue?.monthly?.amount || 0), color: '#36b9cc' },
+                        { id: 'yearlyRevenueDisplay', amount: Number(data.revenue?.yearly?.amount || 0), color: '#f6c23e' }
+                    ];
+
+                    revenueData.forEach(item => {
+                        const el = document.getElementById(item.id);
+                        if (el) {
+                            if (item.amount > 0) {
+                                el.innerHTML = currencySymbol + item.amount.toLocaleString();
+                            } else {
+                                el.innerHTML = '0';
+                            }
+                            el.style.color = item.color;
+                        }
+                    });
+
+                    // Total Revenue
+                    const totalAmount = Number(data.revenue?.total?.amount || 0);
+                    const totalRevenueEl = document.getElementById('totalRevenue');
+                    if (totalRevenueEl) {
+                        if (totalAmount > 0) {
+                            totalRevenueEl.innerHTML = currencySymbol + totalAmount.toLocaleString();
+                        } else {
+                            totalRevenueEl.innerHTML = '0';
+                        }
+                        totalRevenueEl.style.color = '#1cc88a';
+                    }
+
+                    // Total Orders
+                    const totalOrdersEl = document.getElementById('totalOrders');
+                    if (totalOrdersEl) {
+                        totalOrdersEl.innerHTML = Number(data.revenue?.total?.orders || 0).toLocaleString();
+                        totalOrdersEl.style.color = '#4e73df';
+                    }
+
+                    // Update charts
+                    if (typeof revenueChart !== 'undefined' && revenueChart) {
+                        revenueChart.updateSeries([{
                             data: [
                                 Number(data.revenue?.today?.amount || 0),
                                 Number(data.revenue?.yesterday?.amount || 0),
@@ -1458,403 +1438,436 @@
                                 Number(data.revenue?.monthly?.amount || 0),
                                 Number(data.revenue?.yearly?.amount || 0)
                             ]
-                        }
-                    ]);
-                }
-            })
-            .catch(() => { });
-    }
+                        }]);
+                    }
 
-    function resetAllData() {
-    resetRevenueToZero();
+                    if (typeof donutChart !== 'undefined' && donutChart) {
+                        donutChart.updateSeries([
+                            data.orderStatus?.pending ?? 0,
+                            data.orderStatus?.preparing ?? 0,
+                            data.orderStatus?.completed ?? 0,
+                            data.orderStatus?.delivered ?? 0
+                        ]);
+                    }
 
-    if (typeof revenueChart !== 'undefined' && revenueChart) {
-        revenueChart.updateSeries([{ data: [0, 0, 0, 0, 0] }]);
-    }
-
-    if (typeof donutChart !== 'undefined' && donutChart) {
-        donutChart.updateSeries([0, 0, 0, 0]);
-    }
-
-    if (typeof revenueTrendChart !== 'undefined' && revenueTrendChart) {
-        revenueTrendChart.updateSeries([
-            {
-                name: 'Orders',
-                data: [0, 0, 0, 0, 0]
-            },
-            {
-                name: 'Revenue (' + currencySymbol + ')',
-                data: [0, 0, 0, 0, 0]
-            }
-        ]);
-    }
-
-    updatePreparedOrdersTable([]);
-}
-
-    function updatePreparedOrdersTable(orders) {
-        const tbody = document.getElementById('preparedOrdersTableBody');
-        if (!tbody) return;
-
-        let html = '';
-
-        if (!orders || orders.length === 0) {
-            html = `<tr><td colspan="6" class="text-center">No orders found for the selected filters.</td></tr>`;
-        } else {
-            const restaurantSlug = '{{ $restaurantSlug ?? "" }}';
-            const branchSlug = '{{ $branchSlug ?? "" }}';
-
-            orders.forEach(order => {
-                let actionHtml = '';
-
-                if (restaurantSlug && branchSlug) {
-                    actionHtml = `
-                        <a href="/${restaurantSlug}/${branchSlug}/orders/${order.id}"
-                        class="btn btn-md btn-info">
-                            <i class="fas fa-eye"></i>
-                        </a>`;
-                } else if (restaurantSlug) {
-                    actionHtml = `
-                        <a href="/${restaurantSlug}/orders/${order.id}"
-                        class="btn btn-md btn-info">
-                            <i class="fas fa-eye"></i>
-                        </a>`;
-                }
-
-                html += `
-                    <tr>
-                        <td>${order.token_no || ''}</td>
-                        <td>${order.customer_name || ''}</td>
-                        <td>${order.table_no ?? '-'}</td>
-                        <td>${currencySymbol}${Number(order.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                        <td>${order.status || ''}</td>
-                        <td>
-                            <div class="d-flex gap-2">${actionHtml}</div>
-                        </td>
-                    </tr>`;
-            });
+                    if (typeof revenueTrendChart !== 'undefined' && revenueTrendChart) {
+                        revenueTrendChart.updateSeries([
+                            {
+                                name: 'Orders',
+                                data: [
+                                    Number(data.revenue?.today?.orders || 0),
+                                    Number(data.revenue?.yesterday?.orders || 0),
+                                    Number(data.revenue?.weekly?.orders || 0),
+                                    Number(data.revenue?.monthly?.orders || 0),
+                                    Number(data.revenue?.yearly?.orders || 0)
+                                ]
+                            },
+                            {
+                                name: 'Revenue (' + currencySymbol + ')',
+                                data: [
+                                    Number(data.revenue?.today?.amount || 0),
+                                    Number(data.revenue?.yesterday?.amount || 0),
+                                    Number(data.revenue?.weekly?.amount || 0),
+                                    Number(data.revenue?.monthly?.amount || 0),
+                                    Number(data.revenue?.yearly?.amount || 0)
+                                ]
+                            }
+                        ]);
+                    }
+                })
+                .catch(() => { });
         }
 
-        tbody.innerHTML = html;
-    }
+        function resetAllData() {
+        resetRevenueToZero();
 
-    function initializeCharts() {
-        @php
-            $revAmount = $revenueData['amount'] ?? [0, 0, 0, 0, 0];
-            $revOrders = $revenueData['orders'] ?? [0, 0, 0, 0, 0];
-            $invNames = $inventoryAlerts->pluck('name')->toArray();
-            $invStock = $inventoryAlerts->pluck('remaining_stock')->toArray();
+        if (typeof revenueChart !== 'undefined' && revenueChart) {
+            revenueChart.updateSeries([{ data: [0, 0, 0, 0, 0] }]);
+        }
 
-            $chartCurrency = '₹';
-            if (auth()->user()->role != 'super_admin' && isset($currentBranch) && $currentBranch->country) {
-                $chartCurrency = $currentBranch->country->currency_symbol;
-            } elseif (auth()->user()->role == 'super_admin') {
-                $chartCurrency = $currencySymbol ?? '₹';
-            }
-        @endphp
+        if (typeof donutChart !== 'undefined' && donutChart) {
+            donutChart.updateSeries([0, 0, 0, 0]);
+        }
 
-        // Revenue Chart
-        var options1 = {
-            series: [{
-                name: 'Revenue',
-                data: @json($revAmount)
-            }],
-            chart: {
-                height: 380,
-                type: 'area',
-                toolbar: {
-                    show: false
-                },
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800
-                }
-            },
-            colors: ['#4e73df'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.7,
-                    opacityTo: 0.3,
-                    stops: [0, 90, 100]
-                }
-            },
-            xaxis: {
-                categories: ['Today', 'Yesterday', 'This Week', 'This Month', 'This Year'],
-                labels: {
-                    style: {
-                        colors: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val) {
-                        return "{{ $chartCurrency }}" + Number(val).toLocaleString();
-                    }
-                }
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return "{{ $chartCurrency }}" + Number(val).toLocaleString();
-                    }
-                }
-            },
-            markers: {
-                size: 5,
-                colors: ['#4e73df'],
-                strokeColors: '#fff',
-                strokeWidth: 2,
-                hover: {
-                    size: 7
-                }
-            },
-            grid: {
-                borderColor: '#e0e0e0',
-                row: {
-                    colors: ['#f8f9fa', 'transparent'],
-                    opacity: 0.5
-                }
-            }
-        };
-
-        revenueChart = new ApexCharts(document.querySelector("#chart1"), options1);
-        revenueChart.render();
-
-        // Donut Chart
-        var options4 = {
-            series: [
-                {{ $orderStatus['pending'] ?? 0 }},
-                {{ $orderStatus['preparing'] ?? 0 }},
-                {{ $orderStatus['completed'] ?? 0 }},
-                {{ $orderStatus['delivered'] ?? 0 }}
-            ],
-            chart: {
-                height: 300,
-                type: 'donut'
-            },
-            labels: ['Pending', 'Preparing', 'Completed', 'Delivered'],
-            colors: ['#f6c23e', '#36b9cc', '#1cc88a', '#FA8AFA'],
-            legend: {
-                position: 'bottom'
-            }
-        };
-
-        donutChart = new ApexCharts(document.querySelector("#chart4"), options4);
-        donutChart.render();
-
-        // Orders Bar Chart
-        var options3 = {
-            series: [
+        if (typeof revenueTrendChart !== 'undefined' && revenueTrendChart) {
+            revenueTrendChart.updateSeries([
                 {
                     name: 'Orders',
-                    type: 'column',
-                    data: @json($revOrders)
+                    data: [0, 0, 0, 0, 0]
                 },
                 {
-                    name: 'Revenue ({{ $chartCurrency }})',
-                    type: 'line',
-                    data: @json($revAmount)
+                    name: 'Revenue (' + currencySymbol + ')',
+                    data: [0, 0, 0, 0, 0]
                 }
-            ],
-            chart: {
-                height: 300,
-                type: 'line'
-            },
-            colors: ['#4e73df', '#28a745'],
-            stroke: {
-                width: [0, 3]
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 4
-                }
-            },
-            xaxis: {
-                categories: ['Today', 'Yesterday', 'Week', 'Month', 'Year']
-            },
-            yaxis: [
-                {
-                    title: {
-                        text: 'Orders'
-                    }
-                },
-                {
-                    opposite: true,
-                    title: {
-                        text: 'Revenue ({{ $chartCurrency }})'
-                    },
-                    labels: {
-                        formatter: function(val) {
-                            return '{{ $chartCurrency }}' + Number(val).toLocaleString();
-                        }
-                    }
-                }
-            ],
-            tooltip: {
-                y: [
-                    {
-                        formatter: function(val) {
-                            return val + ' Orders';
-                        }
-                    },
-                    {
-                        formatter: function(val) {
-                            return '{{ $chartCurrency }}' + Number(val).toLocaleString();
-                        }
-                    }
-                ]
-            }
-        };
-
-        revenueTrendChart = new ApexCharts(
-            document.querySelector("#chart3"),
-            options3
-        );
-        revenueTrendChart.render();
-
-        // Inventory Chart
-        var options2 = {
-            series: [{
-                name: 'Stock',
-                data: @json($invStock)
-            }],
-            chart: {
-                height: 300,
-                type: 'bar'
-            },
-            colors: ['#e74a3b'],
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    borderRadius: 4
-                }
-            },
-            xaxis: {
-                categories: @json($invNames ?: ['No Alerts'])
-            }
-        };
-
-        new ApexCharts(document.querySelector("#chart2"), options2).render();
-    }
-
-    // ============ INITIALIZE ============
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const restaurantFilter = document.getElementById('restaurantFilter');
-        const branchFilter = document.getElementById('branchFilter');
-
-        initializeCharts();
-
-        // Reset all revenue to "0" on initial load if nothing selected
-        if (!currentRestaurant && !currentBranch) {
-            resetRevenueToZero();
+            ]);
         }
 
-        if (restaurantFilter) {
-            currentRestaurant = restaurantFilter.value || '';
+        updatePreparedOrdersTable([]);
+    }
 
-            restaurantFilter.addEventListener('change', function() {
-                currentRestaurant = this.value;
-                currentBranch = '';
+        function updatePreparedOrdersTable(orders) {
+            const tbody = document.getElementById('preparedOrdersTableBody');
+            if (!tbody) return;
 
-                if (branchFilter) {
-                    branchFilter.innerHTML = '<option value="">All Branches</option>';
+            let html = '';
+
+            if (!orders || orders.length === 0) {
+                html = `<tr><td colspan="6" class="text-center">No orders found for the selected filters.</td></tr>`;
+            } else {
+                const restaurantSlug = '{{ $restaurantSlug ?? "" }}';
+                const branchSlug = '{{ $branchSlug ?? "" }}';
+
+                orders.forEach(order => {
+                    let actionHtml = '';
+
+                    if (restaurantSlug && branchSlug) {
+                        actionHtml = `
+                            <a href="/${restaurantSlug}/${branchSlug}/orders/${order.id}"
+                            class="btn btn-md btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>`;
+                    } else if (restaurantSlug) {
+                        actionHtml = `
+                            <a href="/${restaurantSlug}/orders/${order.id}"
+                            class="btn btn-md btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>`;
+                    }
+
+                    html += `
+                        <tr>
+                            <td>${order.token_no || ''}</td>
+                            <td>${order.customer_name || ''}</td>
+                            <td>${order.table_no ?? '-'}</td>
+                            <td>${currencySymbol}${Number(order.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                            <td>${order.status || ''}</td>
+                            <td>
+                                <div class="d-flex gap-2">${actionHtml}</div>
+                            </td>
+                        </tr>`;
+                });
+            }
+
+            tbody.innerHTML = html;
+        }
+
+        function initializeCharts() {
+            @php
+                $revAmount = $revenueData['amount'] ?? [0, 0, 0, 0, 0];
+                $revOrders = $revenueData['orders'] ?? [0, 0, 0, 0, 0];
+                $invNames = $inventoryAlerts->pluck('name')->toArray();
+                $invStock = $inventoryAlerts->pluck('remaining_stock')->toArray();
+
+                $chartCurrency = '₹';
+                if (auth()->user()->role != 'super_admin' && isset($currentBranch) && $currentBranch->country) {
+                    $chartCurrency = $currentBranch->country->currency_symbol;
+                } elseif (auth()->user()->role == 'super_admin') {
+                    $chartCurrency = $currencySymbol ?? '₹';
                 }
+            @endphp
+
+            // Revenue Chart
+            var options1 = {
+                series: [{
+                    name: 'Revenue',
+                    data: @json($revAmount)
+                }],
+                chart: {
+                    height: 380,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800
+                    }
+                },
+                colors: ['#4e73df'],
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.3,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: ['Today', 'Yesterday', 'This Week', 'This Month', 'This Year'],
+                    labels: {
+                        style: {
+                            colors: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: function (val) {
+                            return "{{ $chartCurrency }}" + Number(val).toLocaleString();
+                        }
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return "{{ $chartCurrency }}" + Number(val).toLocaleString();
+                        }
+                    }
+                },
+                markers: {
+                    size: 5,
+                    colors: ['#4e73df'],
+                    strokeColors: '#fff',
+                    strokeWidth: 2,
+                    hover: {
+                        size: 7
+                    }
+                },
+                grid: {
+                    borderColor: '#e0e0e0',
+                    row: {
+                        colors: ['#f8f9fa', 'transparent'],
+                        opacity: 0.5
+                    }
+                }
+            };
+
+            revenueChart = new ApexCharts(document.querySelector("#chart1"), options1);
+            revenueChart.render();
+
+            // Donut Chart
+            var options4 = {
+                series: [
+                    {{ $orderStatus['pending'] ?? 0 }},
+                    {{ $orderStatus['preparing'] ?? 0 }},
+                    {{ $orderStatus['completed'] ?? 0 }},
+                    {{ $orderStatus['delivered'] ?? 0 }}
+                ],
+                chart: {
+                    height: 300,
+                    type: 'donut'
+                },
+                labels: ['Pending', 'Preparing', 'Completed', 'Delivered'],
+                colors: ['#f6c23e', '#36b9cc', '#1cc88a', '#FA8AFA'],
+                legend: {
+                    position: 'bottom'
+                }
+            };
+
+            donutChart = new ApexCharts(document.querySelector("#chart4"), options4);
+            donutChart.render();
+
+            // Orders Bar Chart
+            var options3 = {
+                series: [
+                    {
+                        name: 'Orders',
+                        type: 'column',
+                        data: @json($revOrders)
+                    },
+                    {
+                        name: 'Revenue ({{ $chartCurrency }})',
+                        type: 'line',
+                        data: @json($revAmount)
+                    }
+                ],
+                chart: {
+                    height: 300,
+                    type: 'line'
+                },
+                colors: ['#4e73df', '#28a745'],
+                stroke: {
+                    width: [0, 3]
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4
+                    }
+                },
+                xaxis: {
+                    categories: ['Today', 'Yesterday', 'Week', 'Month', 'Year']
+                },
+                yaxis: [
+                    {
+                        title: {
+                            text: 'Orders'
+                        }
+                    },
+                    {
+                        opposite: true,
+                        title: {
+                            text: 'Revenue ({{ $chartCurrency }})'
+                        },
+                        labels: {
+                            formatter: function(val) {
+                                return '{{ $chartCurrency }}' + Number(val).toLocaleString();
+                            }
+                        }
+                    }
+                ],
+                tooltip: {
+                    y: [
+                        {
+                            formatter: function(val) {
+                                return val + ' Orders';
+                            }
+                        },
+                        {
+                            formatter: function(val) {
+                                return '{{ $chartCurrency }}' + Number(val).toLocaleString();
+                            }
+                        }
+                    ]
+                }
+            };
+
+            revenueTrendChart = new ApexCharts(
+                document.querySelector("#chart3"),
+                options3
+            );
+            revenueTrendChart.render();
+
+            // Inventory Chart
+            var options2 = {
+                series: [{
+                    name: 'Stock',
+                    data: @json($invStock)
+                }],
+                chart: {
+                    height: 300,
+                    type: 'bar'
+                },
+                colors: ['#e74a3b'],
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        borderRadius: 4
+                    }
+                },
+                xaxis: {
+                    categories: @json($invNames ?: ['No Alerts'])
+                }
+            };
+
+            new ApexCharts(document.querySelector("#chart2"), options2).render();
+        }
+
+        // ============ INITIALIZE ============
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const restaurantFilter = document.getElementById('restaurantFilter');
+            const branchFilter = document.getElementById('branchFilter');
+
+            initializeCharts();
+
+            // Reset all revenue to "0" on initial load if nothing selected
+            if (!currentRestaurant && !currentBranch) {
+                resetRevenueToZero();
+            }
+
+            if (restaurantFilter) {
+                currentRestaurant = restaurantFilter.value || '';
+
+                restaurantFilter.addEventListener('change', function() {
+                    currentRestaurant = this.value;
+                    currentBranch = '';
+
+                    if (branchFilter) {
+                        branchFilter.innerHTML = '<option value="">All Branches</option>';
+                    }
+
+                    if (currentRestaurant) {
+                        loadBranches(currentRestaurant);
+                        setTimeout(refreshAllData, 500);
+                    } else {
+                        // Reset everything to zero when "All Restaurants" is selected
+                        resetAllData();
+                        updatePreparedOrdersTable([]);
+                    }
+                });
 
                 if (currentRestaurant) {
                     loadBranches(currentRestaurant);
                     setTimeout(refreshAllData, 500);
                 } else {
-                    // Reset everything to zero when "All Restaurants" is selected
+                    if (branchFilter) {
+                        branchFilter.innerHTML = '<option value="">All Branches</option>';
+                    }
                     resetAllData();
                     updatePreparedOrdersTable([]);
                 }
-            });
-
-            if (currentRestaurant) {
-                loadBranches(currentRestaurant);
-                setTimeout(refreshAllData, 500);
-            } else {
-                if (branchFilter) {
-                    branchFilter.innerHTML = '<option value="">All Branches</option>';
-                }
-                resetAllData();
-                updatePreparedOrdersTable([]);
             }
-        }
 
-        if (branchFilter) {
-            branchFilter.addEventListener('change', function() {
-                currentBranch = this.value;
-                refreshAllData();
-            });
-        }
+            if (branchFilter) {
+                branchFilter.addEventListener('change', function() {
+                    currentBranch = this.value;
+                    refreshAllData();
+                });
+            }
 
-        @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
-            setTimeout(function() {
-                currentRestaurant = '{{ $currentBranch->restaurant_id }}';
-                currentBranch = '{{ $currentBranch->id }}';
-                refreshAllData();
-            }, 1000);
-        @endif
-    });
-
-    // ============ VIEW REVENUE MODAL ============
-    document.querySelectorAll('.viewRevenue').forEach(button => {
-        button.addEventListener('click', function () {
-            const slug = this.dataset.slug;
-
-            fetch(`/restaurants/${slug}/revenue-details`)
-                .then(response => response.json())
-                .then(res => {
-                    let html = '';
-                    res.forEach(item => {
-                        html += `
-                            <tr>
-                                <td>${item.country ?? '-'}</td>
-                                <td>${item.branch}</td>
-                                <td>${item.orders}</td>
-                                <td class="text-end">
-                                    ${item.currency} ${Number(item.revenue).toLocaleString()}
-                                </td>
-                            </tr>
-                        `;
-                    });
-                    document.getElementById('revenueBody').innerHTML = html;
-                    new bootstrap.Modal(document.getElementById('revenueModal')).show();
-                })
-                .catch(() => {});
+            @if(auth()->user()->role != 'super_admin' && auth()->user()->role != 'owner' && isset($currentBranch))
+                setTimeout(function() {
+                    currentRestaurant = '{{ $currentBranch->restaurant_id }}';
+                    currentBranch = '{{ $currentBranch->id }}';
+                    refreshAllData();
+                }, 1000);
+            @endif
         });
-    });
 
-    @if(isset($currentBranch) && $currentBranch && $currentBranch->country)
-        const branchTimezone = @json($currentBranch->country->timezone);
-        function updateBranchClock() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', {
-                timeZone: branchTimezone,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
+        // ============ VIEW REVENUE MODAL ============
+        document.querySelectorAll('.viewRevenue').forEach(button => {
+            button.addEventListener('click', function () {
+                const slug = this.dataset.slug;
+
+                fetch(`/restaurants/${slug}/revenue-details`)
+                    .then(response => response.json())
+                    .then(res => {
+                        let html = '';
+                        res.forEach(item => {
+                            html += `
+                                <tr>
+                                    <td>${item.country ?? '-'}</td>
+                                    <td>${item.branch}</td>
+                                    <td>${item.orders}</td>
+                                    <td class="text-end">
+                                        ${item.currency} ${Number(item.revenue).toLocaleString()}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        document.getElementById('revenueBody').innerHTML = html;
+                        new bootstrap.Modal(document.getElementById('revenueModal')).show();
+                    })
+                    .catch(() => {});
             });
-            document.getElementById('branchClock').textContent = time;
-        }
-        updateBranchClock();
-        setInterval(updateBranchClock, 1000);
-    @endif
-</script>
+        });
+
+        @if(isset($currentBranch) && $currentBranch && $currentBranch->country)
+            const branchTimezone = @json($currentBranch->country->timezone);
+            function updateBranchClock() {
+                const now = new Date();
+                const time = now.toLocaleTimeString('en-US', {
+                    timeZone: branchTimezone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('branchClock').textContent = time;
+            }
+            updateBranchClock();
+            setInterval(updateBranchClock, 1000);
+        @endif
+    </script>
 @endsection

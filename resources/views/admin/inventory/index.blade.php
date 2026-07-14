@@ -23,24 +23,87 @@
 
                     <div class="header-right">
                         @can('create-inventory')
-                            @if ($branchSlug)
+
+                            {{-- Add Inventory --}}
+                            @if($items->count() > 0)
+
+                                {{-- Add Inventory --}}
+                                @if($branchSlug)
                                     <a href="{{ route('branch.inventory.create', [
+                                        'restaurant' => $restaurantSlug,
+                                        'branch' => $branchSlug,
+                                    ]) }}" class="premium-back-btn" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Create a new inventory item manually.">
+                                        <i class="fas fa-plus"></i>
+                                        Add Inventory Item
+                                    </a>
+                                @else
+                                    <a href="{{ route('restaurant.inventory.create', [
+                                        'restaurant' => $restaurantSlug,
+                                    ]) }}" class="premium-back-btn" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                                        title="Create a new inventory item manually.">
+                                        <i class="fas fa-plus"></i>
+                                        Add Inventory Item
+                                    </a>
+                                @endif
+
+                            @endif
+
+                            {{-- Bulk Upload --}}
+                            @if($branchSlug)
+                                    <a href="{{ route('branch.inventory.import.form', [
                                     'restaurant' => $restaurantSlug,
                                     'branch' => $branchSlug,
-                                ]) }}" class="premium-back-btn">
-                                        <i class="fas fa-plus"></i>
-                                        Add Inventory Item
+                                ]) }}" class="premium-btn btn-primary" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom" title="Upload multiple inventory items using an Excel file.">
+                                        <i class="fas fa-file-upload"></i>
+                                        Bulk Upload
                                     </a>
                             @else
-                                    <a href="{{ route('restaurant.inventory.create', [
+                                    <a href="{{ route('restaurant.inventory.import.form', [
                                     'restaurant' => $restaurantSlug,
-                                ]) }}" class="premium-back-btn">
-                                        <i class="fas fa-plus"></i>
-                                        Add Inventory Item
+                                ]) }}" class="premium-btn btn-primary" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom" title="Upload multiple inventory items using an Excel file.">
+                                        <i class="fas fa-file-upload"></i>
+                                        Bulk Upload
                                     </a>
                             @endif
+
+                            {{-- Add More Items --}}
+                            @if($branchSlug)
+                                    <a href="{{ route('branch.inventory.export', [
+                                    'restaurant' => $restaurantSlug,
+                                    'branch' => $branchSlug,
+                                ]) }}" class="premium-btn btn-success" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        title="Download your current inventory, add new items in Excel, then upload it again.">
+                                        <i class="fas fa-download"></i>
+                                        Add More Items
+                                    </a>
+                            @else
+                                    <a href="{{ route('restaurant.inventory.export', [
+                                    'restaurant' => $restaurantSlug,
+                                ]) }}" class="premium-btn btn-success" data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        title="Download your current inventory, add new items in Excel, then upload it again.">
+                                        <i class="fas fa-download"></i>
+                                        Add More Items
+                                    </a>
+                            @endif
+
                         @endcan
                     </div>
+
+                    {{-- Bootstrap Tooltips --}}
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+
+                            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                                new bootstrap.Tooltip(tooltipTriggerEl);
+                            });
+                        });
+                    </script>
                 </div>
             </div>
         </section>
@@ -56,6 +119,7 @@
                         </div>
                     @endif
                     <div class="table-responsive">
+
                         <table class="table table-bordered align-middle" id="tableExport">
                             <thead>
                                 <tr>
@@ -145,52 +209,52 @@
                                                     @endphp
 
                                                     @if ($branchSlug)
-                                                         {{-- Branch Stock In --}}
-                                                        <li>
-                                                            <a class="dropdown-item py-2"
-                                                                href="{{ route('branch.inventory.stock-in', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
-                                                                <i class="fas fa-plus-circle me-2"
-                                                                    style="color: #28a745; width: 16px;"></i> Stock In
-                                                            </a>
-                                                        </li>
+                                                                                    {{-- Branch Stock In --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2"
+                                                                                            href="{{ route('branch.inventory.stock-in', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
+                                                                                            <i class="fas fa-plus-circle me-2"
+                                                                                                style="color: #28a745; width: 16px;"></i> Stock In
+                                                                                        </a>
+                                                                                    </li>
 
-                                                        {{-- Branch Transactions --}}
-                                                        <li>
-                                                            <a class="dropdown-item py-2"
-                                                                href="{{ route('branch.inventory.transactions', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
-                                                                <i class="fas fa-history me-2" style="color: #6c757d; width: 16px;"></i>
-                                                                Transactions
-                                                            </a>
-                                                        </li>
-                                                        {{-- Branch Edit --}}
-                                                        <li>
-                                                            <a class="dropdown-item py-2" href="{{ route('branch.inventory.edit', [
-                                                                    'restaurant' => $restaurantSlug,
-                                                                    'branch' => $branchSlug,
-                                                                    'inventory' => $item->id,
-                                                                ]) }}">
-                                                                <i class="fas fa-edit me-2" style="color: #FA5603; width: 16px;"></i>
-                                                                Edit Item
-                                                            </a>
-                                                        </li>
+                                                                                    {{-- Branch Transactions --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2"
+                                                                                            href="{{ route('branch.inventory.transactions', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}">
+                                                                                            <i class="fas fa-history me-2" style="color: #6c757d; width: 16px;"></i>
+                                                                                            Transactions
+                                                                                        </a>
+                                                                                    </li>
+                                                                                    {{-- Branch Edit --}}
+                                                                                    <li>
+                                                                                        <a class="dropdown-item py-2" href="{{ route('branch.inventory.edit', [
+                                                            'restaurant' => $restaurantSlug,
+                                                            'branch' => $branchSlug,
+                                                            'inventory' => $item->id,
+                                                        ]) }}">
+                                                                                            <i class="fas fa-edit me-2" style="color: #FA5603; width: 16px;"></i>
+                                                                                            Edit Item
+                                                                                        </a>
+                                                                                    </li>
 
-                                                        {{-- Divider line inside menu --}}
-                                                        <li>
-                                                            <hr class="dropdown-divider opacity-50">
-                                                        </li>
+                                                                                    {{-- Divider line inside menu --}}
+                                                                                    <li>
+                                                                                        <hr class="dropdown-divider opacity-50">
+                                                                                    </li>
 
-                                                        {{-- Branch Delete --}}
-                                                        <li>
-                                                            <form
-                                                                action="{{ route('branch.inventory.destroy', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}"
-                                                                method="POST" class="delete-form m-0">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="dropdown-item text-danger py-2">
-                                                                    <i class="fas fa-trash me-2" style="width: 16px;"></i> Delete Item
-                                                                </button>
-                                                            </form>
-                                                        </li>
+                                                                                    {{-- Branch Delete --}}
+                                                                                    <li>
+                                                                                        <form
+                                                                                            action="{{ route('branch.inventory.destroy', ['restaurant' => $restaurantSlug, 'branch' => $branchSlug, 'inventory' => $item->id]) }}"
+                                                                                            method="POST" class="delete-form m-0">
+                                                                                            @csrf
+                                                                                            @method('DELETE')
+                                                                                            <button type="submit" class="dropdown-item text-danger py-2">
+                                                                                                <i class="fas fa-trash me-2" style="width: 16px;"></i> Delete Item
+                                                                                            </button>
+                                                                                        </form>
+                                                                                    </li>
                                                     @else
                                                         {{-- Restaurant Stock In --}}
                                                         <li>
