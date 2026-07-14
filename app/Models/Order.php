@@ -31,7 +31,7 @@ class Order extends Model
         'branch_id',
         'payment_method',
         'birth_date',
-        'anniversary_date', 'email', 'payment_status', 'bill_no', 'bill_generated_at','order_datetime'
+        'anniversary_date', 'email', 'payment_status', 'bill_no', 'bill_generated_at', 'order_datetime',
     ];
 
     public function orders()
@@ -78,5 +78,10 @@ class Order extends Model
     public function table()
     {
         return $this->belongsTo(RestaurantTable::class, 'table_no', 'table_number');
+    }
+
+    public function rating()
+    {
+        return $this->hasOne(OrderRating::class);
     }
 }
